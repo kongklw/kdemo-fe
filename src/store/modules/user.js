@@ -31,6 +31,7 @@ const mutations = {
 const actions = {
   // user login
   login({ commit }, userInfo) {
+    console.log('hahahah--', commit, userInfo)
     const { username, password } = userInfo
     return new Promise((resolve, reject) => {
       login({ username: username.trim(), password: password }).then(response => {
@@ -74,8 +75,10 @@ const actions = {
 
   // user logout
   logout({ commit, state, dispatch }) {
+    console.log('logout data', commit, '-----', state, '-----', dispatch)
     return new Promise((resolve, reject) => {
       logout(state.token).then(() => {
+        console.log(state.token)
         commit('SET_TOKEN', '')
         commit('SET_ROLES', [])
         removeToken()

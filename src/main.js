@@ -29,14 +29,18 @@ import * as filters from './filters' // global filters
  * please remove it before going online ! ! !
  */
 if (process.env.NODE_ENV === 'production') {
-  const { mockXHR } = require('../mock')
-  mockXHR()
+  // const { mockXHR } = require('../mock')
+  // mockXHR()
 }
 
 Vue.use(Element, {
   size: Cookies.get('size') || 'medium', // set element-ui default size
   locale: enLang // 如果使用中文，无需设置，请删除
 })
+
+// myconfig
+// Vue.prototype.$API = API
+// Vue.prototype.$BASE_API = VUE_APP_BASE_API
 
 // register global utility filters
 Object.keys(filters).forEach(key => {
