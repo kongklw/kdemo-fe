@@ -91,7 +91,7 @@ export default {
   methods: {
 
     handleSetLineChartData(type) {
-      console.log('hahaha')
+    
       this.lineChartData = lineChartData[type]
     }
   }
