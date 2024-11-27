@@ -89,8 +89,9 @@ export default {
     }
   },
   methods: {
+
     handleSetLineChartData(type) {
-      console.log("haha")
+      console.log('hahaha')
       this.lineChartData = lineChartData[type]
     }
   }
