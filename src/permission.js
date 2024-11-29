@@ -8,8 +8,10 @@ import getPageTitle from '@/utils/get-page-title'
 
 NProgress.configure({ showSpinner: false }) // NProgress Configuration
 
+// 不需要登录就可以访问的页面。比如登录页面。
 const whiteList = ['/login', '/auth-redirect'] // no redirect whitelist
 
+// 全局前置路由守卫
 router.beforeEach(async(to, from, next) => {
   // start progress bar
   NProgress.start()
@@ -68,6 +70,7 @@ router.beforeEach(async(to, from, next) => {
   }
 })
 
+// 全局后置路由守卫
 router.afterEach(() => {
   // finish progress bar
   NProgress.done()

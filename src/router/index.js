@@ -129,6 +129,23 @@ export const constantRoutes = [
  * the routes that need to be dynamically loaded based on user roles
  */
 export const asyncRoutes = [
+
+  {
+    path: '/skills',
+    component: Layout,
+    children: [
+      {
+
+        path: 'index',
+        component: () => import('@/views/skills/index'),
+        name: 'Skills',
+        meta: { title: 'Skills', icon: 'icon', noCache: true }
+
+      }
+
+    ]
+  },
+
   {
     path: '/permission',
     component: Layout,
