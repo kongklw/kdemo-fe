@@ -38,7 +38,16 @@ module.exports = {
     },
     //
     // before: require('./mock/mock-server.js')
+    
     proxy: {
+      // 动态代理方式如下。适用场景目前不清楚。
+      // [process.env.VUE_APP_BASE_API]:{
+      //   target:process.env.VUE_APP_SERVICE_URL,
+      //   changeOrigin:false,
+      //   pathRewrite: {
+      //     ['^'+process.env.VUE_APP_BASE_API]: ""
+      //   }
+      // },
       '/dev-api': {
         target: "http://localhost:8000",
         sercure: false,
