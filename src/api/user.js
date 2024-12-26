@@ -1,5 +1,13 @@
 import request from '@/utils/request'
 
+export function signin(data) {
+  return request({
+    url: '/user/signin',
+    method: 'post',
+    data
+  })
+}
+
 export function login(data) {
   return request({
     url: '/user/login',

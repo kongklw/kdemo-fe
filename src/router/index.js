@@ -131,16 +131,51 @@ export const constantRoutes = [
 export const asyncRoutes = [
 
   {
-    path: '/skills',
+    path: '/sports',
     component: Layout,
     children: [
       {
 
         path: 'index',
-        component: () => import('@/views/skills/index'),
-        name: 'Skills',
-        meta: { title: 'Skills', icon: 'icon', noCache: true }
+        component: () => import('@/views/sports/index'),
+        name: 'Sports',
+        meta: { title: 'Sports', icon: 'icon', noCache: true }
 
+      }
+
+    ]
+  },
+
+  {
+    path: '/baby',
+    component: Layout,
+    redirect: '/baby/breastfeed',
+    alwaysShow: true, // will always show the root menu
+    name: 'Baby',
+    meta: {
+      title: 'Baby'
+      // icon: 'lock',
+    },
+    children: [
+      {
+        path: 'breastfeed',
+        component: () => import('@/views/baby/breastfeed.vue'),
+        name: 'BreastFeed',
+        meta: { title: 'BreastFeed', icon: 'el-icon-coffee-cup', noCache: true }
+
+      },
+      {
+        path: 'details',
+        component: () => import('@/views/baby/details.vue'),
+        name: 'Details',
+        meta: { title: 'Details', icon: 'el-icon-coffee-cup' }
+
+      },
+      {
+        path: 'analysis',
+        component: () => import('@/views/baby/analysis.vue'),
+        name: 'Analysis',
+        meta: { title: 'Analysis', icon: 'el-icon-data-analysis', noCache: true }
       }
 
     ]

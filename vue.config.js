@@ -55,7 +55,16 @@ module.exports = {
         pathRewrite: {
           "^/dev-api": ""
         }
-      }
+      },
+      '/dev-api/gobackend': {
+        target: "http://localhost:8080",
+        sercure: false,
+        changeOrigin: true,
+        pathRewrite: {
+          "^/dev-api/gobackend": ""
+        }
+      },
+
     }
   },
   configureWebpack: {

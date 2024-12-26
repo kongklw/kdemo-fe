@@ -2,10 +2,7 @@
   <div class="app-container">
     <el-row>
       <el-button type="primary" @click="dialogFormVisible = true">Add Sport</el-button>
-      <!-- <el-button type="success">nihao</el-button>
-            <el-button type="info">信息按钮</el-button>
-            <el-button type="warning">警告按钮</el-button>
-            <el-button type="danger">危险按钮</el-button> -->
+
     </el-row>
 
     <el-dialog title="Add Sport Form" :visible.sync="dialogFormVisible" destroy-on-close="true">
