@@ -76,7 +76,7 @@ export default {
   components: {
 
   },
-  props: ['basicInfo'],
+  // props: ['basicInfo'],
 
   data() {
     return {
@@ -98,6 +98,7 @@ export default {
   },
   methods: {
     handleSetLineChartData(type) {
+      console.log('触发handleSetLineChartData and type is ', type)
       this.$emit('handleSetLineChartData', type)
     }
   }

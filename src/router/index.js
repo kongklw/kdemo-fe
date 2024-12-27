@@ -153,8 +153,8 @@ export const asyncRoutes = [
     alwaysShow: true, // will always show the root menu
     name: 'Baby',
     meta: {
-      title: 'Baby'
-      // icon: 'lock',
+      title: 'Baby',
+      icon: 'el-icon-user-solid'
     },
     children: [
       {
