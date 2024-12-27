@@ -1,20 +1,21 @@
 <template>
   <div class="dashboard-editor-container">
-    <panel-group :basic-info="basicInfo" @handleSetLineChartData="handleSetLineChartData" />
+    <panel-group
+      :basic-info="basicInfo"
+      @handleSetLineChartData="handleSetLineChartData"
+    />
 
-    <el-row style="background:#fff;padding:16px 16px 0;margin-bottom:32px;">
+    <el-row style="background: #fff; padding: 16px 16px 0; margin-bottom: 32px">
       <line-chart :chart-data="lineChartData" />
     </el-row>
 
-    <el-row style="background:#fff;padding:16px 16px 0;margin-bottom:32px;">
+    <el-row style="background: #fff; padding: 16px 16px 0; margin-bottom: 32px">
       <event-tab />
     </el-row>
-
   </div>
 </template>
 
 <script>
-
 import PanelGroup from './components/PanelGroup'
 import LineChart from './components/LineChart'
 import EventTab from './components/EventTab.vue'
@@ -58,22 +59,43 @@ export default {
   data() {
     return {
       lineChartData: lineChartData.milkVolume,
-      basicInfo: { 'total_volume': 0 }
+      basicInfo: { total_volume: 0 },
+      intervalId: null
     }
   },
 
   created() {
     const date = this.$route.query.date
     console.log('跳转过来传的值日期为 ', date)
-    this.obtainLineChartData()
+    // this.obtainLineChartData()
+    this.dataRefresh()
+  },
+
+  destroyed() {
+    this.clear()
   },
 
   methods: {
+    dataRefresh() {
+      if (this.intervalId != null) {
+        return
+      }
+
+      this.intervalId = setInterval(() => {
+        console.log('refresh')
+        this.obtainLineChartData()
+      }, 10000)
+    },
+    clear() {
+      clearInterval(this.intervalId)
+      this.intervalId = null
+    },
+
     handleSetLineChartData(type) {
       this.lineChartData = lineChartData[type]
     },
     obtainLineChartData() {
-      lineChartReq().then(res => {
+      lineChartReq().then((res) => {
         console.log(res)
         if (res.code === 200) {
           const data = res.data
@@ -83,33 +105,32 @@ export default {
       })
     }
   }
-
 }
 </script>
 
 <style lang="scss" scoped>
 .dashboard-editor-container {
-    padding: 32px;
-    background-color: rgb(240, 242, 245);
-    position: relative;
+  padding: 32px;
+  background-color: rgb(240, 242, 245);
+  position: relative;
 
-    .github-corner {
-        position: absolute;
-        top: 0px;
-        border: 0;
-        right: 0;
-    }
+  .github-corner {
+    position: absolute;
+    top: 0px;
+    border: 0;
+    right: 0;
+  }
 
-    .chart-wrapper {
-        background: #fff;
-        padding: 16px 16px 0;
-        margin-bottom: 32px;
-    }
+  .chart-wrapper {
+    background: #fff;
+    padding: 16px 16px 0;
+    margin-bottom: 32px;
+  }
 }
 
-@media (max-width:1024px) {
-    .chart-wrapper {
-        padding: 8px;
-    }
+@media (max-width: 1024px) {
+  .chart-wrapper {
+    padding: 8px;
+  }
 }
 </style>
