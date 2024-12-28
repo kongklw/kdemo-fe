@@ -16,6 +16,22 @@ export function feedListReq(query) {
   })
 }
 
+export function temperatureListReq(query) {
+  return request({
+    url: '/baby/temperature',
+    method: 'get',
+    params: query
+  })
+}
+
+export function addTemperatureReq(data) {
+  return request({
+    url: '/baby/temperature',
+    method: 'post',
+    data
+  })
+}
+
 export function lineChartReq() {
   return request({
     url: '/baby/line_chart',
@@ -23,4 +39,5 @@ export function lineChartReq() {
     // params: query
   })
 }
+
 

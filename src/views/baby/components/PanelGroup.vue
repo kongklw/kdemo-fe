@@ -25,7 +25,7 @@
       </div>
     </el-col>
     <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
-      <div class="card-panel" @click="handleSetLineChartData('bodyTemperature')">
+      <div class="card-panel" @click="handleSetLineChartData('temperature')">
         <div class="card-panel-icon-wrapper icon-message">
           <svg-icon icon-class="bodyTemperature" class-name="card-panel-icon" />
         </div>
@@ -33,7 +33,7 @@
           <div class="card-panel-text">
             体温
           </div>
-          <label class="card-panel-num">{{ basicInfoText.bodyTemperature }} 度</label>
+          <label class="card-panel-num">{{ basicInfoText.temperature }} 度</label>
         </div>
       </div>
     </el-col>
@@ -86,10 +86,10 @@ export default {
   data() {
     return {
       basicInfoText: {
-        milkVolumes: 800,
+        milkVolumes: NaN,
         refermilkVolumes: '700-900',
-        bodyTemperature: 36.5,
-        babyPants: 8,
+        temperature: NaN,
+        babyPants: NaN,
         purchases: 20000
       }
     }

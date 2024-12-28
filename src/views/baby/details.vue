@@ -36,19 +36,27 @@ export default {
   data() {
     return {
       // 因为只显示一个Linechart 所以data 里面的代表正在展示的。lineChartData
-      currentLineChartData: {},
+      currentLineChartData:  {
+      xAxisData:[],
+      expectedData: [],
+      actualData: []
+      },
       totalLineChartData: {},
-      basicInfo: { total_volume: 0 },
+      basicInfo: { total_volume: 0,temperature:NaN },
       intervalId: null
 
     }
   },
-
-  created() {
+  mounted() {
     const date = this.$route.query.date
     console.log('跳转过来传的值日期为 ', date)
     this.obtainLineChartData()
     // this.dataRefresh()
+  },
+
+
+  created() {
+   
   },
 
   destroyed() {
@@ -72,10 +80,10 @@ export default {
     },
 
     handleSetLineChartData(type) {
-      console.log('触发details 里面的handleSetLineChartData,type is ', type)
-      console.log('当前currentLineChartData', this.currentLineChartData)
-      console.log('this.totalLineChartData', this.totalLineChartData)
-      console.log('加入type 后的选择数据是', this.totalLineChartData[type])
+      // console.log('触发details 里面的handleSetLineChartData,type is ', type)
+      // console.log('当前currentLineChartData', this.currentLineChartData)
+      // console.log('this.totalLineChartData', this.totalLineChartData)
+      // console.log('加入type 后的选择数据是', this.totalLineChartData[type])
       this.currentLineChartData = this.totalLineChartData[type]
     },
     obtainLineChartData() {

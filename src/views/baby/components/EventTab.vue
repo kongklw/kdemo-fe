@@ -2,59 +2,26 @@
   <div>
     <el-tabs type="border-card">
       <el-tab-pane>
-        <span slot="label"><i class="el-icon-date" /> 宝贝喂奶记录</span>
+        <span slot="label"><svg-icon icon-class="milkBottle2" class-name="card-panel-icon" /> 奶量</span>
         <el-row>
-          <el-button type="primary" @click="dialogFormVisible = true">添加喂奶记录</el-button>
+          <el-button type="primary" @click="dialogFormVisible = true">添加记录</el-button>
         </el-row>
-
-        <el-dialog title="喂奶记录" :visible.sync="dialogFormVisible" destroy-on-close>
-          <el-form :model="feedForm" label-width="100px">
+        <el-dialog title="奶量" :visible.sync="dialogFormVisible" width="80%" destroy-on-close>
+          <el-form :model="feedForm" :label-width="formLabelWidth">
             <el-form-item label="喂奶时间" required>
-              <el-col :span="11">
-                <el-date-picker
-                  v-model="feedForm.feed_time"
-                  type="datetime"
-                  placeholder="选择日期时间"
-                  align="right"
-                  :picker-options="pickerOptions"
-                  value-format="yyyy-MM-dd HH:mm:00"
-                  style="width: 100%;"
-                />
-
-              </el-col>
-
-              <!-- <el-col :span="6">
-                                <el-form-item prop="feedDate">
-                                    <el-date-picker type="date" placeholder="选择日期" v-model="feedForm.feedDate"
-                                        style="width: 100%;"></el-date-picker>
-                                </el-form-item>
-                            </el-col>
-                            <el-col class="line" :span="2">-</el-col>
-                            <el-col :span="6">
-
-                                <el-form-item prop="feedTime">
-                                    <el-time-select v-model="feedForm.feedTime" :picker-options="{
-                                        start: '00:00',
-                                        step: '00:10',
-                                        end: '24:00'
-                                    }" placeholder="选择时间">
-                                    </el-time-select>
-                                </el-form-item>
-                            </el-col> -->
+              <el-date-picker v-model="feedForm.feed_time" type="datetime" placeholder="选择日期时间" align="left"
+                :picker-options="pickerOptions" value-format="yyyy-MM-dd HH:mm:00" style="width: 100%;" />
             </el-form-item>
-
             <el-form-item label="奶量" :label-width="formLabelWidth">
               <el-input v-model="feedForm.milk_volume" autocomplete="off" />
-
             </el-form-item>
-
           </el-form>
+
           <div slot="footer" class="dialog-footer">
             <el-button @click="dialogFormVisible = false">取 消</el-button>
             <el-button type="primary" @click="addFeedEvent">确 定</el-button>
           </div>
         </el-dialog>
-
         <el-table :data="feedList" style="width: 100%;padding-top: 15px;">
           <el-table-column label="时间" min-width="100">
             <template slot-scope="scope">
@@ -73,8 +40,44 @@
           </el-table-column>
 
         </el-table>
-
       </el-tab-pane>
+
+      <el-tab-pane label="体温记录">
+        <span slot="label"><svg-icon icon-class="bodyTemperature" class-name="card-panel-icon" /> 体温</span>
+        <el-row>
+          <el-button type="primary" @click="dialogFormVisible = true">添加记录</el-button>
+        </el-row>
+        <el-dialog title="体温记录" :visible.sync="dialogFormVisible" width="80%" destroy-on-close>
+          <el-form :model="temperatureForm" :label-width="formLabelWidth">
+            <el-form-item label="测量日期" required>
+              <el-date-picker v-model="temperatureForm.date" type="date" placeholder="选择日期" align="left"
+                :picker-options="pickerOptions" value-format="yyyy-MM-dd" style="width: 100%;" />
+            </el-form-item>
+            <el-form-item label="体温" :label-width="formLabelWidth">
+              <el-input v-model="temperatureForm.temperature" autocomplete="off" />
+            </el-form-item>
+          </el-form>
+
+          <div slot="footer" class="dialog-footer">
+            <el-button @click="dialogFormVisible = false">取 消</el-button>
+            <el-button type="primary" @click="addTemperatureEvent">确 定</el-button>
+          </div>
+        </el-dialog>
+        <el-table :data="temperatureList" style="width: 100%;padding-top: 15px;">
+          <el-table-column label="时间" min-width="100">
+            <template slot-scope="scope">
+              {{ scope.row.date }}
+            </template>
+          </el-table-column>
+          <el-table-column label="体温" min-width="100">
+            <template slot-scope="scope">
+              {{ scope.row.temperature }}
+            </template>
+          </el-table-column>
+      
+        </el-table>
+      </el-tab-pane>
+
       <el-tab-pane label="睡眠记录">尿不湿</el-tab-pane>
       <el-tab-pane label="尿不湿记录">尿不湿</el-tab-pane>
       <el-tab-pane label="购买记录">
@@ -107,7 +110,7 @@
 
 <script>
 // import { transactionList } from '@/api/remote-search'
-Date.prototype.format = function(fmt) {
+Date.prototype.format = function (fmt) {
   var o = {
     'M+': this.getMonth() + 1, // 月份
     'd+': this.getDate(), // 日
@@ -127,7 +130,7 @@ Date.prototype.format = function(fmt) {
   }
   return fmt
 }
-import { feedListReq, addFeedReq } from '@/api/baby'
+import { feedListReq, addFeedReq,addTemperatureReq,temperatureListReq } from '@/api/baby'
 
 export default {
   filters: {
@@ -145,7 +148,7 @@ export default {
   data() {
     return {
       dialogFormVisible: false,
-      formLabelWidth: '120px',
+      formLabelWidth: '80px',
       pickerOptions: {
         shortcuts: [{
           text: '今天',
@@ -169,16 +172,23 @@ export default {
         }]
       },
       feedForm: {
-
         milk_volume: '',
         feed_time: ''
-
+      },
+      temperatureForm: {
+        temperature: '',
+        date: ''
       },
       // list: [{"order_no":1,"price":100,"status":"success"},{"order_no":2,"price":200,"status":"success"},]
 
       feedList: [],
+      temperatureList:[],
       list: [{ 'order_no': 1, 'price': 100 }, { 'order_no': 2, 'price': 200 }],
-      feed_query: { 'date': '' }
+      feed_query: { 'date': '' },
+      temperature_query:{'date':'','mode':'today'},
+      date :'',
+      date_time:'',
+
     }
   },
   created() {
@@ -187,13 +197,25 @@ export default {
   methods: {
 
     fetchData() {
-      var date = new Date().format('yyyy-MM-dd 00:00:00')
-      console.log('--------time ', date)
-      this.feed_query.date = date
+      var date_time = new Date().format('yyyy-MM-dd 00:00:00')
+      var date = new Date().format('yyyy-MM-dd')
+      this.date = date
+      this.date_time = date_time
+      this.feed_query.date = date_time
+      this.temperature_query.date = date
+
       feedListReq(this.feed_query).then(res => {
         console.log('result is ', res)
         if (res.code === 200) {
           this.feedList = res.data
+        }
+      })
+
+      const temperatureListQuery = {'date':this.date,'mode':'week'}
+      temperatureListReq(temperatureListQuery).then(res=>{
+        console.log('temperatureList res ', res)
+        if (res.code === 200) {
+          this.temperatureList = res.data
         }
       })
       // transactionList().then(response => {
@@ -211,7 +233,20 @@ export default {
           this.fetchData(this.feed_query)
         }
       })
+    },
+
+    addTemperatureEvent() {
+      const data = { ...this.temperatureForm }
+      addTemperatureReq(data).then(res => {
+        console.log(res)
+        if (res.code === 200) {
+          this.dialogFormVisible = false
+          this.fetchData(this.temperature_query)
+        }
+      })
     }
+
+    
   }
 }
 </script>
