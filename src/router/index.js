@@ -154,7 +154,8 @@ export const asyncRoutes = [
     name: 'Baby',
     meta: {
       title: 'Baby',
-      icon: 'el-icon-user-solid'
+      // icon: 'el-icon-user-solid'
+      icon: 'babygirl'
     },
     children: [
       {

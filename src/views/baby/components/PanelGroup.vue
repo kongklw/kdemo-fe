@@ -4,7 +4,7 @@
     <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
       <div class="card-panel" @click="handleSetLineChartData('milkVolumes')">
         <div class="card-panel-icon-wrapper icon-people">
-          <svg-icon icon-class="peoples" class-name="card-panel-icon" />
+          <svg-icon icon-class="babygirl" class-name="card-panel-icon" />
         </div>
 
         <!-- <div class="card-panel-description">
@@ -16,9 +16,9 @@
 
         <div class="card-panel-description">
           <div class="card-panel-text">
-            当日奶量
+            奶量
           </div>
-          <label class="card-panel-num">{{ basicInfo.milkVolumes }} ml</label>
+          <label class="card-panel-num">{{ basicInfoText.milkVolumes }} ml</label>
 
         </div>
 
@@ -27,13 +27,13 @@
     <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
       <div class="card-panel" @click="handleSetLineChartData('bodyTemperature')">
         <div class="card-panel-icon-wrapper icon-message">
-          <svg-icon icon-class="message" class-name="card-panel-icon" />
+          <svg-icon icon-class="bodyTemperature" class-name="card-panel-icon" />
         </div>
         <div class="card-panel-description">
           <div class="card-panel-text">
             体温
           </div>
-          <label class="card-panel-num">{{ basicInfo.bodyTemperature }} 度</label>
+          <label class="card-panel-num">{{ basicInfoText.bodyTemperature }} 度</label>
         </div>
       </div>
     </el-col>
@@ -41,13 +41,13 @@
     <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
       <div class="card-panel" @click="handleSetLineChartData('babyPants')">
         <div class="card-panel-icon-wrapper icon-message">
-          <svg-icon icon-class="message" class-name="card-panel-icon" />
+          <svg-icon icon-class="babyPants" class-name="card-panel-icon" />
         </div>
         <div class="card-panel-description">
           <div class="card-panel-text">
             尿不湿
           </div>
-          <label class="card-panel-num">{{ basicInfo.babyPants }} 个</label>
+          <label class="card-panel-num">{{ basicInfoText.babyPants }} 个</label>
         </div>
       </div>
     </el-col>
@@ -61,7 +61,7 @@
           <div class="card-panel-text">
             花费
           </div>
-          <label class="card-panel-num">{{ basicInfo.purchases }} RMB</label>
+          <label class="card-panel-num">{{ basicInfoText.purchases }} RMB</label>
           <!-- <count-to :start-val="0" :end-val="9280" :duration="3200" class="card-panel-num" /> -->
         </div>
       </div>
@@ -76,32 +76,35 @@ export default {
   components: {
 
   },
-  // props: ['basicInfo'],
+  props: {
+    basicInfo: {
+      type: Object,
+      require: true
+    }
+  },
 
   data() {
     return {
-      basicInfo: {
+      basicInfoText: {
         milkVolumes: 800,
         refermilkVolumes: '700-900',
         bodyTemperature: 36.5,
         babyPants: 8,
         purchases: 20000
       }
-
     }
   },
   watch: {
-    // basicInfo(newVal) {
-    //   console.log('hahaha basicinfo ',newVal)
-    //   // this.basicInfo = newVal
-    // }
+    basicInfo(newVal) {
+      console.log('hahaha basicinfo ', newVal)
+      this.basicInfoText = newVal
+    }
   },
   methods: {
     handleSetLineChartData(type) {
-      console.log('触发handleSetLineChartData and type is ', type)
       this.$emit('handleSetLineChartData', type)
     }
-  }
+  },
 }
 </script>
 

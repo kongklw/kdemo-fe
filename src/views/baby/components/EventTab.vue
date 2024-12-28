@@ -7,7 +7,7 @@
           <el-button type="primary" @click="dialogFormVisible = true">添加喂奶记录</el-button>
         </el-row>
 
-        <el-dialog title="喂奶记录" :visible.sync="dialogFormVisible" destroy-on-close="true">
+        <el-dialog title="喂奶记录" :visible.sync="dialogFormVisible" destroy-on-close>
           <el-form :model="feedForm" label-width="100px">
             <el-form-item label="喂奶时间" required>
               <el-col :span="11">

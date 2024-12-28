@@ -1,5 +1,5 @@
 <template>
-  <div :class="className" :style="{height:height,width:width}" />
+  <div :class="className" :style="{ height: height, width: width }" />
 </template>
 
 <script>
@@ -39,7 +39,9 @@ export default {
   watch: {
     chartData: {
       deep: true,
+
       handler(val) {
+        console.log('chart 接受到的val 为----', val)
         this.setOptions(val)
       }
     }
