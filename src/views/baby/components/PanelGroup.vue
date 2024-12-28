@@ -104,7 +104,7 @@ export default {
     handleSetLineChartData(type) {
       this.$emit('handleSetLineChartData', type)
     }
-  },
+  }
 }
 </script>
 
