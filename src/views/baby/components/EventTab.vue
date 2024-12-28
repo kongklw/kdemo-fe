@@ -9,8 +9,15 @@
         <el-dialog title="奶量" :visible.sync="dialogFormVisible" width="80%" destroy-on-close>
           <el-form :model="feedForm" :label-width="formLabelWidth">
             <el-form-item label="喂奶时间" required>
-              <el-date-picker v-model="feedForm.feed_time" type="datetime" placeholder="选择日期时间" align="left"
-                :picker-options="pickerOptions" value-format="yyyy-MM-dd HH:mm:00" style="width: 100%;" />
+              <el-date-picker
+                v-model="feedForm.feed_time"
+                type="datetime"
+                placeholder="选择日期时间"
+                align="left"
+                :picker-options="pickerOptions"
+                value-format="yyyy-MM-dd HH:mm:00"
+                style="width: 100%;"
+              />
             </el-form-item>
             <el-form-item label="奶量" :label-width="formLabelWidth">
               <el-input v-model="feedForm.milk_volume" autocomplete="off" />
@@ -50,8 +57,15 @@
         <el-dialog title="体温记录" :visible.sync="dialogFormVisible" width="80%" destroy-on-close>
           <el-form :model="temperatureForm" :label-width="formLabelWidth">
             <el-form-item label="测量日期" required>
-              <el-date-picker v-model="temperatureForm.date" type="date" placeholder="选择日期" align="left"
-                :picker-options="pickerOptions" value-format="yyyy-MM-dd" style="width: 100%;" />
+              <el-date-picker
+                v-model="temperatureForm.date"
+                type="date"
+                placeholder="选择日期"
+                align="left"
+                :picker-options="pickerOptions"
+                value-format="yyyy-MM-dd"
+                style="width: 100%;"
+              />
             </el-form-item>
             <el-form-item label="体温" :label-width="formLabelWidth">
               <el-input v-model="temperatureForm.temperature" autocomplete="off" />
@@ -74,7 +88,7 @@
               {{ scope.row.temperature }}
             </template>
           </el-table-column>
-      
+
         </el-table>
       </el-tab-pane>
 
@@ -110,7 +124,7 @@
 
 <script>
 // import { transactionList } from '@/api/remote-search'
-Date.prototype.format = function (fmt) {
+Date.prototype.format = function(fmt) {
   var o = {
     'M+': this.getMonth() + 1, // 月份
     'd+': this.getDate(), // 日
@@ -130,7 +144,7 @@ Date.prototype.format = function (fmt) {
   }
   return fmt
 }
-import { feedListReq, addFeedReq,addTemperatureReq,temperatureListReq } from '@/api/baby'
+import { feedListReq, addFeedReq, addTemperatureReq, temperatureListReq } from '@/api/baby'
 
 export default {
   filters: {
@@ -182,12 +196,12 @@ export default {
       // list: [{"order_no":1,"price":100,"status":"success"},{"order_no":2,"price":200,"status":"success"},]
 
       feedList: [],
-      temperatureList:[],
+      temperatureList: [],
       list: [{ 'order_no': 1, 'price': 100 }, { 'order_no': 2, 'price': 200 }],
       feed_query: { 'date': '' },
-      temperature_query:{'date':'','mode':'today'},
-      date :'',
-      date_time:'',
+      temperature_query: { 'date': '', 'mode': 'today' },
+      date: '',
+      date_time: ''
 
     }
   },
@@ -211,8 +225,8 @@ export default {
         }
       })
 
-      const temperatureListQuery = {'date':this.date,'mode':'week'}
-      temperatureListReq(temperatureListQuery).then(res=>{
+      const temperatureListQuery = { 'date': this.date, 'mode': 'week' }
+      temperatureListReq(temperatureListQuery).then(res => {
         console.log('temperatureList res ', res)
         if (res.code === 200) {
           this.temperatureList = res.data
@@ -246,7 +260,6 @@ export default {
       })
     }
 
-    
   }
 }
 </script>

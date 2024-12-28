@@ -36,13 +36,13 @@ export default {
   data() {
     return {
       // 因为只显示一个Linechart 所以data 里面的代表正在展示的。lineChartData
-      currentLineChartData:  {
-      xAxisData:[],
-      expectedData: [],
-      actualData: []
+      currentLineChartData: {
+        xAxisData: [],
+        expectedData: [],
+        actualData: []
       },
       totalLineChartData: {},
-      basicInfo: { total_volume: 0,temperature:NaN },
+      basicInfo: { total_volume: 0, temperature: NaN },
       intervalId: null
 
     }
@@ -54,9 +54,8 @@ export default {
     // this.dataRefresh()
   },
 
-
   created() {
-   
+
   },
 
   destroyed() {
