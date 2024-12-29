@@ -1,18 +1,35 @@
 import request from '@/utils/request'
 
-export function addFeedReq(data) {
+export function babyPantsListReq(query) {
   return request({
-    url: '/baby/feed',
+    url: '/baby/pants',
+    method: 'get',
+    params: query
+  })
+}
+
+export function addBabyPantsReq(data) {
+  return request({
+    url: '/baby/pants',
     method: 'post',
     data
   })
 }
+
 
 export function feedListReq(query) {
   return request({
     url: '/baby/feed',
     method: 'get',
     params: query
+  })
+}
+
+export function addFeedReq(data) {
+  return request({
+    url: '/baby/feed',
+    method: 'post',
+    data
   })
 }
 

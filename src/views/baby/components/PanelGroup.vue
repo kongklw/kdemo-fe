@@ -1,5 +1,5 @@
 <template>
-  <el-row :gutter="40" class="panel-group">
+  <el-row :gutter="5" class="panel-group">
 
     <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
       <div class="card-panel" @click="handleSetLineChartData('milkVolumes')">
@@ -110,14 +110,16 @@ export default {
 
 <style lang="scss" scoped>
 .panel-group {
-  margin-top: 18px;
+  margin-top: 12px;
+ 
 
   .card-panel-col {
-    margin-bottom: 32px;
+    margin-bottom: 12px;
+    
   }
 
   .card-panel {
-    height: 108px;
+    height: 90px;
     cursor: pointer;
     font-size: 12px;
     position: relative;
@@ -167,46 +169,46 @@ export default {
 
     .card-panel-icon-wrapper {
       float: left;
-      margin: 14px 0 0 14px;
-      padding: 16px;
+      margin: 12px 0 0 12px;
+      padding: 12px;
       transition: all 0.38s ease-out;
       border-radius: 6px;
     }
 
     .card-panel-icon {
       float: left;
-      font-size: 48px;
+      font-size: 50px;
     }
 
     .card-panel-description {
       float: right;
       font-weight: bold;
-      margin: 26px;
-      margin-left: 0px;
+      margin:12px;
+      margin-left: 10px;
 
       .card-panel-text {
-        line-height: 18px;
+        line-height: 40px;
         color: rgba(0, 0, 0, 0.45);
         font-size: 16px;
-        margin-bottom: 12px;
+        margin-bottom: 10px;
       }
 
       .card-panel-num {
-        font-size: 20px;
+        font-size: 16px;
       }
     }
   }
 }
 
-@media (max-width:550px) {
+@media (max-width:200px) {
   .card-panel-description {
     display: none;
   }
 
   .card-panel-icon-wrapper {
     float: none !important;
-    width: 100%;
-    height: 100%;
+    width: 50%;
+    height: 50%;
     margin: 0 !important;
 
     .svg-icon {
