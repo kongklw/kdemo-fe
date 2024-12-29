@@ -9,8 +9,15 @@
         <el-dialog title="奶量" :visible.sync="dialogFormVisible" width="80%" destroy-on-close>
           <el-form :model="feedForm" :label-width="formLabelWidth">
             <el-form-item label="喂奶时间" required>
-              <el-date-picker v-model="feedForm.feed_time" type="datetime" placeholder="选择日期时间" align="left"
-                :picker-options="pickerOptions" value-format="yyyy-MM-dd HH:mm:00" style="width: 100%;" />
+              <el-date-picker
+                v-model="feedForm.feed_time"
+                type="datetime"
+                placeholder="选择日期时间"
+                align="left"
+                :picker-options="pickerOptions"
+                value-format="yyyy-MM-dd HH:mm:00"
+                style="width: 100%;"
+              />
             </el-form-item>
             <el-form-item label="奶量" :label-width="formLabelWidth">
               <el-input v-model="feedForm.milk_volume" autocomplete="off" />
@@ -51,8 +58,15 @@
         <el-dialog title="体温记录" :visible.sync="dialogFormVisible" width="80%" destroy-on-close>
           <el-form :model="temperatureForm" :label-width="formLabelWidth">
             <el-form-item label="测量日期" required>
-              <el-date-picker v-model="temperatureForm.date" type="date" placeholder="选择日期" align="left"
-                :picker-options="pickerOptions" value-format="yyyy-MM-dd" style="width: 100%;" />
+              <el-date-picker
+                v-model="temperatureForm.date"
+                type="date"
+                placeholder="选择日期"
+                align="left"
+                :picker-options="pickerOptions"
+                value-format="yyyy-MM-dd"
+                style="width: 100%;"
+              />
             </el-form-item>
             <el-form-item label="体温" :label-width="formLabelWidth">
               <el-input v-model="temperatureForm.temperature" autocomplete="off" />
@@ -79,7 +93,6 @@
         </el-table>
       </el-tab-pane>
 
-
       <el-tab-pane label="尿不湿">
         <span slot="label"><svg-icon icon-class="babyPants" class-name="card-panel-icon" /> 尿不湿inne</span>
 
@@ -92,8 +105,15 @@
         <el-dialog title="尿不湿" :visible.sync="dialogFormVisible" width="80%" destroy-on-close>
           <el-form :model="babyPantsForm" :label-width="formLabelWidth">
             <el-form-item label="更换时间" required>
-              <el-date-picker v-model="babyPantsForm.use_date" type="datetime" placeholder="选择日期时间" align="left"
-                :picker-options="pickerOptions" value-format="yyyy-MM-dd HH:mm:00" style="width: 100%;" />
+              <el-date-picker
+                v-model="babyPantsForm.use_date"
+                type="datetime"
+                placeholder="选择日期时间"
+                align="left"
+                :picker-options="pickerOptions"
+                value-format="yyyy-MM-dd HH:mm:00"
+                style="width: 100%;"
+              />
             </el-form-item>
 
             <el-form-item label="是否侧漏" :label-width="formLabelWidth">
@@ -103,8 +123,7 @@
 
             <el-form-item label="品牌" :label-width="formLabelWidth">
               <el-select v-model="babyPantsForm.brand" placeholder="请选择">
-                <el-option v-for="item in babyPantsoptions" :key="item.value" :label="item.label" :value="item.value">
-                </el-option>
+                <el-option v-for="item in babyPantsoptions" :key="item.value" :label="item.label" :value="item.value" />
               </el-select>
             </el-form-item>
           </el-form>
@@ -137,9 +156,7 @@
 
       </el-tab-pane>
 
-
       <el-tab-pane label="睡眠记录">尿不湿</el-tab-pane>
-
 
       <el-tab-pane label="购买记录">
         <el-table :data="list" style="width: 100%;padding-top: 15px;">
@@ -171,7 +188,7 @@
 
 <script>
 // import { transactionList } from '@/api/remote-search'
-Date.prototype.format = function (fmt) {
+Date.prototype.format = function(fmt) {
   var o = {
     'M+': this.getMonth() + 1, // 月份
     'd+': this.getDate(), // 日
@@ -299,14 +316,12 @@ export default {
 
       const babyPantsQuery = { 'use_date': this.date_time }
       babyPantsListReq(babyPantsQuery).then(res => {
-
         if (res.code === 200) {
           this.babyPantsList = res.data
         }
       })
 
       feedListReq(this.feed_query).then(res => {
-
         if (res.code === 200) {
           this.feedList = res.data
         }
@@ -314,7 +329,6 @@ export default {
 
       const temperatureListQuery = { 'date': this.date, 'mode': 'week' }
       temperatureListReq(temperatureListQuery).then(res => {
-
         if (res.code === 200) {
           this.temperatureList = res.data
         }
@@ -325,11 +339,9 @@ export default {
     },
 
     addBabyPantsEvent() {
-
       const data = { ...this.babyPantsForm }
 
       addBabyPantsReq(data).then(res => {
-
         if (res.code === 200) {
           this.dialogFormVisible = false
           this.fetchData()
@@ -338,11 +350,9 @@ export default {
     },
 
     addFeedEvent() {
-
       const data = { ...this.feedForm }
 
       addFeedReq(data).then(res => {
-
         if (res.code === 200) {
           this.dialogFormVisible = false
           this.fetchData(this.feed_query)
@@ -353,7 +363,6 @@ export default {
     addTemperatureEvent() {
       const data = { ...this.temperatureForm }
       addTemperatureReq(data).then(res => {
-
         if (res.code === 200) {
           this.dialogFormVisible = false
           this.fetchData(this.temperature_query)

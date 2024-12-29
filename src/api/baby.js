@@ -16,7 +16,6 @@ export function addBabyPantsReq(data) {
   })
 }
 
-
 export function feedListReq(query) {
   return request({
     url: '/baby/feed',

@@ -111,11 +111,10 @@ export default {
 <style lang="scss" scoped>
 .panel-group {
   margin-top: 12px;
- 
 
   .card-panel-col {
     margin-bottom: 12px;
-    
+
   }
 
   .card-panel {
