@@ -1,5 +1,38 @@
 import request from '@/utils/request'
 
+
+export function showTodoListReq() {
+  return request({
+    url: '/baby/todo',
+    method: 'get',
+    // params: query
+  })
+}
+
+export function addTodoListReq(data) {
+  return request({
+    url: '/baby/todo',
+    method: 'post',
+    data
+  })
+}
+
+export function updateTodoListReq(data) {
+  return request({
+    url: '/baby/todo',
+    method: 'put',
+    data
+  })
+}
+
+export function deleteTodoListReq(data) {
+  return request({
+    url: '/baby/todo',
+    method: 'delete',
+    data
+  })
+}
+
 export function babyPantsListReq(query) {
   return request({
     url: '/baby/pants',

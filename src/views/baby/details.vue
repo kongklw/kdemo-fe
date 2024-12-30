@@ -2,8 +2,16 @@
   <div class="dashboard-editor-container">
     <panel-group :basic-info="basicInfo" @handleSetLineChartData="handleSetLineChartData" />
 
-    <el-row style="background:#fff;padding:16px 16px 0;margin-bottom:32px;">
+    <el-row :gutter="8" style="background:#fff;padding:16px 16px 0;margin-bottom:32px;">
       <line-chart :chart-data="currentLineChartData" />
+    </el-row>
+
+    <el-row :gutter="8">
+
+      <el-col :xs="{ span: 24 }" :sm="{ span: 12 }" :md="{ span: 12 }" :lg="{ span: 6 }" :xl="{ span: 6 }"
+        style="margin-bottom:30px;">
+        <todo-list />
+      </el-col>
     </el-row>
 
     <el-row style="background: #fff; padding: 16px 16px 0; margin-bottom: 32px">
@@ -16,6 +24,7 @@
 import PanelGroup from './components/PanelGroup'
 import LineChart from './components/LineChart'
 import EventTab from './components/EventTab.vue'
+import TodoList from './components/TodoList'
 import { lineChartReq } from '@/api/baby'
 
 export default {
@@ -24,12 +33,13 @@ export default {
     // GithubCorner,
     PanelGroup,
     LineChart,
-    EventTab
+    TodoList,
+    EventTab,
     // RaddarChart,
     // PieChart,
     // BarChart,
     // TransactionTable,
-    // TodoList,
+
     // BoxCard
   },
 
@@ -51,7 +61,7 @@ export default {
     const date = this.$route.query.date
     console.log('跳转过来传的值日期为 ', date)
     this.obtainLineChartData()
-    // this.dataRefresh()
+    this.dataRefresh()
   },
 
   created() {

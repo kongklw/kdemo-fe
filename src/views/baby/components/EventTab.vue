@@ -4,9 +4,9 @@
       <el-tab-pane>
         <span slot="label"><svg-icon icon-class="milkBottle2" class-name="card-panel-icon" /> 奶量</span>
         <el-row>
-          <el-button type="primary" @click="dialogFormVisible = true">添加记录</el-button>
+          <el-button type="primary" @click="milk_dialogFormVisible = true">添加记录</el-button>
         </el-row>
-        <el-dialog title="奶量" :visible.sync="dialogFormVisible" width="80%" destroy-on-close>
+        <el-dialog title="奶量" :visible.sync="milk_dialogFormVisible" width="100%" destroy-on-close>
           <el-form :model="feedForm" :label-width="formLabelWidth">
             <el-form-item label="喂奶时间" required>
               <el-date-picker
@@ -16,7 +16,11 @@
                 align="left"
                 :picker-options="pickerOptions"
                 value-format="yyyy-MM-dd HH:mm:00"
-                style="width: 100%;"
+                
+                size="mini"
+               
+                editable="false"
+                
               />
             </el-form-item>
             <el-form-item label="奶量" :label-width="formLabelWidth">
@@ -25,7 +29,7 @@
           </el-form>
 
           <div slot="footer" class="dialog-footer">
-            <el-button @click="dialogFormVisible = false">取 消</el-button>
+            <el-button @click="milk_dialogFormVisible = false">取 消</el-button>
             <el-button type="primary" @click="addFeedEvent">确 定</el-button>
           </div>
         </el-dialog>
@@ -53,9 +57,9 @@
       <el-tab-pane label="体温记录">
         <span slot="label"><svg-icon icon-class="bodyTemperature" class-name="card-panel-icon" /> 体温</span>
         <el-row>
-          <el-button type="primary" @click="dialogFormVisible = true">添加记录</el-button>
+          <el-button type="primary" @click="temperature_dialogFormVisible = true">添加记录</el-button>
         </el-row>
-        <el-dialog title="体温记录" :visible.sync="dialogFormVisible" width="80%" destroy-on-close>
+        <el-dialog title="体温记录" :visible.sync="temperature_dialogFormVisible" width="80%" destroy-on-close>
           <el-form :model="temperatureForm" :label-width="formLabelWidth">
             <el-form-item label="测量日期" required>
               <el-date-picker
@@ -66,6 +70,7 @@
                 :picker-options="pickerOptions"
                 value-format="yyyy-MM-dd"
                 style="width: 100%;"
+                editable="false"
               />
             </el-form-item>
             <el-form-item label="体温" :label-width="formLabelWidth">
@@ -74,7 +79,7 @@
           </el-form>
 
           <div slot="footer" class="dialog-footer">
-            <el-button @click="dialogFormVisible = false">取 消</el-button>
+            <el-button @click="temperature_dialogFormVisible = false">取 消</el-button>
             <el-button type="primary" @click="addTemperatureEvent">确 定</el-button>
           </div>
         </el-dialog>
@@ -94,15 +99,15 @@
       </el-tab-pane>
 
       <el-tab-pane label="尿不湿">
-        <span slot="label"><svg-icon icon-class="babyPants" class-name="card-panel-icon" /> 尿不湿inne</span>
+        <span slot="label"><svg-icon icon-class="babyPants" class-name="card-panel-icon" /> 尿不湿</span>
 
         <!-- 尿不湿添加记录显示button -->
         <el-row>
-          <el-button type="primary" @click="dialogFormVisible = true">添加记录</el-button>
+          <el-button type="primary" @click="pants_dialogFormVisible = true">添加记录</el-button>
         </el-row>
 
         <!-- 尿不湿dialog -->
-        <el-dialog title="尿不湿" :visible.sync="dialogFormVisible" width="80%" destroy-on-close>
+        <el-dialog title="尿不湿" :visible.sync="pants_dialogFormVisible" width="80%" destroy-on-close>
           <el-form :model="babyPantsForm" :label-width="formLabelWidth">
             <el-form-item label="更换时间" required>
               <el-date-picker
@@ -113,6 +118,7 @@
                 :picker-options="pickerOptions"
                 value-format="yyyy-MM-dd HH:mm:00"
                 style="width: 100%;"
+                editable="false"
               />
             </el-form-item>
 
@@ -129,7 +135,7 @@
           </el-form>
 
           <div slot="footer" class="dialog-footer">
-            <el-button @click="dialogFormVisible = false">取 消</el-button>
+            <el-button @click="pants_dialogFormVisible = false">取 消</el-button>
             <el-button type="primary" @click="addBabyPantsEvent">确 定</el-button>
           </div>
         </el-dialog>
@@ -186,6 +192,32 @@
 
 </template>
 
+
+<style lang="scss">
+
+
+.el-date-picker .el-picker-panel__body {
+    // min-width: 100%;
+    // width: 390px
+}
+  // .el-picker-panel__body-wrapper{
+  //   min-width: 390px;
+
+  // }
+  .el-picker-panel__sidebar{
+    margin-left: 50px;
+    width:60px ;
+  }
+  // .el-picker-panel__body {
+  //   margin-left: 80px !important;
+  // }
+  .el-date-picker__time-header {
+    width: 290px;
+  }
+
+
+</style>
+
 <script>
 // import { transactionList } from '@/api/remote-search'
 Date.prototype.format = function(fmt) {
@@ -229,7 +261,9 @@ export default {
   },
   data() {
     return {
-      dialogFormVisible: false,
+      milk_dialogFormVisible: false,
+      temperature_dialogFormVisible:false,
+      pants_dialogFormVisible: false,
       formLabelWidth: '80px',
       pickerOptions: {
         shortcuts: [{
@@ -304,7 +338,10 @@ export default {
   methods: {
 
     fetchData() {
+      // var now_time = new Date()
       var date_time = new Date().format('yyyy-MM-dd hh:mm:ss')
+
+      
       var date = new Date().format('yyyy-MM-dd')
       var before_now_36 = new Date(new Date().getTime() - 36 * 60 * 60 * 1000).format('yyyy-MM-dd hh:mm:ss')
 
@@ -314,7 +351,7 @@ export default {
       this.feed_query.start_time = before_now_36
       this.temperature_query.date = date
 
-      const babyPantsQuery = { 'use_date': this.date_time }
+      const babyPantsQuery = { 'use_date': this.date }
       babyPantsListReq(babyPantsQuery).then(res => {
         if (res.code === 200) {
           this.babyPantsList = res.data
@@ -343,7 +380,7 @@ export default {
 
       addBabyPantsReq(data).then(res => {
         if (res.code === 200) {
-          this.dialogFormVisible = false
+          this.pants_dialogFormVisible = false
           this.fetchData()
         }
       })
@@ -354,7 +391,7 @@ export default {
 
       addFeedReq(data).then(res => {
         if (res.code === 200) {
-          this.dialogFormVisible = false
+          this.milk_dialogFormVisible = false
           this.fetchData(this.feed_query)
         }
       })
@@ -364,7 +401,7 @@ export default {
       const data = { ...this.temperatureForm }
       addTemperatureReq(data).then(res => {
         if (res.code === 200) {
-          this.dialogFormVisible = false
+          this.temperature_dialogFormVisible = false
           this.fetchData(this.temperature_query)
         }
       })
