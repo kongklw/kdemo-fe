@@ -65,6 +65,14 @@ export function addFeedReq(data) {
   })
 }
 
+export function deleteFeedReq(data) {
+  return request({
+    url: '/baby/feed',
+    method: 'delete',
+    data
+  })
+}
+
 export function temperatureListReq(query) {
   return request({
     url: '/baby/temperature',

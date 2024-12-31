@@ -50,6 +50,13 @@
               {{ scope.row.time_different }}
             </template>
           </el-table-column>
+          <el-table-column label="操作" min-width="100">
+
+            <template slot-scope="scope">
+              <el-button type="danger" @click="deleteFeedLog(scope.row)">删除</el-button>
+             
+            </template>
+          </el-table-column>
 
         </el-table>
       </el-tab-pane>
@@ -241,7 +248,7 @@ Date.prototype.format = function(fmt) {
   return fmt
 }
 import {
-  feedListReq, addFeedReq,
+  feedListReq, addFeedReq,deleteFeedReq,
   addTemperatureReq, temperatureListReq,
   babyPantsListReq, addBabyPantsReq
 } from '@/api/baby'
@@ -336,6 +343,16 @@ export default {
     this.fetchData()
   },
   methods: {
+    deleteFeedLog(row){
+      console.log('delete feed log  row is ',row)
+      deleteFeedReq(row).then(res=>{
+        console.log(res)
+        if (res.code===200){
+          this.fetchData()
+        }
+      })
+      
+    },
 
     fetchData() {
       // var now_time = new Date()
