@@ -16,11 +16,10 @@
                 align="left"
                 :picker-options="pickerOptions"
                 value-format="yyyy-MM-dd HH:mm:00"
-                
+
                 size="mini"
-               
+
                 editable="false"
-                
               />
             </el-form-item>
             <el-form-item label="奶量" :label-width="formLabelWidth">
@@ -34,7 +33,7 @@
           </div>
         </el-dialog>
 
-        <el-table :data="feedList" style="width: 100%;padding-top: 15px;">
+        <el-table v-loading="loading" :data="feedList" style="width: 100%;padding-top: 15px;">
           <el-table-column label="时间" min-width="100">
             <template slot-scope="scope">
               {{ scope.row.feed_time }}
@@ -54,7 +53,7 @@
 
             <template slot-scope="scope">
               <el-button type="danger" @click="deleteFeedLog(scope.row)">删除</el-button>
-             
+
             </template>
           </el-table-column>
 
@@ -199,9 +198,7 @@
 
 </template>
 
-
 <style lang="scss">
-
 
 .el-date-picker .el-picker-panel__body {
     // min-width: 100%;
@@ -221,7 +218,6 @@
   .el-date-picker__time-header {
     width: 290px;
   }
-
 
 </style>
 
@@ -248,7 +244,7 @@ Date.prototype.format = function(fmt) {
   return fmt
 }
 import {
-  feedListReq, addFeedReq,deleteFeedReq,
+  feedListReq, addFeedReq, deleteFeedReq,
   addTemperatureReq, temperatureListReq,
   babyPantsListReq, addBabyPantsReq
 } from '@/api/baby'
@@ -268,8 +264,9 @@ export default {
   },
   data() {
     return {
+      loading: false,
       milk_dialogFormVisible: false,
-      temperature_dialogFormVisible:false,
+      temperature_dialogFormVisible: false,
       pants_dialogFormVisible: false,
       formLabelWidth: '80px',
       pickerOptions: {
@@ -343,22 +340,22 @@ export default {
     this.fetchData()
   },
   methods: {
-    deleteFeedLog(row){
-      console.log('delete feed log  row is ',row)
-      deleteFeedReq(row).then(res=>{
+    deleteFeedLog(row) {
+      this.loading = true
+      console.log('delete feed log  row is ', row)
+      deleteFeedReq(row).then(res => {
         console.log(res)
-        if (res.code===200){
+        if (res.code === 200) {
           this.fetchData()
         }
       })
-      
+      this.loading = false
     },
 
     fetchData() {
       // var now_time = new Date()
       var date_time = new Date().format('yyyy-MM-dd hh:mm:ss')
 
-      
       var date = new Date().format('yyyy-MM-dd')
       var before_now_36 = new Date(new Date().getTime() - 36 * 60 * 60 * 1000).format('yyyy-MM-dd hh:mm:ss')
 

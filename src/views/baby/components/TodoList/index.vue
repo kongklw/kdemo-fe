@@ -6,12 +6,23 @@
     </header>
     <!-- main section -->
     <section v-show="todos.length" class="main">
-      <input id="toggle-all" :checked="allChecked" class="toggle-all" type="checkbox"
-        @change="toggleAll({ done: !allChecked })">
+      <input
+        id="toggle-all"
+        :checked="allChecked"
+        class="toggle-all"
+        type="checkbox"
+        @change="toggleAll({ done: !allChecked })"
+      >
       <label for="toggle-all" />
       <ul class="todo-list">
-        <todo v-for="(todo, index) in filteredTodos" :key="index" :todo="todo" @toggleTodo="toggleTodo"
-          @editTodo="editTodo" @deleteTodo="deleteTodo" />
+        <todo
+          v-for="(todo, index) in filteredTodos"
+          :key="index"
+          :todo="todo"
+          @toggleTodo="toggleTodo"
+          @editTodo="editTodo"
+          @deleteTodo="deleteTodo"
+        />
       </ul>
     </section>
     <!-- footer -->
@@ -33,7 +44,7 @@
 </template>
 
 <script>
-import { done } from 'nprogress';
+import { done } from 'nprogress'
 import Todo from './Todo.vue'
 import { addTodoListReq, updateTodoListReq, showTodoListReq, deleteTodoListReq } from '@/api/baby'
 
@@ -47,7 +58,7 @@ const defalutList = [
   { text: 'AD', done: false },
   { text: '钙', done: false },
   { text: '大便', done: false },
-  { text: '益生菌', done: true },
+  { text: '益生菌', done: true }
 
 ]
 export default {
@@ -64,10 +75,6 @@ export default {
       todos: defalutList
     }
   },
-
-  created() {
-    this.todo_init()
-  },
   computed: {
     allChecked() {
       return this.todos.every(todo => todo.done)
@@ -79,9 +86,13 @@ export default {
       return this.todos.filter(todo => !todo.done).length
     }
   },
+
+  created() {
+    this.showTodoList()
+  },
   methods: {
 
-    todo_init() {
+    showTodoList() {
       showTodoListReq().then(res => {
         if (res.code === 200) {
           console.log(res)
@@ -89,6 +100,7 @@ export default {
         }
       })
     },
+
     setLocalStorage() {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(this.todos))
     },
@@ -105,7 +117,7 @@ export default {
         addTodoListReq(data).then(res => {
           if (res.code === 200) {
             console.log(res)
-            this.showTodoListReq()
+            this.showTodoList()
           }
         })
       }
@@ -118,10 +130,9 @@ export default {
       updateTodoListReq(val).then(res => {
         if (res.code === 200) {
           console.log(res)
-          this.showTodoListReq()
+          this.showTodoList()
         }
       })
-
     },
     deleteTodo(todo) {
       this.todos.splice(this.todos.indexOf(todo), 1)
@@ -129,7 +140,7 @@ export default {
       deleteTodoListReq(todo).then(res => {
         if (res.code === 200) {
           console.log(res)
-          this.showTodoListReq()
+          this.showTodoList()
         }
       })
       this.setLocalStorage()
