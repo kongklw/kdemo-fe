@@ -8,7 +8,7 @@
         </el-row>
         <el-dialog title="奶量" :visible.sync="milk_dialogFormVisible" width="100%" destroy-on-close>
           <el-form :model="feedForm" :label-width="formLabelWidth">
-            <el-form-item label="喂奶时间" required>
+            <el-form-item label="喂奶时间" required size="mini">
               <el-date-picker
                 v-model="feedForm.feed_time"
                 type="datetime"
@@ -66,7 +66,7 @@
           <el-button type="primary" @click="temperature_dialogFormVisible = true">添加记录</el-button>
         </el-row>
         <el-dialog title="体温记录" :visible.sync="temperature_dialogFormVisible" width="80%" destroy-on-close>
-          <el-form :model="temperatureForm" :label-width="formLabelWidth">
+          <el-form :model="temperatureForm" :label-width="formLabelWidth" size="mini">
             <el-form-item label="测量日期" required>
               <el-date-picker
                 v-model="temperatureForm.date"
@@ -115,7 +115,7 @@
         <!-- 尿不湿dialog -->
         <el-dialog title="尿不湿" :visible.sync="pants_dialogFormVisible" width="80%" destroy-on-close>
           <el-form :model="babyPantsForm" :label-width="formLabelWidth">
-            <el-form-item label="更换时间" required>
+            <el-form-item label="更换时间" required >
               <el-date-picker
                 v-model="babyPantsForm.use_date"
                 type="datetime"

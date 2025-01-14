@@ -7,7 +7,6 @@
     </el-row>
 
     <el-row :gutter="8">
-
       <el-col :xs="{ span: 24 }" :sm="{ span: 12 }" :md="{ span: 12 }" :lg="{ span: 6 }" :xl="{ span: 6 }"
         style="margin-bottom:30px;">
         <todo-list />
@@ -54,7 +53,6 @@ export default {
       totalLineChartData: {},
       basicInfo: { total_volume: 0, temperature: NaN },
       intervalId: null
-
     }
   },
   mounted() {

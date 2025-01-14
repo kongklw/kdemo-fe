@@ -1,5 +1,20 @@
 import request from '@/utils/request'
 
+export function showExpenseListReq(query) {
+  return request({
+    url: '/baby/expense_list',
+    method: 'get',
+    params: query
+  })
+}
+
+export function addExpenseReq(data) {
+  return request({
+    url: '/baby/expense',
+    method: 'post',
+    data
+  })
+}
 
 export function showTodoListReq() {
   return request({
