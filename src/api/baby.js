@@ -1,10 +1,10 @@
 import request from '@/utils/request'
 
-export function showExpenseListReq(query) {
+export function showExpenseListReq(data) {
   return request({
     url: '/baby/expense_list',
-    method: 'get',
-    params: query
+    method: 'post',
+    data
   })
 }
 

@@ -149,6 +149,13 @@ export const asyncRoutes = [
         meta: { title: 'Langchain', icon: 'openai-copy', noCache: true }
 
       },
+      {
+        path: 'wenxin',
+        component: () => import('@/views/ai/wenxin.vue'),
+        name: '文心',
+        meta: { title: '文心', icon: 'openai-copy', noCache: true }
+
+      },
     ]
   },
 

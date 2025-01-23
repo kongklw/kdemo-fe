@@ -19,6 +19,7 @@ import './permission' // permission control
 import './utils/error-log' // error log
 
 import * as filters from './filters' // global filters
+import moment from 'moment'
 
 /**
  * If you don't want to use mock-server
@@ -39,7 +40,7 @@ Vue.use(Element, {
 })
 
 // myconfig
-// Vue.prototype.$API = API
+Vue.prototype.moment = moment
 // Vue.prototype.$BASE_API = VUE_APP_BASE_API
 
 // register global utility filters

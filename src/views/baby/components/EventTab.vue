@@ -39,7 +39,7 @@
               {{ scope.row.feed_time }}
             </template>
           </el-table-column>
-          <el-table-column label="奶量" min-width="100">
+          <el-table-column label="奶量" >
             <template slot-scope="scope">
               {{ scope.row.milk_volume }}
             </template>

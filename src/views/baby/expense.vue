@@ -22,22 +22,17 @@
                     <el-button type="primary" @click="dialogFormVisible = true">添加记录</el-button>
                 </el-form-item>
             </el-form>
-
-
-
-
         </div>
         <div>
-
-            <el-button @click="clearFilter">清除所有过滤器</el-button>
+            <!-- <el-button @click="clearFilter">清除所有过滤器</el-button> -->
             <el-table ref="filterTable" :data="tableData" style="width: 100%">
-                <el-table-column prop="date" label="消费日期" sortable width="180" column-key="date">
+                <el-table-column prop="create_time" label="消费日期" column-key="date">
                 </el-table-column>
-                <el-table-column prop="name" label="物品名称" width="180">
+                <el-table-column prop="name" label="物品名称">
                 </el-table-column>
                 <el-table-column prop="amount" label="金额" :formatter="formatter">
                 </el-table-column>
-                <el-table-column prop="tag" label="标签" width="100"
+                <el-table-column prop="tag" label="标签"
                     :filters="[{ text: '家', value: '家' }, { text: '公司', value: '公司' }]" :filter-method="filterTag"
                     filter-placement="bottom-end">
                     <template slot-scope="scope">
@@ -47,8 +42,9 @@
                 </el-table-column>
 
             </el-table>
-            <el-pagination background layout="prev, pager, next" :total="pageInfo.totalPage" :page-sizes="pageInfo.pageSizes"
-                :page-size="pageSize" @current-change="handleCurrentChange" :current-page.sync="pageInfo.currentPage">
+            <el-pagination background layout="prev, pager, next" :total="pageInfo.totalPage" :page-sizes="pageSizes"
+                :page-size="pageInfo.pageSize" @current-change="handleCurrentChange"
+                :current-page.sync="pageInfo.currentPage">
             </el-pagination>
         </div>
         <!-- modal 框 -->
@@ -57,17 +53,26 @@
                 <el-form :model="expenseForm" :label-width="formLabelWidth">
                     <el-form-item label="购买日期" required>
                         <el-date-picker v-model="expenseForm.order_time" type="date" placeholder="选择日期" align="left"
-                            value-format="yyyy-MM-dd" style="width: 100%;" editable="false" />
+                            value-format="yyyy-MM-dd" :default-value="new Date()" style="width: 100%;" />
                     </el-form-item>
                     <el-form-item label="名称" :label-width="formLabelWidth">
                         <el-input v-model="expenseForm.name" autocomplete="off" />
                     </el-form-item>
+
+                    <el-form-item label="标签" :label-width="formLabelWidth">
+                        <el-select v-model="expenseForm.tag" placeholder="请选择标签分类">
+                            <el-option v-for="item in tagOptions" :key="item.value" :label="item.label"
+                                :value="item.value">
+                            </el-option>
+                        </el-select>
+
+                    </el-form-item>
+
+
                     <el-form-item label="金额" :label-width="formLabelWidth">
                         <el-input v-model="expenseForm.amount" autocomplete="off" />
                     </el-form-item>
-                    <el-form-item label="标签" :label-width="formLabelWidth">
-                        <el-input v-model="expenseForm.tag" autocomplete="off" />
-                    </el-form-item>
+
                 </el-form>
 
                 <div slot="footer" class="dialog-footer">
@@ -98,18 +103,36 @@ export default {
     data() {
         return {
             expenseForm: {
-                order_time: '',
+                order_time: this.moment().format("YYYY-MM-DD"),
                 name: '',
-                amount: 0,
                 tag: '',
+                amount: 0,
+
             },
+
+            tagOptions: [{
+                value: '奶粉',
+                label: '奶粉'
+            }, {
+                value: '衣服',
+                label: '衣服'
+            }, {
+                value: '玩具',
+                label: '玩具'
+            }, {
+                value: '娱乐',
+                label: '娱乐'
+            }, {
+                value: '其他',
+                label: '其他'
+            }],
             dialogFormVisible: false,
             formLabelWidth: '80px',
-            pageSizes: "[20, 50,100]",
-            pageInfo: {  
+            pageSizes: [20, 50, 100],
+            pageInfo: {
                 totalPage: 100,
                 currentPage: 1,
-                pageSize: "20",
+                pageSize: 20,
             },
             // totalPage: 100,
             // currentPage: 1,
@@ -119,33 +142,17 @@ export default {
                 monthrange: '',
                 name: '',
             },
-            tableData: [{
-                date: '2016-05-02',
-                name: '王小虎',
-                address: '上海市普陀区金沙江路 1518 弄',
-                tag: '家'
-            }, {
-                date: '2016-05-04',
-                name: '王小虎',
-                address: '上海市普陀区金沙江路 1517 弄',
-                tag: '公司'
-            }, {
-                date: '2016-05-01',
-                name: '王小虎',
-                address: '上海市普陀区金沙江路 1519 弄',
-                tag: '家'
-            }, {
-                date: '2016-05-03',
-                name: '王小虎',
-                address: '上海市普陀区金沙江路 1516 弄',
-                tag: '公司'
-            }],
+            tableData: [],
 
             pickerOptions: {
                 shortcuts: [{
                     text: '本月',
                     onClick(picker) {
-                        picker.$emit('pick', [new Date(), new Date()]);
+                        const end = new Date();
+                        const start = new Date();
+                        start.setDate(1);
+                        picker.$emit('pick', [start, end]);
+
                     }
                 }, {
                     text: '今年至今',
@@ -216,10 +223,22 @@ export default {
     },
 
     methods: {
+
         onSubmit(formName) {
             this.$refs[formName].validate((valid) => {
                 if (valid) {
-                    alert('submit!');
+
+                    const data = { ...this.pageInfo, ...this.formInline }
+                    console.log('--------data----', data)
+                    showExpenseListReq(data).then(res => {
+                        if (res.code === 200) {
+                            console.log('res data', res.data)
+                            this.tableData = res.data
+
+                        }
+                    })
+
+
                 } else {
                     console.log('error submit!!');
                     return false;
@@ -230,10 +249,14 @@ export default {
         },
 
         addExpenseEvent() {
+
+            const data = this.expenseForm
+            console.log('expense data ', data)
             addExpenseReq(data).then((res) => {
                 console.log('res')
                 if (res.code === 200) {
                     this.tableData = res.data
+                    this.dialogFormVisible = false
 
                 }
 
