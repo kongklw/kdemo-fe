@@ -155,7 +155,7 @@ export const asyncRoutes = [
         name: '文心',
         meta: { title: '文心', icon: 'openai-copy', noCache: true }
 
-      },
+      }
     ]
   },
 

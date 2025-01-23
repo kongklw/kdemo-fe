@@ -1,121 +1,119 @@
 <template>
-    <div class="app-container">
+  <div class="app-container">
 
-        <div class="chat-container">
-            <div class="message-list">
-                <el-card >
-                    <div v-for="(message, index) in messages" :key="index" class="message-item">
-                        <span class="message-author">{{ message.author }}</span>
-                        <span class="message-text">{{ message.text }}</span>
-                    </div>
-                </el-card>
-            </div>
+    <div class="chat-container">
+      <div class="message-list">
+        <el-card>
+          <div v-for="(message, index) in messages" :key="index" class="message-item">
+            <span class="message-author">{{ message.author }}</span>
+            <span class="message-text">{{ message.text }}</span>
+          </div>
+        </el-card>
+      </div>
 
-            <!-- <div class="fixed-bottom-input"> -->
+      <!-- <div class="fixed-bottom-input"> -->
 
+      <div class="input-box">
 
-            <div class="input-box">
+        <span style="color:#67C23A; margin:0px 0px 20px 60px; font-size: large;">Hello everyone, we are
+          experiencing
+          a
+          wonderful era
+          of AI. Try it !!! <br>
+        </span>
 
-                <span style="color:#67C23A; margin:0px 0px 20px 60px; font-size: large;">Hello everyone, we are
-                    experiencing
-                    a
-                    wonderful era
-                    of AI. Try it !!! <br>
-                </span>
+        <el-row>
+          <el-col :span="20">
+            <el-input
+              v-model="newMessage"
+              placeholder="试试AI吧"
+              class="input-message"
+              @keyup.enter.native="sendMessage"
+            />
+          </el-col>
+          <el-col :span="4">
+            <el-button type="primary" @click="sendMessage">交流</el-button>
+          </el-col>
+        </el-row>
+      </div>
 
-                <el-row>
-                    <el-col :span="20">
-                        <el-input v-model="newMessage" placeholder="试试AI吧" class="input-message"
-                            @keyup.enter.native="sendMessage" />
-                    </el-col>
-                    <el-col :span="4">
-                        <el-button type="primary" @click="sendMessage">交流</el-button>
-                    </el-col>
-                </el-row>
-            </div>
-
-            <!-- </div> -->
-
-        </div>
-
+      <!-- </div> -->
 
     </div>
+
+  </div>
 </template>
 
 <script>
 
 import {
-    askAIReq
+  askAIReq
 } from '@/api/aipark'
-
 
 export default {
 
-    data() {
-        return {
-            form: {
-                textarea: '',
-            },
+  data() {
+    return {
+      form: {
+        textarea: ''
+      },
 
-            dialogVisible: true,
-            messages: [
-                { author: 'Alice', text: 'Hello, Bob!' },
-                { author: 'Bob', text: 'Hi, Alice! How are you?' },
-            ],
-            newMessage: '',
-
-        }
-    },
-
-    created() {
-
-    },
-
-    methods: {
-
-        handleClose() {
-            // 可以在这里处理对话框关闭前的逻辑
-        },
-
-        sendMessage() {
-            if (this.newMessage.trim()) {
-
-                this.messages.push({ author: 'You', text: this.newMessage });
-                this.$nextTick(() => {
-                    this.scrollToBottom(); // 在DOM更新后滚动到底部
-                });
-
-                // 发送后端请求，将结果加入到messages里面.
-                const data = { content: this.newMessage }
-                askAIReq(data).then(res => {
-                    this.newMessage = '';
-                    if (res.code === 200) {
-                        this.messages.push({ author: 'OpenAI', text: res.data });
-                    }
-                })
-
-                this.$nextTick(() => {
-                    this.scrollToBottom(); // 在DOM更新后滚动到底部
-                });
-
-
-                // 可以在这里添加滚动到底部的逻辑
-                this.$nextTick(() => {
-                    const chatContent = this.$el.querySelector('.chat-content .el-card__body');
-                    chatContent.scrollTop = chatContent.scrollHeight;
-                });
-            }
-        },
-        scrollToBottom() {
-            const messageList = this.$refs.messageList;
-            messageList.scrollTop = messageList.scrollHeight; // 滚动到底部
-        },
+      dialogVisible: true,
+      messages: [
+        { author: 'Alice', text: 'Hello, Bob!' },
+        { author: 'Bob', text: 'Hi, Alice! How are you?' }
+      ],
+      newMessage: ''
 
     }
+  },
+
+  created() {
+
+  },
+
+  methods: {
+
+    handleClose() {
+      // 可以在这里处理对话框关闭前的逻辑
+    },
+
+    sendMessage() {
+      if (this.newMessage.trim()) {
+        this.messages.push({ author: 'You', text: this.newMessage })
+        this.$nextTick(() => {
+          this.scrollToBottom() // 在DOM更新后滚动到底部
+        })
+
+        // 发送后端请求，将结果加入到messages里面.
+        const data = { content: this.newMessage }
+        askAIReq(data).then(res => {
+          this.newMessage = ''
+          if (res.code === 200) {
+            this.messages.push({ author: 'OpenAI', text: res.data })
+          }
+        })
+
+        this.$nextTick(() => {
+          this.scrollToBottom() // 在DOM更新后滚动到底部
+        })
+
+        // 可以在这里添加滚动到底部的逻辑
+        this.$nextTick(() => {
+          const chatContent = this.$el.querySelector('.chat-content .el-card__body')
+          chatContent.scrollTop = chatContent.scrollHeight
+        })
+      }
+    },
+    scrollToBottom() {
+      const messageList = this.$refs.messageList
+      messageList.scrollTop = messageList.scrollHeight // 滚动到底部
+    }
+
+  }
 
 }
 </script>
-
 
 <style>
 .chat-container {
@@ -155,9 +153,6 @@ export default {
   box-sizing: border-box; /* 包括内边距和边框在内计算宽度 */
 }
 
-
-
-
 .fixed-bottom-input {
     position: fixed;
     /* 固定定位 */
@@ -184,8 +179,6 @@ export default {
     box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
     /* 阴影效果，增加层次感 */
 }
-
-
 
 .message-author {
     font-weight: bold;

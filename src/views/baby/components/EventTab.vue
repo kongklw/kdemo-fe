@@ -39,7 +39,7 @@
               {{ scope.row.feed_time }}
             </template>
           </el-table-column>
-          <el-table-column label="奶量" >
+          <el-table-column label="奶量">
             <template slot-scope="scope">
               {{ scope.row.milk_volume }}
             </template>
@@ -115,7 +115,7 @@
         <!-- 尿不湿dialog -->
         <el-dialog title="尿不湿" :visible.sync="pants_dialogFormVisible" width="80%" destroy-on-close>
           <el-form :model="babyPantsForm" :label-width="formLabelWidth">
-            <el-form-item label="更换时间" required >
+            <el-form-item label="更换时间" required>
               <el-date-picker
                 v-model="babyPantsForm.use_date"
                 type="datetime"

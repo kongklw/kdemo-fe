@@ -19,7 +19,7 @@ export function addExpenseReq(data) {
 export function showTodoListReq() {
   return request({
     url: '/baby/todo',
-    method: 'get',
+    method: 'get'
     // params: query
   })
 }
