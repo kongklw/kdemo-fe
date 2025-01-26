@@ -1,5 +1,42 @@
 import request from '@/utils/request'
 
+
+
+export function showSleepListReq(data) {
+  return request({
+    url: '/baby/sleep_list',
+    method: 'post',
+    data
+  })
+}
+
+export function addSleepReq(data) {
+  return request({
+    url: '/baby/sleep',
+    method: 'post',
+    data
+  })
+}
+
+
+export function uploadExpenseFile(data) {
+  return request({
+    url: '/file/upload',
+    method: 'post',
+    data
+  })
+}
+
+export function batchProcessExpenseReq(data) {
+  return request({
+    url: '/baby/batch_expense',
+    method: 'post',
+    data
+  })
+}
+
+
+
 export function showExpenseListReq(data) {
   return request({
     url: '/baby/expense_list',

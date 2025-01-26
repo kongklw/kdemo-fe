@@ -3,20 +3,25 @@
 
     <!-- 查询form -->
     <div>
+
+      <div>
+
+        <el-upload class="upload-demo inline-block" ref="upload" action="" :http-request="upload"
+          :on-preview="handlePreview" :on-remove="handleRemove" :file-list="fileList" list-type="picture">
+
+          <el-button slot="trigger" size="small" type="primary">点击上传</el-button>
+          <el-button style="margin-left: 10px;" size="small" type="success" @click="batchProcess">批量处理</el-button>
+          <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
+        </el-upload>
+
+      </div>
+
       <el-form ref="formInline" :rules="rules" :inline="true" :model="formInline" class="demo-form-inline">
         <el-form-item label="月份" prop="monthrange" required>
 
-          <el-date-picker
-            v-model="formInline.monthrange"
-            type="monthrange"
-            align="right"
-            unlink-panels
-            range-separator="至"
-            start-placeholder="开始月份"
-            end-placeholder="结束月份"
-            :picker-options="pickerOptions"
-            value-format="yyyy-MM-dd"
-          />
+          <el-date-picker v-model="formInline.monthrange" type="monthrange" align="right" unlink-panels
+            range-separator="至" start-placeholder="开始月份" end-placeholder="结束月份" :picker-options="pickerOptions"
+            value-format="yyyy-MM-dd" />
         </el-form-item>
         <el-form-item label="物品名称" prop="name">
           <el-input v-model="formInline.name" placeholder="例如 尿不湿" />
@@ -28,6 +33,12 @@
         <el-form-item>
           <el-button type="primary" @click="dialogFormVisible = true">添加记录</el-button>
         </el-form-item>
+
+        <el-form-item>
+          <el-button style="margin-left: 10px;" size="small" type="success" @click="batchProcess">批量处理</el-button>
+        </el-form-item>
+
+
       </el-form>
     </div>
     <div>
@@ -36,44 +47,27 @@
         <el-table-column prop="create_time" label="消费日期" column-key="date" />
         <el-table-column prop="name" label="物品名称" />
         <el-table-column prop="amount" label="金额" :formatter="formatter" />
-        <el-table-column
-          prop="tag"
-          label="标签"
-          :filters="[{ text: '家', value: '家' }, { text: '公司', value: '公司' }]"
-          :filter-method="filterTag"
-          filter-placement="bottom-end"
-        >
+        <el-table-column prop="tag" label="标签" :filters="[{ text: '家', value: '家' }, { text: '公司', value: '公司' }]"
+          :filter-method="filterTag" filter-placement="bottom-end">
           <template slot-scope="scope">
             <el-tag :type="scope.row.tag === '家' ? 'primary' : 'success'" disable-transitions>{{
               scope.row.tag }}</el-tag>
           </template>
         </el-table-column>
+        <el-table-column prop="image_url" label="图片地址" />
 
       </el-table>
-      <el-pagination
-        background
-        layout="prev, pager, next"
-        :total="pageInfo.totalPage"
-        :page-sizes="pageSizes"
-        :page-size="pageInfo.pageSize"
-        :current-page.sync="pageInfo.currentPage"
-        @current-change="handleCurrentChange"
-      />
+      <el-pagination background layout="prev, pager, next" :total="pageInfo.totalPage" :page-sizes="pageSizes"
+        :page-size="pageInfo.pageSize" :current-page.sync="pageInfo.currentPage"
+        @current-change="handleCurrentChange" />
     </div>
     <!-- modal 框 -->
     <div>
       <el-dialog title="购买记录" :visible.sync="dialogFormVisible" width="80%" destroy-on-close>
         <el-form :model="expenseForm" :label-width="formLabelWidth">
           <el-form-item label="购买日期" required>
-            <el-date-picker
-              v-model="expenseForm.order_time"
-              type="date"
-              placeholder="选择日期"
-              align="left"
-              value-format="yyyy-MM-dd"
-              :default-value="new Date()"
-              style="width: 100%;"
-            />
+            <el-date-picker v-model="expenseForm.order_time" type="date" placeholder="选择日期" align="left"
+              value-format="yyyy-MM-dd" :default-value="new Date()" style="width: 100%;" />
           </el-form-item>
           <el-form-item label="名称" :label-width="formLabelWidth">
             <el-input v-model="expenseForm.name" autocomplete="off" />
@@ -81,12 +75,7 @@
 
           <el-form-item label="标签" :label-width="formLabelWidth">
             <el-select v-model="expenseForm.tag" placeholder="请选择标签分类">
-              <el-option
-                v-for="item in tagOptions"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-              />
+              <el-option v-for="item in tagOptions" :key="item.value" :label="item.label" :value="item.value" />
             </el-select>
 
           </el-form-item>
@@ -109,8 +98,10 @@
 
 <script>
 import {
-  addExpenseReq, showExpenseListReq
+  addExpenseReq, showExpenseListReq, uploadExpenseFile, batchProcessExpenseReq
 } from '@/api/baby'
+
+
 
 export default {
   name: 'BabyExpense',
@@ -120,6 +111,13 @@ export default {
 
   data() {
     return {
+      fileList: [
+        // { name: 'food.jpeg', url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100' },
+        // { name: 'food2.jpeg', url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100' }
+      ],
+
+      myFileList: [],
+
       expenseForm: {
         order_time: this.moment().format('YYYY-MM-DD'),
         name: '',
@@ -157,7 +155,7 @@ export default {
       // pageSizes: "[20, 50,100]",
       // pageSize: "20",
       formInline: {
-        monthrange: '',
+        monthrange: [this.moment().subtract(2,'months').startOf().format('YYYY-MM-DD'),this.moment().format('YYYY-MM-DD')],
         name: ''
       },
       tableData: [],
@@ -232,6 +230,7 @@ export default {
   },
 
   created() {
+    this.showExpenseList()
 
   },
 
@@ -241,17 +240,68 @@ export default {
 
   methods: {
 
+    batchProcess() {
+      console.log('batch process', this.myFileList)
+      const data = { 'fileList': this.myFileList }
+      batchProcessExpenseReq(data).then(res => {
+        if (res.code === 200) {
+          console.log('success')
+          // alert('batch process successful')
+          this.fileList = []
+          this.myFileList = []
+          
+          this.showExpenseList()
+
+        }
+      })
+    },
+
+
+    upload(param) {
+      const formData = new FormData()
+      formData.append('file', param.file)
+
+      uploadExpenseFile(formData).then(res => {
+        if (res.code === 200) {
+
+          const data = res.data
+          this.myFileList.push(data)
+
+        }
+      })
+
+      // const url = 'http://localhost:8000/file/upload'
+      // axios.post(url, formData).then(data => {
+      //   console.log('data is ',data)
+      //   console.log('上传图片成功')
+      // }).catch(response => {
+      //   console.log('失败原因',response.message)
+      //   console.log('图片上传失败')
+      // })
+    },
+
+    handleRemove(file, fileList) {
+      console.log('remove------', file, fileList);
+    },
+    handlePreview(file) {
+      console.log('hahahah', file);
+    },
+
+    showExpenseList() {
+      const data = { ...this.pageInfo, ...this.formInline }
+      console.log('--------data----', data)
+      showExpenseListReq(data).then(res => {
+        if (res.code === 200) {
+          console.log('res data', res.data)
+          this.tableData = res.data
+        }
+      })
+    },
+
     onSubmit(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          const data = { ...this.pageInfo, ...this.formInline }
-          console.log('--------data----', data)
-          showExpenseListReq(data).then(res => {
-            if (res.code === 200) {
-              console.log('res data', res.data)
-              this.tableData = res.data
-            }
-          })
+          this.showExpenseList()
         } else {
           console.log('error submit!!')
           return false
@@ -295,28 +345,32 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.inline-block {
+  display: inline-block;
+}
+
 .dashboard-editor-container {
-    padding: 32px;
-    background-color: rgb(240, 242, 245);
-    position: relative;
+  padding: 32px;
+  background-color: rgb(240, 242, 245);
+  position: relative;
 
-    .github-corner {
-        position: absolute;
-        top: 0px;
-        border: 0;
-        right: 0;
-    }
+  .github-corner {
+    position: absolute;
+    top: 0px;
+    border: 0;
+    right: 0;
+  }
 
-    .chart-wrapper {
-        background: #fff;
-        padding: 16px 16px 0;
-        margin-bottom: 32px;
-    }
+  .chart-wrapper {
+    background: #fff;
+    padding: 16px 16px 0;
+    margin-bottom: 32px;
+  }
 }
 
 @media (max-width: 1024px) {
-    .chart-wrapper {
-        padding: 8px;
-    }
+  .chart-wrapper {
+    padding: 8px;
+  }
 }
 </style>

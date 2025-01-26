@@ -144,6 +144,7 @@ export const asyncRoutes = [
     children: [
       {
         path: 'index',
+
         component: () => import('@/views/ai/index.vue'),
         name: 'Langchain',
         meta: { title: 'Langchain', icon: 'openai-copy', noCache: true }
@@ -160,32 +161,10 @@ export const asyncRoutes = [
   },
 
   {
-    path: '/sports',
-    component: Layout,
-    children: [
-      {
-
-        path: 'index',
-        component: () => import('@/views/sports/index'),
-        name: 'Sports',
-        meta: { title: 'Sports', icon: 'sport-basket', noCache: true }
-
-      },
-      {
-        path: 'dashboard',
-        component: () => import('@/views/dashboard/index.vue'),
-        name: 'Dashboard',
-        meta: { title: 'Dashboard', icon: 'dashboard' }
-      }
-
-    ]
-  },
-
-  {
     path: '/baby',
     component: Layout,
     redirect: '/baby/breastfeed',
-    alwaysShow: true, // will always show the root menu
+    alwaysShow: false, // will always show the root menu
     name: 'Baby',
     meta: {
       title: 'Baby',
@@ -195,9 +174,18 @@ export const asyncRoutes = [
     children: [
       {
         path: 'breastfeed',
+     
         component: () => import('@/views/baby/breastfeed.vue'),
         name: 'BreastFeed',
         meta: { title: 'BreastFeed', icon: 'el-icon-coffee-cup', noCache: true }
+
+      },
+      {
+        path: 'sleep',
+       
+        component: () => import('@/views/baby/sleep.vue'),
+        name: 'Sleep',
+        meta: { title: 'Sleep', icon: 'sleep2' }
 
       },
       {
@@ -223,6 +211,30 @@ export const asyncRoutes = [
 
     ]
   },
+
+
+  {
+    path: '/sports',
+    component: Layout,
+    children: [
+      {
+
+        path: 'index',
+        component: () => import('@/views/sports/index'),
+        name: 'Sports',
+        meta: { title: 'Sports', icon: 'sport-basket', noCache: true }
+
+      },
+      {
+        path: 'dashboard',
+        component: () => import('@/views/dashboard/index.vue'),
+        name: 'Dashboard',
+        meta: { title: 'Dashboard', icon: 'dashboard' }
+      }
+
+    ]
+  },
+
 
   // {
   //   path: '/permission',
