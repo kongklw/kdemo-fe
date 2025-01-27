@@ -35,6 +35,15 @@ export function batchProcessExpenseReq(data) {
   })
 }
 
+export function batchDeleteExpenseReq(data) {
+  return request({
+    url: '/baby/batch_delete_expense',
+    method: 'post',
+    data
+  })
+}
+
+
 
 
 export function showExpenseListReq(data) {

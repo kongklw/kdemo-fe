@@ -4,16 +4,13 @@
     <!-- 查询form -->
     <div>
 
-      <div>
-
-        <el-upload class="upload-demo inline-block" ref="upload" action="" :http-request="upload"
+      <div class="batch-process">
+        <el-upload class="upload-demo inline-block" ref="upload" multiple action="" :http-request="upload"
           :on-preview="handlePreview" :on-remove="handleRemove" :file-list="fileList" list-type="picture">
-
           <el-button slot="trigger" size="small" type="primary">点击上传</el-button>
-          <el-button style="margin-left: 10px;" size="small" type="success" @click="batchProcess">批量处理</el-button>
-          <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
+          <el-button style="margin-left: 10px;" size="small" type="success" @click="batchProcess">批量处理订单</el-button>
+          <!-- <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div> -->
         </el-upload>
-
       </div>
 
       <el-form ref="formInline" :rules="rules" :inline="true" :model="formInline" class="demo-form-inline">
@@ -35,7 +32,7 @@
         </el-form-item>
 
         <el-form-item>
-          <el-button style="margin-left: 10px;" size="small" type="success" @click="batchProcess">批量处理</el-button>
+          <el-button style="margin-left: 10px;" size="small" type="danger" @click="batchDelete">批量删除</el-button>
         </el-form-item>
 
 
@@ -43,8 +40,10 @@
     </div>
     <div>
       <!-- <el-button @click="clearFilter">清除所有过滤器</el-button> -->
-      <el-table ref="filterTable" :data="tableData" style="width: 100%">
-        <el-table-column prop="create_time" label="消费日期" column-key="date" />
+      <el-table ref="filterTable" @selection-change="handleSelectionChange" :data="tableData" style="width: 100%">
+        <el-table-column type="selection" prop="id" width="55">
+        </el-table-column>
+        <el-table-column prop="order_time" label="消费日期" column-key="date" />
         <el-table-column prop="name" label="物品名称" />
         <el-table-column prop="amount" label="金额" :formatter="formatter" />
         <el-table-column prop="tag" label="标签" :filters="[{ text: '家', value: '家' }, { text: '公司', value: '公司' }]"
@@ -98,7 +97,7 @@
 
 <script>
 import {
-  addExpenseReq, showExpenseListReq, uploadExpenseFile, batchProcessExpenseReq
+  addExpenseReq, showExpenseListReq, uploadExpenseFile, batchProcessExpenseReq, batchDeleteExpenseReq
 } from '@/api/baby'
 
 
@@ -111,6 +110,7 @@ export default {
 
   data() {
     return {
+
       fileList: [
         // { name: 'food.jpeg', url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100' },
         // { name: 'food2.jpeg', url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100' }
@@ -155,10 +155,11 @@ export default {
       // pageSizes: "[20, 50,100]",
       // pageSize: "20",
       formInline: {
-        monthrange: [this.moment().subtract(2,'months').startOf().format('YYYY-MM-DD'),this.moment().format('YYYY-MM-DD')],
+        monthrange: [this.moment().subtract(2, 'months').startOf().format('YYYY-MM-DD'), this.moment().format('YYYY-MM-DD')],
         name: ''
       },
       tableData: [],
+      multipleSelection: [],
 
       pickerOptions: {
         shortcuts: [{
@@ -241,17 +242,35 @@ export default {
   methods: {
 
     batchProcess() {
+      const loading = this.$loading({
+        lock: true,
+        text: 'Loading',
+        spinner: 'el-icon-loading',
+        background: 'rgba(0, 0, 0, 0.7)'
+      });
+
       console.log('batch process', this.myFileList)
       const data = { 'fileList': this.myFileList }
       batchProcessExpenseReq(data).then(res => {
         if (res.code === 200) {
           console.log('success')
+          loading.close();
           // alert('batch process successful')
           this.fileList = []
           this.myFileList = []
-          
+
           this.showExpenseList()
 
+        }
+      })
+    },
+
+    batchDelete() {
+      const data = { 'ids': this.multipleSelection }
+      batchDeleteExpenseReq(data).then(res => {
+
+        if (res.code === 200) {
+          this.showExpenseList()
         }
       })
     },
@@ -292,10 +311,19 @@ export default {
       console.log('--------data----', data)
       showExpenseListReq(data).then(res => {
         if (res.code === 200) {
-          console.log('res data', res.data)
+          console.log('res data---expense list', res.data)
           this.tableData = res.data
         }
       })
+    },
+
+    handleSelectionChange(val) {
+
+      const idsArray = val.map(v => (
+        v.id
+      ));
+      this.multipleSelection = idsArray;
+      console.log('触发选择', this.multipleSelection)
     },
 
     onSubmit(formName) {
@@ -345,6 +373,20 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+
+.batch-process {
+  margin: 10px 0px 20px 0px;
+  padding: 10px;
+  /* 输入框内边距 */
+  background-color: #fff;
+  /* 背景色 */
+  border: 1px solid #dcdcdc;
+  /* 边框 */
+  border-radius: 10px;
+  /* 圆角 */
+  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+  /* 阴影效果，增加层次感 */
+}
 .inline-block {
   display: inline-block;
 }

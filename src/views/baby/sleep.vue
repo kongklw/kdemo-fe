@@ -9,18 +9,63 @@
           </el-date-picker>
         </el-form-item>
 
-        <!-- <el-form-item label="物品名称" prop="name">
-          <el-input v-model="formInline.name" placeholder="例如 尿不湿" />
-        </el-form-item> -->
-
         <el-form-item>
           <el-button type="primary" @click="onSubmit('formInline')">查询</el-button>
         </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="dialogFormVisible = true">添加记录</el-button>
-        </el-form-item>
+       
       </el-form>
     </div>
+
+    <div class="add-sleep">
+      <el-form label-position="top" :model="sleepForm" :label-width="formLabelWidth">
+        <el-row :gutter="5">
+          <el-col :xs="{ span: 12 }" :sm="{ span: 12 }" :md="{ span: 12 }" :lg="{ span: 4 }" :xl="{ span: 4 }">
+            <el-form-item label="时间点" required>
+              <el-time-picker v-model="sleepForm.sleep_time" placeholder="时间点">
+              </el-time-picker>
+            </el-form-item>
+          </el-col>
+
+          <el-col :xs="{ span: 12 }" :sm="{ span: 12 }" :md="{ span: 12 }" :lg="{ span: 4 }" :xl="{ span: 4 }">
+            <el-form-item label="状态" required :label-width="formLabelWidth">
+              <el-select v-model="sleepForm.status" placeholder="状态">
+                <el-option v-for="item in statusOptions" :key="item.value" :label="item.label" :value="item.value" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+
+          <el-col :xs="{ span: 24 }" :sm="{ span: 12 }" :md="{ span: 12 }" :lg="{ span: 10 }" :xl="{ span: 12 }">
+            <el-form-item label="睡眠描述">
+              <el-input type="textarea" ref="inputWord" v-model="sleepForm.describe" @blur="handleInputBlur"></el-input>
+            </el-form-item>
+            <div class="main-word">
+              <div class="main-word-left">
+                <span class="main-word-label">插入动态词包: </span>
+                <el-button v-for="n in commonWordList" :key="n.creativeWordId" class="button-word" type="text"
+                  @click="btnClick(n.name)">#{{ n.name }}</el-button>
+              </div>
+            </div>
+          </el-col>
+
+          <el-col :xs="{ span: 24 }" :sm="{ span: 12 }" :md="{ span: 12 }" :lg="{ span: 4 }" :xl="{ span: 2 }"
+            :offset="2">
+            <el-form-item>
+              <el-button type="primary" @click="addSleepEvent">添加记录</el-button>
+            </el-form-item>
+          </el-col>
+
+
+        </el-row>
+
+
+
+
+
+      </el-form>
+    </div>
+
+
+
     <div>
       <!-- <el-button @click="clearFilter">清除所有过滤器</el-button> -->
       <el-table ref="filterTable" :data="tableData" style="width: 100%">
@@ -34,39 +79,16 @@
               scope.row.status }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="amount" label="持续时间" />
 
+        <el-table-column prop="describe" label="描述" />
+        <el-table-column prop="amount" label="持续时间" />
 
       </el-table>
       <el-pagination background layout="prev, pager, next" :total="pageInfo.totalPage" :page-sizes="pageSizes"
         :page-size="pageInfo.pageSize" :current-page.sync="pageInfo.currentPage"
         @current-change="handleCurrentChange" />
     </div>
-    <!-- modal 框 -->
-    <div>
-      <el-dialog title="睡眠记录" :visible.sync="dialogFormVisible" width="80%" destroy-on-close>
-        <el-form :model="sleepForm" :label-width="formLabelWidth">
-          <el-form-item label="时间点" required>
 
-            <el-time-picker v-model="sleepForm.sleep_time"  placeholder="时间点">
-            </el-time-picker>
-          </el-form-item>
-
-          <el-form-item label="状态" required :label-width="formLabelWidth">
-            <el-select v-model="sleepForm.status" placeholder="状态">
-              <el-option v-for="item in statusOptions" :key="item.value" :label="item.label" :value="item.value" />
-            </el-select>
-
-          </el-form-item>
-
-        </el-form>
-
-        <div slot="footer" class="dialog-footer">
-          <el-button @click="dialogFormVisible = false">取 消</el-button>
-          <el-button type="primary" @click="addSleepEvent">确 定</el-button>
-        </div>
-      </el-dialog>
-    </div>
 
   </div>
 </template>
@@ -84,39 +106,38 @@ export default {
 
   data() {
     return {
+      commonWordList: [
+        { name: "喂水", creativeWordId: 1 },
+        { name: "喂奶", creativeWordId: 2 },
+        { name: "翻身", creativeWordId: 3 },
+        { name: "轻拍", creativeWordId: 4 },
+        { name: "奶嘴安抚", creativeWordId: 5 },
+        { name: "哼唧", creativeWordId: 6 },
+        { name: "侧漏", creativeWordId: 7 },
+        { name: "梦哭", creativeWordId: 8 },
+        { name: "梦笑", creativeWordId: 9 },
+
+      ],
+      cursorIndex: "", // 光标位置
+
       sleepForm: {
         sleep_time: this.moment().format('YYYY-MM-DD HH:mm:ss'),
         status: '熟睡',
+        describe: ''
 
       },
-
       statusOptions: [{
         value: '醒着',
         label: '醒着'
       }, {
         value: '熟睡',
         label: '熟睡'
-      }, {
-        value: '哼唧',
-        label: '哼唧'
       },
-      {
-        value: '开心',
-        label: '开心'
-      }, 
-      {
-        value: '普通',
-        label: '普通'
-      }, 
-      {
-        value: '难过',
-        label: '难过'
-      }, 
       {
         value: '其他',
         label: '其他'
       }
-    ],
+      ],
       dialogFormVisible: false,
       formLabelWidth: '80px',
       pageSizes: [20, 50, 100],
@@ -125,15 +146,11 @@ export default {
         currentPage: 1,
         pageSize: 20
       },
-
       formInline: {
         date: this.moment().format('YYYY-MM-DD'),
 
       },
       tableData: [],
-
-
-
       rules: {
 
         date: [
@@ -144,12 +161,10 @@ export default {
     }
   },
   mounted() {
-
   },
 
   created() {
-    this.onSubmit('formInline')
-
+    this.showSleepList()
   },
 
   destroyed() {
@@ -157,18 +172,49 @@ export default {
   },
 
   methods: {
+    // 获取光标位置
+    handleInputBlur(e) {
+      this.cursorIndex = e.srcElement.selectionStart;
+    },
+
+    btnClick(label) {
+      // 将文本内容在光标位置进行拆分
+      const txt = this.sleepForm.describe;
+      const start = txt.substring(0, this.cursorIndex);
+      const end = txt.substring(this.cursorIndex, txt.length);
+
+      // 插入关键词
+      this.sleepForm.describe = start + `#${label} ` + end;
+
+      // 获取文本框，设置焦点，处理光标位置
+      if (this.$refs.inputWord) {
+        // this.$refs.inputWord.focus();
+        this.$nextTick(() => {
+          var a = this.$refs.inputWord.$el.firstElementChild;
+          a.focus();
+          a.selectionStart = this.cursorIndex + label.length + 2;
+          a.selectionEnd = this.cursorIndex + label.length + 2;
+        });
+      }
+    },
+
+    showSleepList() {
+      const data = { ...this.pageInfo, ...this.formInline }
+      console.log('--------data----', data)
+      showSleepListReq(data).then(res => {
+        if (res.code === 200) {
+
+          this.tableData = res.data
+        }
+      })
+
+    },
 
     onSubmit(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          const data = { ...this.pageInfo, ...this.formInline }
-          console.log('--------data----', data)
-          showSleepListReq(data).then(res => {
-            if (res.code === 200) {
-              console.log('res data', res.data)
-              this.tableData = res.data
-            }
-          })
+          this.showSleepList()
+
         } else {
           console.log('error submit!!')
           return false
@@ -185,7 +231,7 @@ export default {
         console.log('res')
         if (res.code === 200) {
           this.tableData = res.data
-          this.dialogFormVisible = false
+          this.showSleepList()
         }
       })
     },
@@ -212,6 +258,54 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.add-sleep {
+  margin: 10px 0px 20px 0px;
+  padding: 10px;
+  /* 输入框内边距 */
+  background-color: #fff;
+  /* 背景色 */
+  border: 1px solid #dcdcdc;
+  /* 边框 */
+  border-radius: 10px;
+  /* 圆角 */
+  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+  /* 阴影效果，增加层次感 */
+}
+
+.el-row {
+  margin-bottom: 20px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.el-col {
+  border-radius: 4px;
+}
+
+.bg-purple-dark {
+  background: #99a9bf;
+}
+
+.bg-purple {
+  background: #d3dce6;
+}
+
+.bg-purple-light {
+  background: #e5e9f2;
+}
+
+.grid-content {
+  border-radius: 4px;
+  min-height: 36px;
+}
+
+.row-bg {
+  padding: 10px 0;
+  background-color: #f9fafc;
+}
+
 .dashboard-editor-container {
   padding: 32px;
   background-color: rgb(240, 242, 245);
