@@ -8,45 +8,46 @@
         <el-upload class="upload-demo inline-block" ref="upload" multiple action="" :http-request="upload"
           :on-preview="handlePreview" :on-remove="handleRemove" :file-list="fileList" list-type="picture">
           <el-button slot="trigger" size="small" type="primary">点击上传</el-button>
-          <el-button style="margin-left: 10px;" size="small" type="success" @click="batchProcess">批量处理订单</el-button>
+          <el-button style="margin-left: 10px;" size="small" type="primary" @click="batchProcess">批量AI处理</el-button>
+          <el-button style="margin-left: 20px;" size="small" type="primary"
+            @click="dialogFormVisible = true">单个添加</el-button>
           <!-- <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div> -->
         </el-upload>
       </div>
 
-      <el-form ref="formInline" :rules="rules" :inline="true" :model="formInline" class="demo-form-inline">
-        <el-form-item label="月份" prop="monthrange" required>
+      <div class="batch-process">
+        <el-form ref="formInline" :rules="rules" :inline="true" :model="formInline" class="demo-form-inline">
+          <el-form-item label="月份" prop="monthrange" required>
 
-          <el-date-picker v-model="formInline.monthrange" type="monthrange" align="right" unlink-panels
-            range-separator="至" start-placeholder="开始月份" end-placeholder="结束月份" :picker-options="pickerOptions"
-            value-format="yyyy-MM-dd" />
-        </el-form-item>
-        <el-form-item label="物品名称" prop="name">
-          <el-input v-model="formInline.name" placeholder="例如 尿不湿" />
-        </el-form-item>
+            <el-date-picker v-model="formInline.monthrange" type="monthrange" align="right" unlink-panels
+              range-separator="至" start-placeholder="开始月份" end-placeholder="结束月份" :picker-options="pickerOptions"
+              value-format="yyyy-MM-dd" />
+          </el-form-item>
+          <el-form-item label="物品名称" prop="name">
+            <el-input v-model="formInline.name" placeholder="例如 尿不湿" />
+          </el-form-item>
 
-        <el-form-item>
-          <el-button type="primary" @click="onSubmit('formInline')">查询</el-button>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="dialogFormVisible = true">添加记录</el-button>
-        </el-form-item>
+          <el-form-item>
+            <el-button type="primary" @click="onSubmit('formInline')">查询</el-button>
+          </el-form-item>
 
-        <el-form-item>
-          <el-button style="margin-left: 10px;" size="small" type="danger" @click="batchDelete">批量删除</el-button>
-        </el-form-item>
+          <el-form-item>
+            <el-button style="margin-left: 10px;" size="small" type="danger" @click="batchDelete">批量删除</el-button>
+          </el-form-item>
 
 
-      </el-form>
+        </el-form>
+      </div>
     </div>
     <div>
       <!-- <el-button @click="clearFilter">清除所有过滤器</el-button> -->
       <el-table ref="filterTable" @selection-change="handleSelectionChange" :data="tableData" style="width: 100%">
-        <el-table-column type="selection" prop="id" width="55">
+        <el-table-column type="selection" prop="id" min-width="30px">
         </el-table-column>
-        <el-table-column prop="order_time" label="消费日期" column-key="date" />
-        <el-table-column prop="name" label="物品名称" />
-        <el-table-column prop="amount" label="金额" :formatter="formatter" />
-        <el-table-column prop="tag" label="标签" :filters="[{ text: '家', value: '家' }, { text: '公司', value: '公司' }]"
+        <el-table-column prop="order_time" min-width="80px" label="消费日期" column-key="date" />
+        <el-table-column prop="name" min-width="80px" label="物品名称" />
+        <el-table-column prop="amount" min-width="70px" label="金额" :formatter="formatter" />
+        <el-table-column prop="tag" min-width="80px" label="标签" :filters="[{ text: '家', value: '家' }, { text: '公司', value: '公司' }]"
           :filter-method="filterTag" filter-placement="bottom-end">
           <template slot-scope="scope">
             <el-tag :type="scope.row.tag === '家' ? 'primary' : 'success'" disable-transitions>{{
@@ -373,7 +374,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
 .batch-process {
   margin: 10px 0px 20px 0px;
   padding: 10px;
@@ -387,6 +387,7 @@ export default {
   box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
   /* 阴影效果，增加层次感 */
 }
+
 .inline-block {
   display: inline-block;
 }

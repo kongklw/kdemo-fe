@@ -1,17 +1,17 @@
 <template>
   <el-row :gutter="10" class="panel-group">
-    <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
+    <el-col :xs="24" :sm="12" :lg="12" class="card-panel-col">
       <div class="card-panel" @click="handleSetLineChartData('milkVolumes')">
         <div class="card-panel-icon-wrapper icon-people">
           <svg-icon icon-class="babygirl" class-name="card-panel-icon" />
         </div>
 
-        <!-- <div class="card-panel-description">
+        <div class="card-panel-description">
           <div class="card-panel-text">
             参考量
           </div>
           <label class="card-panel-num">{{ basicInfo.refermilkVolumes }} ml</label>
-        </div> -->
+        </div>
 
         <div class="card-panel-description">
           <div class="card-panel-text">
@@ -21,48 +21,6 @@
 
         </div>
 
-      </div>
-    </el-col>
-    <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
-      <div class="card-panel" @click="handleSetLineChartData('temperature')">
-        <div class="card-panel-icon-wrapper icon-message">
-          <svg-icon icon-class="bodyTemperature" class-name="card-panel-icon" />
-        </div>
-        <div class="card-panel-description">
-          <div class="card-panel-text">
-            体温
-          </div>
-          <label class="card-panel-num">{{ basicInfoText.temperature }} 度</label>
-        </div>
-      </div>
-    </el-col>
-
-    <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
-      <div class="card-panel" @click="handleSetLineChartData('babyPants')">
-        <div class="card-panel-icon-wrapper icon-message">
-          <svg-icon icon-class="babyPants" class-name="card-panel-icon" />
-        </div>
-        <div class="card-panel-description">
-          <div class="card-panel-text">
-            尿不湿
-          </div>
-          <label class="card-panel-num">{{ basicInfoText.babyPants }} 个</label>
-        </div>
-      </div>
-    </el-col>
-
-    <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
-      <div class="card-panel" @click="handleSetLineChartData('purchases')">
-        <div class="card-panel-icon-wrapper icon-money">
-          <svg-icon icon-class="money" class-name="card-panel-icon" />
-        </div>
-        <div class="card-panel-description">
-          <div class="card-panel-text">
-            花费
-          </div>
-          <label class="card-panel-num">{{ basicInfoText.purchases }} RMB</label>
-          <!-- <count-to :start-val="0" :end-val="9280" :duration="3200" class="card-panel-num" /> -->
-        </div>
       </div>
     </el-col>
 
@@ -85,11 +43,9 @@ export default {
   data() {
     return {
       basicInfoText: {
-        milkVolumes: NaN,
-        refermilkVolumes: '700-900',
-        temperature: NaN,
-        babyPants: NaN,
-        purchases: 20000
+        milkVolumes: 800,
+        refermilkVolumes: '800-1000',
+       
       }
     }
   },
@@ -181,7 +137,7 @@ export default {
     .card-panel-description {
       float: right;
       font-weight: bold;
-      margin:12px;
+      margin: 12px;
       margin-left: 10px;
 
       .card-panel-text {
@@ -205,7 +161,7 @@ export default {
 
   .card-panel-icon-wrapper {
     float: none !important;
-    width: 50%;
+    width: 30%;
     height: 50%;
     margin: 0 !important;
 

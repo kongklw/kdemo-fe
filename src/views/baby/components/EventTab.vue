@@ -329,7 +329,7 @@ export default {
       babyPantsList: [],
 
       list: [{ 'order_no': 1, 'price': 100 }, { 'order_no': 2, 'price': 200 }],
-      feed_query: { 'start_time': '', 'end_time': '' },
+       
       temperature_query: { 'date': '', 'mode': 'today' },
       date: '',
       date_time: ''

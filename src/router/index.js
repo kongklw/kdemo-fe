@@ -164,7 +164,7 @@ export const asyncRoutes = [
     path: '/baby',
     component: Layout,
     redirect: '/baby/breastfeed',
-    alwaysShow: false, // will always show the root menu
+    alwaysShow: true, // will always show the root menu
     name: 'Baby',
     meta: {
       title: 'Baby',
@@ -177,7 +177,7 @@ export const asyncRoutes = [
      
         component: () => import('@/views/baby/breastfeed.vue'),
         name: 'BreastFeed',
-        meta: { title: 'BreastFeed', icon: 'el-icon-coffee-cup', noCache: true }
+        meta: { title: 'BreastFeed', icon: 'milkBottle', noCache: true }
 
       },
       {
