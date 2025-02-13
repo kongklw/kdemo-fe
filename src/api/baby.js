@@ -110,6 +110,16 @@ export function addBabyPantsReq(data) {
   })
 }
 
+
+export function deleteBabyPantsReq(data) {
+  return request({
+    url: '/baby/pants',
+    method: 'delete',
+    data
+  })
+}
+
+
 export function feedListReq(query) {
   return request({
     url: '/baby/feed',
@@ -150,6 +160,14 @@ export function addTemperatureReq(data) {
   })
 }
 
+export function deleteTemperatureReq(data) {
+  return request({
+    url: '/baby/temperature',
+    method: 'delete',
+    data
+  })
+}
+
 export function lineChartReq() {
   return request({
     url: '/baby/line_chart',
@@ -158,3 +176,11 @@ export function lineChartReq() {
   })
 }
 
+
+export function dashboardReq() {
+  return request({
+    url: '/baby/dashboard',
+    method: 'get'
+    // params: query
+  })
+}

@@ -12,7 +12,7 @@
         <el-form-item>
           <el-button type="primary" @click="onSubmit('formInline')">查询</el-button>
         </el-form-item>
-       
+
       </el-form>
     </div>
 
@@ -21,7 +21,7 @@
         <el-row :gutter="5">
           <el-col :xs="{ span: 12 }" :sm="{ span: 12 }" :md="{ span: 12 }" :lg="{ span: 4 }" :xl="{ span: 4 }">
             <el-form-item label="时间点" required>
-              <el-time-picker v-model="sleepForm.sleep_time" placeholder="时间点">
+              <el-time-picker v-model="sleepForm.sleep_time" value-format="yyyy-MM-dd HH:mm:00" placeholder="时间点">
               </el-time-picker>
             </el-form-item>
           </el-col>
@@ -121,7 +121,8 @@ export default {
       cursorIndex: "", // 光标位置
 
       sleepForm: {
-        sleep_time: this.moment().format('YYYY-MM-DD HH:mm:ss'),
+        sleep_time: this.moment().format('YYYY-MM-DD HH:mm:00'),
+        
         status: '熟睡',
         describe: ''
 

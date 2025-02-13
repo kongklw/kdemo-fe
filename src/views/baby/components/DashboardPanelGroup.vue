@@ -1,30 +1,24 @@
 <template>
   <el-row :gutter="10" class="panel-group">
     <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
-      <div class="card-panel" @click="handleSetLineChartData('milkVolumes')">
+      <div class="card-panel" @click="handleNavigate('BreastFeed')">
         <div class="card-panel-icon-wrapper icon-people">
           <svg-icon icon-class="babygirl" class-name="card-panel-icon" />
         </div>
-
-        <!-- <div class="card-panel-description">
-          <div class="card-panel-text">
-            参考量
-          </div>
-          <label class="card-panel-num">{{ basicInfo.refermilkVolumes }} ml</label>
-        </div> -->
 
         <div class="card-panel-description">
           <div class="card-panel-text">
             奶量
           </div>
-          <label class="card-panel-num">{{ basicInfoText.milkVolumes }} ml</label>
+          <label class="card-panel-num">{{ basicInfoText.total_milk_volumes }} ml</label>
 
         </div>
 
       </div>
     </el-col>
+
     <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
-      <div class="card-panel" @click="handleSetLineChartData('temperature')">
+      <div class="card-panel" @click="handleNavigate('Temperature')">
         <div class="card-panel-icon-wrapper icon-message">
           <svg-icon icon-class="bodyTemperature" class-name="card-panel-icon" />
         </div>
@@ -32,13 +26,13 @@
           <div class="card-panel-text">
             体温
           </div>
-          <label class="card-panel-num">{{ basicInfoText.temperature }} 度</label>
+          <label class="card-panel-num">{{ basicInfoText.current_temperature }}</label>
         </div>
       </div>
     </el-col>
 
     <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
-      <div class="card-panel" @click="handleSetLineChartData('babyPants')">
+      <div class="card-panel" @click="handleNavigate('BabyPants')">
         <div class="card-panel-icon-wrapper icon-message">
           <svg-icon icon-class="babyPants" class-name="card-panel-icon" />
         </div>
@@ -46,13 +40,27 @@
           <div class="card-panel-text">
             尿不湿
           </div>
-          <label class="card-panel-num">{{ basicInfoText.babyPants }} 个</label>
+          <label class="card-panel-num">{{ basicInfoText.babyPantsCount }} 个</label>
         </div>
       </div>
     </el-col>
 
     <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
-      <div class="card-panel" @click="handleSetLineChartData('purchases')">
+      <div class="card-panel" @click="handleNavigate('Sleep')">
+        <div class="card-panel-icon-wrapper icon-message">
+          <svg-icon icon-class="sleep2" class-name="card-panel-icon" />
+        </div>
+        <div class="card-panel-description">
+          <div class="card-panel-text">
+            睡眠
+          </div>
+          <label class="card-panel-num">记录</label>
+        </div>
+      </div>
+    </el-col>
+
+    <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
+      <div class="card-panel" @click="handleNavigate('Expense')">
         <div class="card-panel-icon-wrapper icon-money">
           <svg-icon icon-class="money" class-name="card-panel-icon" />
         </div>
@@ -60,11 +68,45 @@
           <div class="card-panel-text">
             花费
           </div>
-          <label class="card-panel-num">{{ basicInfoText.purchases }} RMB</label>
+          <label class="card-panel-num">{{ basicInfoText.total_amount }}</label>
           <!-- <count-to :start-val="0" :end-val="9280" :duration="3200" class="card-panel-num" /> -->
         </div>
       </div>
     </el-col>
+
+    <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
+      <div class="card-panel" @click="handleNavigate('Analysis')">
+        <div class="card-panel-icon-wrapper icon-money">
+          <svg-icon icon-class="data-analysis" class-name="card-panel-icon" />
+        </div>
+        <div class="card-panel-description">
+          <div class="card-panel-text">
+            分析
+          </div>
+          <!-- <label class="card-panel-num">Feature Analysis</label> -->
+          <!-- <count-to :start-val="0" :end-val="9280" :duration="3200" class="card-panel-num" /> -->
+        </div>
+      </div>
+    </el-col>
+
+
+    <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
+      <div class="card-panel" @click="handleNavigate('Langchain')">
+        <div class="card-panel-icon-wrapper icon-money">
+          <svg-icon icon-class="langchain" class-name="card-panel-icon" />
+        </div>
+        <div class="card-panel-description">
+          <div class="card-panel-text">
+            langchain
+          </div>
+          <label class="card-panel-num">chatbot</label>
+          <!-- <count-to :start-val="0" :end-val="9280" :duration="3200" class="card-panel-num" /> -->
+        </div>
+      </div>
+    </el-col>
+
+
+
 
   </el-row>
 </template>
@@ -84,13 +126,7 @@ export default {
 
   data() {
     return {
-      basicInfoText: {
-        milkVolumes: NaN,
-        refermilkVolumes: '700-900',
-        temperature: NaN,
-        babyPants: NaN,
-        purchases: 20000
-      }
+      basicInfoText: { total_milk_volumes: 0, total_amount: 0, current_temperature: '', babyPantsCount: 0 }
     }
   },
   watch: {
@@ -100,15 +136,14 @@ export default {
     }
   },
   methods: {
-    handleSetLineChartData(type) {
-      this.$emit('handleSetLineChartData', type)
+    handleNavigate(type) {
+      this.$emit('handleNavigate', type)
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-
 
 .panel-group {
   margin-top: 12px;
@@ -121,7 +156,7 @@ export default {
   .card-panel {
     height: 90px;
     cursor: pointer;
-    font-size: 12px;
+    font-size: 10px;
     position: relative;
     overflow: hidden;
     color: #666;
@@ -169,8 +204,8 @@ export default {
 
     .card-panel-icon-wrapper {
       float: left;
-      margin: 12px 0 0 12px;
-      padding: 12px;
+      margin: 20px 0 0 12px;
+      // padding: 12px;
       transition: all 0.38s ease-out;
       border-radius: 6px;
     }

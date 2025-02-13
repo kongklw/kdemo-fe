@@ -1,25 +1,20 @@
 <template>
   <div class="dashboard-editor-container">
-
-
     <div class="data-area">
-
       <el-form :model="feedForm" :inline="true">
         <el-form-item label="时间" required>
           <el-date-picker v-model="feedForm.feed_time" type="datetime" placeholder="选择日期时间" align="left"
-            :picker-options="pickerOptions" value-format="yyyy-MM-dd HH:mm:00" editable="false" />
+             value-format="yyyy-MM-dd HH:mm:00" />
         </el-form-item>
         <el-form-item label="奶量">
 
-          <el-input-number v-model="feedForm.milk_volume" :step="10" @change="handleMilkChange" :min="10" :max="300"
+          <el-input-number v-model="feedForm.milk_volume" :step="10"  :min="10" :max="300"
             label="吃奶量"></el-input-number>
 
         </el-form-item>
 
         <el-button type="primary" @click="addFeedEvent">添加</el-button>
       </el-form>
-
-
 
     </div>
 
@@ -31,12 +26,12 @@
               <svg-icon icon-class="babygirl" class-name="card-panel-icon" />
             </div>
 
-            <div class="card-panel-description">
+            <!-- <div class="card-panel-description">
               <div class="card-panel-text">
                 参考量
               </div>
               <label class="card-panel-num">{{ basicInfo.refermilkVolumes }} ml</label>
-            </div>
+            </div> -->
 
             <div class="card-panel-description">
               <div class="card-panel-text">
@@ -50,7 +45,6 @@
         </el-col>
 
       </el-row>
-
     </div>
 
 
@@ -80,8 +74,7 @@
       <el-table-column label="操作" min-width="80">
 
         <template slot-scope="scope">
-          <el-button size="mini" type="danger" @click="deleteFeedLog(scope.row)">删除</el-button>
-
+          <el-button type="danger" size="mini" @click="open(scope.row)">删除</el-button>
         </template>
       </el-table-column>
 
@@ -99,13 +92,11 @@ import TodoList from './components/TodoList'
 import {
   feedListReq, addFeedReq, deleteFeedReq,
   lineChartReq,
-  addTemperatureReq, temperatureListReq,
-  babyPantsListReq, addBabyPantsReq
 } from '@/api/baby'
 
 
 export default {
-  name: 'BabyDashboard',
+  name: 'BabyBreastfeed',
   components: {
     // GithubCorner,
     PanelGroup,
@@ -122,6 +113,7 @@ export default {
 
   data() {
     return {
+      loading:false,
       feedList: [],
       feed_query: { 'start_time': '', 'end_time': '' },
 
@@ -177,13 +169,12 @@ export default {
       var date_time = new Date().format('yyyy-MM-dd hh:mm:ss')
 
       var date = new Date().format('yyyy-MM-dd')
-      var before_now_36 = new Date(new Date().getTime() - 36 * 60 * 60 * 1000).format('yyyy-MM-dd hh:mm:ss')
+      var before_now_24 = new Date(new Date().getTime() - 24 * 60 * 60 * 1000).format('yyyy-MM-dd hh:mm:ss')
 
       this.date = date
       this.date_time = date_time
       this.feed_query.end_time = date_time
-      this.feed_query.start_time = before_now_36
-
+      this.feed_query.start_time = before_now_24
 
       feedListReq(this.feed_query).then(res => {
         if (res.code === 200) {
@@ -212,6 +203,37 @@ export default {
 
         }
       })
+    },
+
+    open(row) {
+      this.$confirm(`你将删除时间为${row.feed_time} 奶量为 ${row.milk_volume}的喂奶记录, 是否继续?`, '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+
+        deleteFeedReq(row).then(res => {
+          console.log('删除的',res)
+          if (res.code === 200) {
+            this.fetchData()
+            this.$message({
+              type: 'success',
+              message: '删除成功!'
+            });
+          } else {
+            this.$message({
+              type: 'info',
+              message: '删除失败'
+            });
+          }
+        })
+
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        });
+      });
     },
 
 

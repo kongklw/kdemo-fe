@@ -1,6 +1,39 @@
 <template>
   <div class="dashboard-editor-container">
 
+
+    <div class="pannel">
+      <el-row :gutter="10" class="panel-group">
+        <el-col :xs="24" :sm="24" :lg="12" class="card-panel-col">
+          <div class="card-panel" @click="handleSetLineChartData('purchases')">
+            <div class="card-panel-icon-wrapper icon-money">
+              <svg-icon icon-class="money" class-name="card-panel-icon" />
+            </div>
+
+            
+            <div class="card-panel-description">
+              <div class="card-panel-text">
+                总花费 
+              </div>
+              <label class="card-panel-num">{{ search_amount }}</label>
+              <!-- <count-to :start-val="0" :end-val="9280" :duration="3200" class="card-panel-num" /> -->
+            </div>
+              
+            <div class="card-panel-description">
+              <div class="card-panel-text">
+                查询总花费
+              </div>
+              <label class="card-panel-num">{{ search_amount }} </label>
+              <!-- <count-to :start-val="0" :end-val="9280" :duration="3200" class="card-panel-num" /> -->
+            </div>
+          </div>
+        </el-col>
+
+      </el-row>
+    </div>
+
+
+
     <!-- 查询form -->
     <div>
 
@@ -47,8 +80,9 @@
         <el-table-column prop="order_time" min-width="80px" label="消费日期" column-key="date" />
         <el-table-column prop="name" min-width="80px" label="物品名称" />
         <el-table-column prop="amount" min-width="70px" label="金额" :formatter="formatter" />
-        <el-table-column prop="tag" min-width="80px" label="标签" :filters="[{ text: '家', value: '家' }, { text: '公司', value: '公司' }]"
-          :filter-method="filterTag" filter-placement="bottom-end">
+        <el-table-column prop="tag" min-width="80px" label="标签"
+          :filters="[{ text: '家', value: '家' }, { text: '公司', value: '公司' }]" :filter-method="filterTag"
+          filter-placement="bottom-end">
           <template slot-scope="scope">
             <el-tag :type="scope.row.tag === '家' ? 'primary' : 'success'" disable-transitions>{{
               scope.row.tag }}</el-tag>
@@ -118,6 +152,7 @@ export default {
       ],
 
       myFileList: [],
+      search_amount: 0,
 
       expenseForm: {
         order_time: this.moment().format('YYYY-MM-DD'),
@@ -263,6 +298,8 @@ export default {
           this.showExpenseList()
 
         }
+      }).catch(err => {
+        loading.close();
       })
     },
 
@@ -312,8 +349,10 @@ export default {
       console.log('--------data----', data)
       showExpenseListReq(data).then(res => {
         if (res.code === 200) {
+          const data = res.data
           console.log('res data---expense list', res.data)
-          this.tableData = res.data
+          this.tableData = data.expense_list
+          this.search_amount = data.search_amount
         }
       })
     },
@@ -374,6 +413,115 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.panel-group {
+  margin-top: 12px;
+
+  .card-panel-col {
+    margin-bottom: 12px;
+
+  }
+
+  .card-panel {
+    height: 90px;
+    cursor: pointer;
+    font-size: 12px;
+    position: relative;
+    overflow: hidden;
+    color: #666;
+    background: #fff;
+    box-shadow: 4px 4px 40px rgba(0, 0, 0, .05);
+    border-color: rgba(0, 0, 0, .05);
+
+    &:hover {
+      .card-panel-icon-wrapper {
+        color: #fff;
+      }
+
+      .icon-people {
+        background: #40c9c6;
+      }
+
+      .icon-message {
+        background: #36a3f7;
+      }
+
+      .icon-money {
+        background: #f4516c;
+      }
+
+      .icon-shopping {
+        background: #34bfa3
+      }
+    }
+
+    .icon-people {
+      color: #40c9c6;
+    }
+
+    .icon-message {
+      color: #36a3f7;
+    }
+
+    .icon-money {
+      color: #f4516c;
+    }
+
+    .icon-shopping {
+      color: #34bfa3
+    }
+
+    .card-panel-icon-wrapper {
+      float: left;
+      margin: 12px 0 0 12px;
+      padding: 12px;
+      transition: all 0.38s ease-out;
+      border-radius: 6px;
+    }
+
+    .card-panel-icon {
+      float: left;
+      font-size: 50px;
+    }
+
+    .card-panel-description {
+      float: right;
+      font-weight: bold;
+      margin:12px;
+      margin-left: 10px;
+
+      .card-panel-text {
+        line-height: 40px;
+        color: rgba(0, 0, 0, 0.45);
+        font-size: 16px;
+        margin-bottom: 10px;
+      }
+
+      .card-panel-num {
+        font-size: 16px;
+      }
+    }
+  }
+}
+
+@media (max-width:200px) {
+  .card-panel-description {
+    display: none;
+  }
+
+  .card-panel-icon-wrapper {
+    float: none !important;
+    width: 50%;
+    height: 50%;
+    margin: 0 !important;
+
+    .svg-icon {
+      display: block;
+      margin: 14px auto !important;
+      float: none !important;
+    }
+  }
+}
+
 .batch-process {
   margin: 10px 0px 20px 0px;
   padding: 10px;

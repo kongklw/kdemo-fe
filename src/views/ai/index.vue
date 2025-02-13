@@ -4,7 +4,7 @@
 
 
     <div class="chat-content">
-      <span style="color:#67C23A; margin:0px 0px 20px 60px; font-size: large;">Hello everyone, we are experiencing a
+      <span style="color:#67C23A; margin:0px 0px 20px 0px; font-size: Medium;">Hello everyone, we are experiencing a
         wonderful era
         of AI. Try it !!! <br>
       </span>
@@ -48,6 +48,8 @@ export default {
         textarea: '',
       },
 
+      thread_id:'',
+
       dialogVisible: true,
       messages: [
         { author: 'Alice', text: 'Hello, Bob!' },
@@ -74,11 +76,15 @@ export default {
         this.messages.push({ author: 'You', text: this.newMessage });
 
         // 发送后端请求，将结果加入到messages里面.
-        const data = { content: this.newMessage }
+        const data = { content: this.newMessage,thread_id:this.thread_id }
         askAIReq(data).then(res => {
           this.newMessage = '';
           if (res.code === 200) {
-            this.messages.push({ author: 'OpenAI', text: res.data });
+
+            const data = res.data
+            console.log('请求ai 返回的数据为',data)
+            this.messages.push({ author: 'AI', text: data.msg });
+            this.thread_id = data.thread_id
           }
         })
 

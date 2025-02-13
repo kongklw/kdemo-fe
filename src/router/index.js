@@ -77,7 +77,7 @@ export const constantRoutes = [
     children: [
       {
         path: 'dashboard',
-        component: () => import('@/views/baby/details.vue'),
+        component: () => import('@/views/baby/dashboard.vue'),
         // component: () => import('@/views/dashboard/index'),
         name: 'Dashboard',
         meta: { title: 'Dashboard', icon: 'dashboard', affix: true }
@@ -135,7 +135,7 @@ export const asyncRoutes = [
     component: Layout,
     redirect: '/ai/index',
     alwaysShow: true, // will always show the root menu
-    name: 'AI Park',
+    name: 'AIPark',
     meta: {
       title: 'AI Park',
       // icon: 'el-icon-user-solid'
@@ -143,20 +143,19 @@ export const asyncRoutes = [
     },
     children: [
       {
-        path: 'index',
-
+        path: 'langchain',
         component: () => import('@/views/ai/index.vue'),
         name: 'Langchain',
-        meta: { title: 'Langchain', icon: 'openai-copy', noCache: true }
+        meta: { title: 'Langchain', icon: 'langchain', noCache: true }
 
       },
-      {
-        path: 'wenxin',
-        component: () => import('@/views/ai/wenxin.vue'),
-        name: '文心',
-        meta: { title: '文心', icon: 'openai-copy', noCache: true }
+      // {
+      //   path: 'wenxin',
+      //   component: () => import('@/views/ai/wenxin.vue'),
+      //   name: 'Wenxin',
+      //   meta: { title: '文心', icon: 'openai-copy', noCache: true }
 
-      }
+      // }
     ]
   },
 
@@ -174,18 +173,42 @@ export const asyncRoutes = [
     children: [
       {
         path: 'breastfeed',
-     
+
         component: () => import('@/views/baby/breastfeed.vue'),
         name: 'BreastFeed',
         meta: { title: 'BreastFeed', icon: 'milkBottle', noCache: true }
 
       },
       {
+        path: 'todo',
+
+        component: () => import('@/views/baby/todo.vue'),
+        name: 'Todo',
+        meta: { title: 'Todo', icon: 'todo', noCache: true }
+
+      },
+      {
+        path: 'temperature',
+
+        component: () => import('@/views/baby/temperature.vue'),
+        name: 'Temperature',
+        meta: { title: 'Temperature', icon: 'bodyTemperature' }
+
+      },
+      {
         path: 'sleep',
-       
+
         component: () => import('@/views/baby/sleep.vue'),
         name: 'Sleep',
         meta: { title: 'Sleep', icon: 'sleep2' }
+
+      },
+      {
+        path: 'babyPants',
+
+        component: () => import('@/views/baby/babyPants.vue'),
+        name: 'BabyPants',
+        meta: { title: 'BabyPants', icon: 'babyPants' }
 
       },
       {
@@ -216,6 +239,13 @@ export const asyncRoutes = [
   {
     path: '/sports',
     component: Layout,
+    redirect: '/sports/index',
+    alwaysShow: true, // will always show the root menu
+    name: 'Funny',
+    meta: {
+      title: 'Funny',
+      icon: 'funny'
+    },
     children: [
       {
 
