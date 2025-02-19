@@ -6,23 +6,12 @@
     </header>
     <!-- main section -->
     <section v-show="todos.length" class="main">
-      <input
-        id="toggle-all"
-        :checked="allChecked"
-        class="toggle-all"
-        type="checkbox"
-        @change="toggleAll({ done: !allChecked })"
-      >
+      <input id="toggle-all" :checked="allChecked" class="toggle-all" type="checkbox"
+        @change="toggleAll({ done: !allChecked })">
       <label for="toggle-all" />
       <ul class="todo-list">
-        <todo
-          v-for="(todo, index) in filteredTodos"
-          :key="index"
-          :todo="todo"
-          @toggleTodo="toggleTodo"
-          @editTodo="editTodo"
-          @deleteTodo="deleteTodo"
-        />
+        <todo v-for="(todo, index) in filteredTodos" :key="index" :todo="todo" @toggleTodo="toggleTodo"
+          @editTodo="editTodo" @deleteTodo="deleteTodo" />
       </ul>
     </section>
     <!-- footer -->
@@ -44,7 +33,6 @@
 </template>
 
 <script>
-import { done } from 'nprogress'
 import Todo from './Todo.vue'
 import { addTodoListReq, updateTodoListReq, showTodoListReq, deleteTodoListReq } from '@/api/baby'
 
@@ -54,13 +42,7 @@ const filters = {
   active: todos => todos.filter(todo => !todo.done),
   completed: todos => todos.filter(todo => todo.done)
 }
-const defalutList = [
-  { text: 'AD', done: false },
-  { text: '钙', done: false },
-  { text: '大便', done: false },
-  { text: '益生菌', done: true }
 
-]
 export default {
   components: { Todo },
   filters: {
@@ -72,7 +54,8 @@ export default {
       visibility: 'all',
       filters,
       // todos: JSON.parse(window.localStorage.getItem(STORAGE_KEY)) || defalutList
-      todos: defalutList
+      todos: [],
+      range_date: { start_date: this.moment().format('YYYY-MM-DD'), end_date: this.moment().format('YYYY-MM-DD'), }
     }
   },
   computed: {
@@ -93,9 +76,8 @@ export default {
   methods: {
 
     showTodoList() {
-      showTodoListReq().then(res => {
+      showTodoListReq(this.range_date).then(res => {
         if (res.code === 200) {
-          console.log(res)
           this.todos = res.data
         }
       })
@@ -113,10 +95,10 @@ export default {
         }
         this.todos.push(data)
         this.setLocalStorage()
-        console.log('addTodo', text, false)
+       
         addTodoListReq(data).then(res => {
           if (res.code === 200) {
-            console.log(res)
+        
             this.showTodoList()
           }
         })
@@ -126,20 +108,20 @@ export default {
     toggleTodo(val) {
       val.done = !val.done
       this.setLocalStorage()
-      console.log('切换事件', val, typeof (val.done))
+    
       updateTodoListReq(val).then(res => {
         if (res.code === 200) {
-          console.log(res)
+        
           this.showTodoList()
         }
       })
     },
     deleteTodo(todo) {
       this.todos.splice(this.todos.indexOf(todo), 1)
-      console.log('deleteTodo', todo)
+    
       deleteTodoListReq(todo).then(res => {
         if (res.code === 200) {
-          console.log(res)
+       
           this.showTodoList()
         }
       })
@@ -148,7 +130,7 @@ export default {
     editTodo({ todo, value }) {
       todo.text = value
       this.setLocalStorage()
-      console.log('editTodo', todo, value)
+   
     },
     clearCompleted() {
       this.todos = this.todos.filter(todo => !todo.done)

@@ -11,14 +11,16 @@
 
 
     <div>
-      <el-card class="box-card">
+      <el-card class="box-card" v-for="(card) in todoTableList" :key="card.date">
         <div slot="header" class="clearfix">
-          <span>卡片名称</span>
-          <el-button style="float: right; padding: 3px 0" type="text">操作按钮</el-button>
+          <span>{{ `日期: ${card.date}` }}</span>
         </div>
-        <div v-for="o in 4" :key="o" class="text item">
-          {{ '列表内容 ' + o }}
+
+        <div>
+            <el-checkbox v-for="item in card.date_items" :label="item.text" v-model="item.done" 
+              :key="item.text"></el-checkbox>
         </div>
+      
       </el-card>
     </div>
 
@@ -28,23 +30,20 @@
 <script>
 
 import TodoList from './components/TodoList'
-import {
-  feedListReq, addFeedReq, deleteFeedReq,
-  lineChartReq,
-  addTemperatureReq, temperatureListReq,
-  babyPantsListReq, addBabyPantsReq
-} from '@/api/baby'
+import { addTodoListReq, updateTodoListReq, showTodoListReq, deleteTodoListReq, showTodoTableReq } from '@/api/baby'
 
 
 export default {
   name: 'BabyTodo',
   components: {
     TodoList,
+
   },
 
   data() {
     return {
-
+      range_date: { start_date: this.moment().subtract(1, "weeks").format('YYYY-MM-DD'), end_date: this.moment().format('YYYY-MM-DD'), },
+      todoTableList: [],
     }
   },
   mounted() {
@@ -52,7 +51,8 @@ export default {
   },
 
   created() {
-
+    this.showTodoList()
+    this.showTodoTable()
   },
 
   destroyed() {
@@ -60,6 +60,27 @@ export default {
   },
 
   methods: {
+
+    showTodoTable() {
+      showTodoTableReq(this.range_date).then(res => {
+        if (res.code === 200) {
+          console.log('todo table-----------', res.data)
+          this.todoTableList = res.data
+        }
+      })
+    },
+
+
+
+
+    showTodoList() {
+      showTodoListReq(this.range_date).then(res => {
+        if (res.code === 200) {
+          console.log('todo-----------', res.data)
+          this.todos = res.data
+        }
+      })
+    },
 
   }
 }
@@ -85,7 +106,8 @@ export default {
 }
 
 .box-card {
-  width: 480px;
+  width: 100%;
+  margin-bottom: 10px;
 }
 
 .dashboard-editor-container {

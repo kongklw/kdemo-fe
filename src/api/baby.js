@@ -62,11 +62,19 @@ export function addExpenseReq(data) {
   })
 }
 
-export function showTodoListReq() {
+export function showTodoListReq(query) {
   return request({
     url: '/baby/todo',
-    method: 'get'
-    // params: query
+    method: 'get',
+    params: query
+  })
+}
+
+export function showTodoTableReq(query) {
+  return request({
+    url: '/baby/todo_table',
+    method: 'get',
+    params: query
   })
 }
 

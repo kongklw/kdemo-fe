@@ -45,7 +45,8 @@
           <el-col :xs="{ span: 24 }" :sm="{ span: 12 }" :md="{ span: 12 }" :lg="{ span: 12 }" :xl="{ span: 12 }">
             <el-form-item :label-width="formLabelWidth">
               <template slot="label">
-                <label for="">品牌 <el-button type="text" @click="openAddBrandModel" class="btn-word">+</el-button></label>
+                <label for="">品牌 <el-button type="text" @click="openAddBrandModel"
+                    class="btn-word">+</el-button></label>
               </template>
               <el-radio-group v-model="babyPantsForm.brand">
                 <el-radio v-for="item in babyPantsoptions" :key="item.value" :label="item.label">{{ item.value
@@ -74,17 +75,21 @@
 
             <el-tab-pane name="stool">
               <span slot="label"><svg-icon icon-class="stool" /> 便便</span>
-              <el-form-item label="便便形状" required>
-                <el-radio-group v-model="babyPantsForm.stool_shape">
+              <el-form-item label="便便形状(多选)" required>
 
 
+                <el-checkbox-group v-model="babyPantsForm.stool_shape_list">
+                  <el-checkbox v-for="item in stoolShapeOptions" :key="item.value" :label="item.label">{{ item.value }}</el-checkbox>
+                </el-checkbox-group>
+
+                <!-- <el-radio-group v-model="babyPantsForm.stool_shape">
                   <el-radio v-for="item in stoolShapeOptions" :key="item.value" :label="item.label">{{ item.value
                     }}</el-radio>
+                </el-radio-group> -->
 
-                </el-radio-group>
               </el-form-item>
 
-              <el-form-item label="便便颜色" required>
+              <el-form-item label="便便颜色(单选)" required>
                 <el-radio-group v-model="babyPantsForm.stool_color">
                   <el-radio v-for="item in stoolColorOptions" :key="item.value" :label="item.label">{{ item.value
                     }}</el-radio>
@@ -96,21 +101,27 @@
             <el-tab-pane name="peeing-stool">
               <span slot="label"><svg-icon icon-class="peeing-stool" /> 嘘嘘+便便</span>
 
-              <el-form-item label="嘘嘘颜色" required>
+              <el-form-item label="嘘嘘颜色(单选)" required>
+
                 <el-radio-group v-model="babyPantsForm.peeing_color">
-                  <el-radio v-for="item in peeingColorOptions" :key="item.value" :label="item.label">{{ item.value
+                  <el-radio v-for="item in peeingColorOptions" :key="item.label" :label="item.label">{{ item.value
                     }}</el-radio>
                 </el-radio-group>
               </el-form-item>
 
-              <el-form-item label="便便形状" required>
-                <el-radio-group v-model="babyPantsForm.stool_shape">
+              <el-form-item label="便便形状(多选)" required>
+
+                <el-checkbox-group v-model="babyPantsForm.stool_shape_list">
+                  <el-checkbox v-for="item in stoolShapeOptions" :key="item.value" :label="item.label">{{ item.value }}</el-checkbox>
+                </el-checkbox-group>
+
+                <!-- <el-radio-group v-model="babyPantsForm.stool_shape">
                   <el-radio v-for="item in stoolShapeOptions" :key="item.value" :label="item.label">{{ item.value
                     }}</el-radio>
-                </el-radio-group>
+                </el-radio-group> -->
               </el-form-item>
 
-              <el-form-item label="便便颜色" required>
+              <el-form-item label="便便颜色(单选)" required>
                 <el-radio-group v-model="babyPantsForm.stool_color">
                   <el-radio v-for="item in stoolColorOptions" :key="item.value" :label="item.label">{{ item.value
                     }}</el-radio>
@@ -159,6 +170,7 @@
         <el-table-column prop="status" label="状态" min-width="100" />
         <el-table-column prop="peeing" label="嘘嘘" />
         <el-table-column prop="stool" label="大便" />
+        <el-table-column prop="describe" label="描述" />
         <el-table-column label="操作" min-width="80">
           <template slot-scope="scope">
             <el-button type="danger" size="mini" @click="open(scope.row)">删除</el-button>
@@ -189,10 +201,11 @@ export default {
 
       babyPantsForm: {
         use_date: this.moment().format('YYYY-MM-DD HH:mm:00'),
-        peeing_color: 3,
+        peeing_color: "正常",
         describe: '',
-        stool_shape: 1,
-        stool_color: 3,
+        // stool_shape: 1,
+        stool_shape_list:['膏状'],
+        stool_color: "黄色",
         is_leaked: false,
         brand: 'whatever',
         tabActiveName: "peeing",
@@ -207,78 +220,78 @@ export default {
 
       peeingColorOptions: [{
         value: '乳白色',
-        label: 1
+        label: '乳白色'
       }, {
         value: '粉色',
-        label: 2
+        label: '粉色'
       }, {
         value: '正常',
-        label: 3
+        label: '正常'
       }, {
         value: '黄色',
-        label: 4
+        label: '黄色'
       }, {
         value: '红色',
-        label: 5
+        label: '红色'
       },
       {
         value: '浓茶色',
-        label: 6
+        label: '浓茶色'
       }],
 
 
 
       stoolColorOptions: [{
         value: '墨绿色',
-        label: 1
+        label:'墨绿色',
       }, {
         value: '绿色',
-        label: 2
+        label: '绿色',
       }, {
         value: '黄色',
-        label: 3
+        label: '黄色',
       }, {
         value: '棕色',
-        label: 4
+        label: '棕色',
       }, {
         value: '红色',
-        label: 5
+        label: '红色',
       },
       {
         value: '黑色',
-        label: 6
+        label:'黑色',
       }, {
         value: '灰白色',
-        label: 7
+        label:'灰白色',
       }],
 
 
       stoolShapeOptions: [{
         value: '膏状',
-        label: 1
+        label: '膏状',
       }, {
         value: '泡沫样',
-        label: 2
+        label:'泡沫样',
       }, {
         value: '有奶瓣',
-        label: 3
+        label: '有奶瓣',
       }, {
         value: '有食物残渣',
-        label: 4
+        label: '有食物残渣',
       }, {
         value: '蛋花样',
-        label: 5
+        label:'蛋花样',
       },
       {
         value: '水样便',
-        label: 6
+        label: '水样便',
       }, {
         value: '羊屎便',
-        label: 7
+        label: '羊屎便',
       },
       {
         value: '含血便',
-        label: 8
+        label: '含血便',
       }],
       babyPantsoptions: [{
         value: 'whatever',
@@ -332,9 +345,9 @@ export default {
 
   methods: {
 
-    openAddBrandModel(){
+    openAddBrandModel() {
       console.log('data')
-      
+
     },
 
     handleTabClick(tab, event) {

@@ -15,7 +15,7 @@
               <div class="card-panel-text">
                 总花费 
               </div>
-              <label class="card-panel-num">{{ search_amount }}</label>
+              <label class="card-panel-num">{{ total_amount }}</label>
               <!-- <count-to :start-val="0" :end-val="9280" :duration="3200" class="card-panel-num" /> -->
             </div>
               
@@ -153,6 +153,7 @@ export default {
 
       myFileList: [],
       search_amount: 0,
+      total_amount:0,
 
       expenseForm: {
         order_time: this.moment().format('YYYY-MM-DD'),
@@ -353,6 +354,7 @@ export default {
           console.log('res data---expense list', res.data)
           this.tableData = data.expense_list
           this.search_amount = data.search_amount
+          this.total_amount = data.total_amount
         }
       })
     },
