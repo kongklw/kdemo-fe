@@ -111,7 +111,7 @@ export default {
 }
 
 .dashboard-editor-container {
-  padding: 32px;
+  padding: 5px;
   background-color: rgb(240, 242, 245);
   position: relative;
 

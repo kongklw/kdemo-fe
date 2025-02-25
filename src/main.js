@@ -21,6 +21,7 @@ import './utils/error-log' // error log
 import * as filters from './filters' // global filters
 import moment from 'moment'
 
+
 /**
  * If you don't want to use mock-server
  * you want to use MockJs for mock api
@@ -41,7 +42,8 @@ Vue.use(Element, {
 
 // myconfig
 Vue.prototype.moment = moment
-// Vue.prototype.$BASE_API = VUE_APP_BASE_API
+
+Vue.prototype.$BASE_API = process.env.VUE_APP_BASE_API
 
 // register global utility filters
 Object.keys(filters).forEach(key => {

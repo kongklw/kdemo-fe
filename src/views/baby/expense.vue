@@ -10,15 +10,15 @@
               <svg-icon icon-class="money" class-name="card-panel-icon" />
             </div>
 
-            
+
             <div class="card-panel-description">
               <div class="card-panel-text">
-                总花费 
+                总花费
               </div>
               <label class="card-panel-num">{{ total_amount }}</label>
               <!-- <count-to :start-val="0" :end-val="9280" :duration="3200" class="card-panel-num" /> -->
             </div>
-              
+
             <div class="card-panel-description">
               <div class="card-panel-text">
                 查询总花费
@@ -80,15 +80,29 @@
         <el-table-column prop="order_time" min-width="80px" label="消费日期" column-key="date" />
         <el-table-column prop="name" min-width="80px" label="物品名称" />
         <el-table-column prop="amount" min-width="70px" label="金额" :formatter="formatter" />
-        <el-table-column prop="tag" min-width="80px" label="标签"
+        <el-table-column prop="tag" min-width="70px" label="标签">
+          <template slot-scope="scope">
+            <el-tag type="success">{{
+              scope.row.tag }}</el-tag>
+          </template>
+        </el-table-column>
+        <!-- <el-table-column prop="tag" min-width="80px" label="标签"
           :filters="[{ text: '家', value: '家' }, { text: '公司', value: '公司' }]" :filter-method="filterTag"
           filter-placement="bottom-end">
           <template slot-scope="scope">
             <el-tag :type="scope.row.tag === '家' ? 'primary' : 'success'" disable-transitions>{{
               scope.row.tag }}</el-tag>
           </template>
+        </el-table-column> -->
+
+        <el-table-column prop="image_url" min-width="200px" label="图片">
+          <template slot-scope="scope">
+            <el-image style="width: 100px; height: 100px" :preview-src-list="[getImageUrl(scope.row)]"
+              :src="getImageUrl(scope.row)" fit="scale-down" lazy></el-image>
+          </template>
+
         </el-table-column>
-        <el-table-column prop="image_url" label="图片地址" />
+
 
       </el-table>
       <el-pagination background layout="prev, pager, next" :total="pageInfo.totalPage" :page-sizes="pageSizes"
@@ -137,6 +151,7 @@ import {
 
 
 
+
 export default {
   name: 'BabyExpense',
   components: {
@@ -153,7 +168,7 @@ export default {
 
       myFileList: [],
       search_amount: 0,
-      total_amount:0,
+      total_amount: 0,
 
       expenseForm: {
         order_time: this.moment().format('YYYY-MM-DD'),
@@ -278,6 +293,14 @@ export default {
 
   methods: {
 
+    getImageUrl(row) {
+   
+      // const url =this.$BASE_API+"/media/"+row.image_url
+      const url = this.$BASE_API + "/media/expense1.png"
+    
+      return url
+    },
+
     batchProcess() {
       const loading = this.$loading({
         lock: true,
@@ -286,11 +309,11 @@ export default {
         background: 'rgba(0, 0, 0, 0.7)'
       });
 
-      console.log('batch process', this.myFileList)
+    
       const data = { 'fileList': this.myFileList }
       batchProcessExpenseReq(data).then(res => {
         if (res.code === 200) {
-          console.log('success')
+        
           loading.close();
           // alert('batch process successful')
           this.fileList = []
@@ -328,30 +351,22 @@ export default {
         }
       })
 
-      // const url = 'http://localhost:8000/file/upload'
-      // axios.post(url, formData).then(data => {
-      //   console.log('data is ',data)
-      //   console.log('上传图片成功')
-      // }).catch(response => {
-      //   console.log('失败原因',response.message)
-      //   console.log('图片上传失败')
-      // })
     },
 
     handleRemove(file, fileList) {
-      console.log('remove------', file, fileList);
+     
     },
     handlePreview(file) {
-      console.log('hahahah', file);
+    
     },
 
     showExpenseList() {
       const data = { ...this.pageInfo, ...this.formInline }
-      console.log('--------data----', data)
+    
       showExpenseListReq(data).then(res => {
         if (res.code === 200) {
           const data = res.data
-          console.log('res data---expense list', res.data)
+       
           this.tableData = data.expense_list
           this.search_amount = data.search_amount
           this.total_amount = data.total_amount
@@ -365,7 +380,7 @@ export default {
         v.id
       ));
       this.multipleSelection = idsArray;
-      console.log('触发选择', this.multipleSelection)
+    
     },
 
     onSubmit(formName) {
@@ -373,19 +388,18 @@ export default {
         if (valid) {
           this.showExpenseList()
         } else {
-          console.log('error submit!!')
+      
           return false
         }
       })
-      console.log('submit!')
-      console.log(this.formInline)
+    
     },
 
     addExpenseEvent() {
       const data = this.expenseForm
-      console.log('expense data ', data)
+    
       addExpenseReq(data).then((res) => {
-        console.log('res')
+       
         if (res.code === 200) {
           this.tableData = res.data
           this.dialogFormVisible = false
@@ -394,7 +408,7 @@ export default {
     },
 
     handleCurrentChange(val) {
-      console.log(`当前页: ${val}`)
+    
     },
 
     clearFilter() {
@@ -488,7 +502,7 @@ export default {
     .card-panel-description {
       float: right;
       font-weight: bold;
-      margin:12px;
+      margin: 12px;
       margin-left: 10px;
 
       .card-panel-text {
@@ -543,7 +557,7 @@ export default {
 }
 
 .dashboard-editor-container {
-  padding: 32px;
+  padding: 5px;
   background-color: rgb(240, 242, 245);
   position: relative;
 

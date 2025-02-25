@@ -105,6 +105,37 @@
       </div>
     </el-col>
 
+    <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
+      <div class="card-panel" @click="handleNavigate('Todo')">
+        <div class="card-panel-icon-wrapper icon-money">
+          <svg-icon icon-class="todo" class-name="card-panel-icon" />
+        </div>
+        <div class="card-panel-description">
+          <div class="card-panel-text">
+            待办
+          </div>
+          <label class="card-panel-num">{{ basicInfoText.todo_count }}</label>
+          <!-- <count-to :start-val="0" :end-val="9280" :duration="3200" class="card-panel-num" /> -->
+        </div>
+      </div>
+    </el-col>
+
+    <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
+      <div class="card-panel" @click="handleNavigate('Growing')">
+        <div class="card-panel-icon-wrapper icon-money">
+          <svg-icon icon-class="tree3" class-name="card-panel-icon" />
+        </div>
+        <div class="card-panel-description">
+          <div class="card-panel-text">
+            成长
+          </div>
+          <label class="card-panel-num">{{ basicInfoText.growing_moments }}</label>
+          <!-- <count-to :start-val="0" :end-val="9280" :duration="3200" class="card-panel-num" /> -->
+        </div>
+      </div>
+    </el-col>
+
+
 
 
 

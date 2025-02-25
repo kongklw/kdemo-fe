@@ -2,6 +2,30 @@ import request from '@/utils/request'
 
 
 
+export function geneContentReq(data) {
+  return request({
+    url: '/baby/ai_gen',
+    method: 'post',
+    data
+  })
+}
+
+export function showGrowingListReq() {
+  return request({
+    url: '/baby/growing',
+    method: 'get',
+   
+  })
+}
+
+export function addGrowingReq(data) {
+  return request({
+    url: '/baby/growing',
+    method: 'post',
+    data
+  })
+}
+
 export function showSleepListReq(data) {
   return request({
     url: '/baby/sleep_list',
@@ -183,6 +207,15 @@ export function lineChartReq() {
     // params: query
   })
 }
+
+export function feedChartReq() {
+  return request({
+    url: '/baby/feed_chart',
+    method: 'get'
+    // params: query
+  })
+}
+
 
 
 export function dashboardReq() {

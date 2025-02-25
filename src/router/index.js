@@ -188,6 +188,14 @@ export const asyncRoutes = [
 
       },
       {
+        path: 'growing',
+
+        component: () => import('@/views/baby/growing.vue'),
+        name: 'Growing',
+        meta: { title: 'Growing', icon: 'tree3', noCache: true }
+
+      },
+      {
         path: 'temperature',
 
         component: () => import('@/views/baby/temperature.vue'),

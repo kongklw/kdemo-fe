@@ -12,56 +12,54 @@
     </el-row>
 
     <el-row :gutter="8" style="background:#fff;padding:16px 16px 0;margin-bottom:32px;">
-      <line-chart :chart-data="currentLineChartData" />
+      <feed-chart :chart-data="feedWeekChartData" />
     </el-row>
 
-
-
-    <el-row style="background: #fff; padding: 16px 16px 0; margin-bottom: 32px">
-      <event-tab />
-    </el-row>
   </div>
 </template>
 
 <script>
 import PanelGroup from './components/DashboardPanelGroup.vue'
-import LineChart from './components/LineChart'
-import EventTab from './components/EventTab.vue'
 import TodoList from './components/TodoList'
 import { dashboardReq } from '@/api/baby'
+import FeedChart from './components/FeedChart.vue'
 
 export default {
   name: 'BabyDashboard',
   components: {
     // GithubCorner,
     PanelGroup,
-    LineChart,
     TodoList,
-    // EventTab, 
-    // RaddarChart,
-    // PieChart,
-    // BarChart,
-    // TransactionTable,
-
-    // BoxCard
+    FeedChart,
   },
 
   data() {
     return {
-      // 因为只显示一个Linechart 所以data 里面的代表正在展示的。lineChartData
-      currentLineChartData: {
+    
+      feedDayChartData: {
         xAxisData: [],
-        expectedData: [],
-        actualData: []
+        lowData: [],
+        highData: [],
+        actualData: [],
+        titleText:"",
+        yMin:0,
       },
-      totalLineChartData: {},
-      basicInfo: { total_milk_volumes: 0, total_amount: 0, current_temperature: '', babyPantsCount: 0 },
+
+      feedWeekChartData: {
+        xAxisData: [],
+        lowData: [],
+        highData: [],
+        actualData: [],
+        titleText:"",
+        yMin:0,
+      },
+
+      basicInfo: { total_milk_volumes: 0, total_amount: 0, current_temperature: '', babyPantsCount: 0 ,todo_count:4},
       intervalId: null
     }
   },
   mounted() {
-    // const date = this.$route.query.date
-    // console.log('跳转过来传的值日期为 ', date)
+   
     this.obtainDashboardData()
     // this.dataRefresh()
   },
@@ -81,17 +79,17 @@ export default {
       }
 
       this.intervalId = setInterval(() => {
-        console.log('refresh')
+      
         this.obtainDashboardData()
       }, 10000)
     },
     clear() {
-      clearInterval(this.intervalId)
-      this.intervalId = null
+      // clearInterval(this.intervalId)
+      // this.intervalId = null
     },
 
     handleNavigate(type) {
-      console.log('触发details 里面的handleNavigate,type is ', type)
+    
       switch (type) {
         case "BreastFeed":
           this.$router.push('/baby/breastfeed')
@@ -115,23 +113,25 @@ export default {
         case "Analysis":
           this.$router.push("/baby/analysis")
           break
+        case "Todo":
+          this.$router.push("/baby/todo")
+          break
+
+        case "Growing":
+          this.$router.push("/baby/growing")
+          break
 
       }
 
-
-      // console.log('当前currentLineChartData', this.currentLineChartData)
-      // console.log('this.totalLineChartData', this.totalLineChartData)
-      // console.log('加入type 后的选择数据是', this.totalLineChartData[type])
-      // this.currentLineChartData = this.totalLineChartData[type]
     },
+
+
     obtainDashboardData() {
       dashboardReq().then((res) => {
-        console.log(res)
         if (res.code === 200) {
           const data = res.data
-          console.log('dash board data', data)
-          // this.totalLineChartData = data.totalLineChartData
-          this.currentLineChartData = data.milk_chart
+          this.feedDayChartData = data.charData.current_day
+          this.feedWeekChartData = data.charData.latest_week
           this.basicInfo = data.basicInfo
         }
       })
@@ -142,7 +142,7 @@ export default {
 
 <style lang="scss" scoped>
 .dashboard-editor-container {
-  padding: 32px;
+  padding: 5px;
   background-color: rgb(240, 242, 245);
   position: relative;
 

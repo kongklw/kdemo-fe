@@ -4,10 +4,10 @@ import store from '@/store'
 import { getToken } from '@/utils/auth'
 
 console.log('VUE_APP_BASE_API-different-environment-api------', process.env.VUE_APP_BASE_API)
-
+const baseURL = process.env.VUE_APP_BASE_API
 // create an axios instance
 const service = axios.create({
-  baseURL: process.env.VUE_APP_BASE_API, // url = base url + request url
+  baseURL: baseURL, // url = base url + request url
   // withCredentials: true, // send cookies when cross-domain requests
   timeout: 120000 // request timeout
 })
