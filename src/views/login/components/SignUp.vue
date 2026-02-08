@@ -1,33 +1,46 @@
 <template>
-  <div class="social-signup-container">
-    <el-form ref="ruleForm" :model="ruleForm" status-icon :rules="rules" label-width="100px" class="demo-ruleForm">
-
-      <el-form-item required label="用户名" prop="username">
-        <el-input v-model="ruleForm.username" autocomplete="off" />
+  <div class="sign-up-container">
+    <el-form 
+      ref="ruleForm" 
+      :model="ruleForm" 
+      :rules="rules" 
+      label-position="top" 
+      class="sign-up-form"
+    >
+      <el-form-item label="用户名" prop="username">
+        <el-input 
+          v-model="ruleForm.username" 
+          placeholder="请输入用户名" 
+          autocomplete="off"
+        >
+          <svg-icon slot="prefix" icon-class="user" class="input-icon" />
+        </el-input>
       </el-form-item>
 
-      <el-form-item required label="密码" prop="password">
-        <el-input v-model="ruleForm.password" type="password" autocomplete="off" />
+      <el-form-item label="手机号" prop="phone">
+        <el-input 
+          v-model="ruleForm.phone" 
+          placeholder="请输入手机号"
+        >
+          <i slot="prefix" class="el-icon-mobile-phone input-icon" />
+        </el-input>
       </el-form-item>
 
-      <el-form-item required label="确认密码" prop="checkPass">
-        <el-input v-model="ruleForm.checkPass" type="password" autocomplete="off" />
+      <el-form-item label="密码" prop="password">
+        <el-input 
+          v-model="ruleForm.password" 
+          type="password" 
+          placeholder="请输入密码" 
+          autocomplete="off" 
+          show-password
+        >
+          <svg-icon slot="prefix" icon-class="password" class="input-icon" />
+        </el-input>
       </el-form-item>
 
-      <el-form-item required label="手机号" prop="phone">
-        <el-input v-model.number="ruleForm.phone" />
-      </el-form-item>
-
-      <el-form-item required label="邮箱" prop="email">
-        <el-input v-model="ruleForm.email" />
-      </el-form-item>
-
-      <el-form-item>
-
-        <el-button type="primary" @click="handleSignIn('ruleForm')">注册</el-button>
-        <!-- <el-button type="primary" @click="submitForm('ruleForm')">注册</el-button> -->
-        <el-button @click="resetForm('ruleForm')">重置</el-button>
-      </el-form-item>
+      <div class="form-actions">
+        <el-button type="primary" class="submit-btn" :loading="loading" @click="handleSignIn('ruleForm')">立即注册</el-button>
+      </div>
     </el-form>
   </div>
 </template>
@@ -37,153 +50,82 @@ import { signin } from '@/api/user'
 
 export default {
   name: 'SignUp',
-
   props: {
     parentSignUpDialog: Boolean
   },
-
   data() {
-    var checkName = (rule, value, callback) => {
-      if (value === '') {
-        callback(new Error('用户名不能为空'))
-      } else {
-        if (this.ruleForm.checkName !== '') {
-          this.$refs.ruleForm.validateField('checkName')
-        }
-        callback()
-      }
-    }
-    var checkEmail = (rule, value, callback) => {
-      if (value === '') {
-        callback(new Error('邮箱不能为空'))
-      } else {
-        if (this.ruleForm.checkEmail !== '') {
-          this.$refs.ruleForm.validateField('checkEmail')
-        }
-        callback()
-      }
-    }
-    var checkPhone = (rule, value, callback) => {
+    const validateUsername = (rule, value, callback) => {
       if (!value) {
-        return callback(new Error('手机号不能为空'))
+        callback(new Error('请输入用户名'))
+      } else {
+        callback()
       }
-      setTimeout(() => {
-        if (!Number.isInteger(value)) {
-          callback(new Error('请输入手机号'))
-        } else {
-          if (value < 18) {
-            callback(new Error('必须年满18岁'))
-          } else {
-            callback()
-          }
-        }
-      }, 1000)
     }
-    var validatePass = (rule, value, callback) => {
+    
+    const validatePass = (rule, value, callback) => {
       if (value === '') {
         callback(new Error('请输入密码'))
       } else {
-        if (this.ruleForm.checkPass !== '') {
-          this.$refs.ruleForm.validateField('checkPass')
-        }
         callback()
       }
     }
-    var validatePass2 = (rule, value, callback) => {
-      if (value === '') {
-        callback(new Error('请再次输入密码'))
-      } else if (value !== this.ruleForm.password) {
-        callback(new Error('两次输入密码不一致!'))
+    
+    const validatePhone = (rule, value, callback) => {
+      if (!value) {
+        callback(new Error('请输入手机号'))
       } else {
-        callback()
+        const reg = /^1[3-9]\d{9}$/
+        if (!reg.test(value)) {
+          callback(new Error('请输入正确的手机号'))
+        } else {
+          callback()
+        }
       }
     }
+
     return {
-      loginForm: {
-        username: '',
-        password: ''
-      },
+      loading: false,
       ruleForm: {
         username: '',
         password: '',
-        checkPass: '',
-        phone: '',
-        email: ''
+        phone: ''
       },
       rules: {
-        usename: [
-          { validator: checkName, trigger: 'blur' }
-        ],
-        pass: [
-          { validator: validatePass, trigger: 'blur' }
-        ],
-        checkPass: [
-          { validator: validatePass2, trigger: 'blur' }
-        ],
-        phone: [
-          { validator: checkPhone, trigger: 'blur' }
-        ],
-        email: [
-          { validator: checkEmail, trigger: 'blur' }
-        ]
-
+        username: [{ validator: validateUsername, trigger: 'blur', required: true }],
+        password: [{ validator: validatePass, trigger: 'blur', required: true }],
+        phone: [{ validator: validatePhone, trigger: 'blur', required: true }]
       }
     }
   },
-
   methods: {
-    handleLogin() {
-      this.$store.dispatch('user/login', this.loginForm)
-        .then(() => {
-          this.$router.push({ path: this.redirect || '/', query: this.otherQuery })
-        })
-        .catch(() => {
-
-        })
-    },
-
     handleSignIn(formName) {
       this.$refs[formName].validate(valid => {
         if (valid) {
-          console.log('已经通过验证')
-          console.log(this.ruleForm)
+          this.loading = true
           const data = { ...this.ruleForm }
-
+          
           signin(data).then(res => {
-            console.log('res data', res)
+            this.loading = false
             if (res.code === 200) {
-              console.log('已经注册成功')
-              // 关闭dialog对话框
+              this.$message.success('注册成功，正在登录...')
               this.$emit('updateSignUpDialog', false)
-
-              // 进行登录先给登录需要的数据form 进行赋值
-              this.loginForm.username = this.ruleForm.username
-              this.loginForm.password = this.ruleForm.password
-              // 登录
-              this.handleLogin()
+              
+              // 自动登录
+              const loginData = {
+                username: this.ruleForm.username,
+                password: this.ruleForm.password
+              }
+              this.$store.dispatch('user/login', loginData)
+                .then(() => {
+                  this.$router.push('/')
+                })
+                .catch(() => {
+                  // 登录失败不用做特殊处理，停留在当前页即可
+                })
             }
+          }).catch(() => {
+            this.loading = false
           })
-
-          // this.loading = true
-          // this.$store.dispatch('user/login', this.loginForm)
-          //   .then(() => {
-          //     this.$router.push({ path: this.redirect || '/', query: this.otherQuery })
-          //     this.loading = false
-          //   })
-          //   .catch(() => {
-          //     this.loading = false
-          //   })
-        } else {
-          console.log('注册信息有误,请检查!!')
-          return false
-        }
-      })
-    },
-
-    submitForm(formName) {
-      this.$refs[formName].validate((valid) => {
-        if (valid) {
-          alert('submit!')
         } else {
           console.log('error submit!!')
           return false
@@ -193,14 +135,67 @@ export default {
     resetForm(formName) {
       this.$refs[formName].resetFields()
     }
-
   }
 }
 </script>
 
 <style lang="scss" scoped>
-.social-signup-container {
-  margin: 20px 0;
+.sign-up-container {
+  padding: 10px 10px 20px;
+}
 
+.sign-up-form {
+  ::v-deep .el-form-item {
+    margin-bottom: 22px;
+  }
+
+  ::v-deep .el-form-item__label {
+    font-weight: 500;
+    padding-bottom: 4px;
+    line-height: 20px;
+    font-size: 14px;
+    color: #606266;
+  }
+  
+  ::v-deep .el-input__inner {
+    height: 44px;
+    line-height: 44px;
+    border-radius: 8px;
+    border: 1px solid #dcdfe6;
+    &:focus {
+      border-color: #409EFF;
+    }
+  }
+
+  .input-icon {
+    font-size: 18px;
+    margin-left: 2px;
+    vertical-align: middle;
+    color: #909399;
+  }
+}
+
+.form-actions {
+  margin-top: 35px;
+  
+  .submit-btn {
+    width: 100%;
+    height: 44px;
+    font-size: 16px;
+    letter-spacing: 4px;
+    border-radius: 22px;
+    background: linear-gradient(90deg, #409EFF 0%, #36a3f7 100%);
+    border: none;
+    box-shadow: 0 4px 10px rgba(64, 158, 255, 0.3);
+    
+    &:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+    
+    &:active {
+      transform: translateY(1px);
+    }
+  }
 }
 </style>

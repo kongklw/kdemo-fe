@@ -52,23 +52,26 @@
         </el-form-item>
       </el-tooltip>
 
+      <div style="margin-bottom: 20px;">
+        <el-checkbox v-model="rememberMe" style="color:#fff">记住密码</el-checkbox>
+      </div>
+
       <el-button
         :loading="loading"
         type="primary"
-        style="width:100%;margin-bottom:30px;"
+        style="width:100%;margin-bottom:20px;"
         @click.native.prevent="handleLogin"
       >Login</el-button>
 
-      <div style="position:relative">
-        <el-button type="primary" @click="showSignUpDialog = true">Sign up</el-button>
-
-        <el-button class="thirdparty-button" type="primary" @click="showDialog = true">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <el-button type="text" style="color: #fff;" @click="showSignUpDialog = true">注册账户</el-button>
+        <!-- <el-button class="thirdparty-button" type="primary" @click="showDialog = true">
           Or connect with
-        </el-button>
+        </el-button> -->
       </div>
     </el-form>
 
-    <el-dialog title="SignUp" :visible.sync="showSignUpDialog">
+    <el-dialog title="SignUp" :visible.sync="showSignUpDialog" width="450px" center append-to-body custom-class="signup-dialog">
       <SignUp :parent-sign-up-dialog="showSignUpDialog" @updateSignUpDialog="updateSignUpDialog" />
     </el-dialog>
 
@@ -86,6 +89,7 @@
 import { validUsername } from '@/utils/validate'
 import { SocialSign } from './components/SocialSignin'
 import SignUp from './components/SignUp.vue'
+import Cookies from 'js-cookie'
 
 export default {
   name: 'Login',
@@ -107,8 +111,8 @@ export default {
     }
     return {
       loginForm: {
-        username: 'kdx',
-        password: 'kdx830'
+        username: '',
+        password: ''
       },
       loginRules: {
         username: [{ required: true, trigger: 'blur', validator: validateUsername }],
@@ -120,7 +124,8 @@ export default {
       showDialog: false,
       showSignUpDialog: false,
       redirect: undefined,
-      otherQuery: {}
+      otherQuery: {},
+      rememberMe: false
     }
   },
   watch: {
@@ -137,6 +142,7 @@ export default {
   },
   created() {
     // window.addEventListener('storage', this.afterQRScan)
+    this.getCookie()
   },
   mounted() {
     if (this.loginForm.username === '') {
@@ -149,6 +155,16 @@ export default {
     // window.removeEventListener('storage', this.afterQRScan)
   },
   methods: {
+    getCookie() {
+      const username = Cookies.get('username')
+      const password = Cookies.get('password')
+      const rememberMe = Cookies.get('rememberMe')
+      this.loginForm = {
+        username: username === undefined ? this.loginForm.username : username,
+        password: password === undefined ? this.loginForm.password : window.atob(password)
+      }
+      this.rememberMe = rememberMe === undefined ? false : Boolean(rememberMe)
+    },
     updateSignUpDialog(newValue) {
       this.showSignUpDialog = newValue
     },
@@ -171,6 +187,15 @@ export default {
       this.$refs.loginForm.validate(valid => {
         if (valid) {
           this.loading = true
+          if (this.rememberMe) {
+            Cookies.set('username', this.loginForm.username, { expires: 30 })
+            Cookies.set('password', window.btoa(this.loginForm.password), { expires: 30 })
+            Cookies.set('rememberMe', this.rememberMe, { expires: 30 })
+          } else {
+            Cookies.remove('username')
+            Cookies.remove('password')
+            Cookies.remove('rememberMe')
+          }
           this.$store.dispatch('user/login', this.loginForm)
             .then(() => {
               this.$router.push({ path: this.redirect || '/baby/details', query: this.otherQuery })
@@ -335,6 +360,15 @@ $light_gray: #eee;
     .thirdparty-button {
       display: none;
     }
+  }
+}
+</style>
+
+<style lang="scss">
+@media screen and (max-width: 768px) {
+  .signup-dialog {
+    width: 90% !important;
+    max-width: 450px;
   }
 }
 </style>

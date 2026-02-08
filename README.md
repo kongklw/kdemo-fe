@@ -2,7 +2,7 @@
   <img width="320" src="https://wpimg.wallstcn.com/ecc53a42-d79b-42e2-8852-5126b810a4c8.svg">
 </p>
 git add .
-git commit -m 'build todo page' --no-verify
+git commit -m 'increase feed expense add growing feature' --no-verify
 git push
 
 <p align="center">

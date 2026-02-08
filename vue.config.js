@@ -49,16 +49,16 @@ module.exports = {
       //   }
       // },
       '/dev-api': {
-        target: "http://localhost:8000",
-        sercure: false,
+        target: process.env.VUE_APP_API_TARGET_DEFAULT || "http://localhost:8000",
+        secure: false,
         changeOrigin: true,
         pathRewrite: {
           "^/dev-api": ""
         }
       },
       '/dev-api/gobackend': {
-        target: "http://localhost:8080",
-        sercure: false,
+        target: process.env.VUE_APP_API_TARGET_GO || "http://localhost:8080",
+        secure: false,
         changeOrigin: true,
         pathRewrite: {
           "^/dev-api/gobackend": ""

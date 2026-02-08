@@ -295,8 +295,8 @@ export default {
 
     getImageUrl(row) {
    
-      // const url =this.$BASE_API+"/media/"+row.image_url
-      const url = this.$BASE_API + "/media/expense1.png"
+      const url =this.$BASE_API+"/media/"+row.image_url
+      // const url = this.$BASE_API + "/media/expense1.png"
     
       return url
     },
