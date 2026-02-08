@@ -21,6 +21,14 @@ import './utils/error-log' // error log
 import * as filters from './filters' // global filters
 import moment from 'moment'
 
+// Vant UI (Mobile)
+import { DatetimePicker, Popup } from 'vant'
+import 'vant/lib/datetime-picker/style'
+import 'vant/lib/popup/style'
+
+Vue.use(DatetimePicker)
+Vue.use(Popup)
+
 
 /**
  * If you don't want to use mock-server

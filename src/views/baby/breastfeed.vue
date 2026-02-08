@@ -4,13 +4,26 @@
 
       <el-form :model="feedForm" :inline="true">
         <el-form-item label="时间" required>
-          <el-date-picker v-model="feedForm.feed_time" type="datetime" format="yyyy-MM-dd HH:mm" placeholder="选择日期时间"
-            align="left" value-format="yyyy-MM-dd HH:mm:00" />
+          <div @click="showPicker = true">
+            <el-input 
+              :value="feedForm.feed_time" 
+              readonly 
+              placeholder="点击选择时间" 
+              prefix-icon="el-icon-time"
+            />
+          </div>
 
-
-          <!-- <el-time-picker v-model="feedForm.feed_time" format="HH:mm" value-format="yyyy-MM-dd HH:mm:00"
-            placeholder="时间点">
-          </el-time-picker> -->
+          <van-popup v-model="showPicker" position="bottom" get-container="body">
+            <van-datetime-picker
+              v-model="currentDate"
+              type="datetime"
+              title="选择时间"
+              :min-date="minDate"
+              :max-date="maxDate"
+              @confirm="onConfirm"
+              @cancel="showPicker = false"
+            />
+          </van-popup>
         </el-form-item>
 
         <el-form-item label="快捷">
@@ -145,6 +158,10 @@ export default {
 
       },
 
+      showPicker: false,
+      minDate: new Date(2020, 0, 1),
+      maxDate: new Date(2030, 11, 31),
+      currentDate: new Date(),
 
       feedDayChartData: {
         xAxisData: [],
@@ -171,6 +188,16 @@ export default {
       intervalId: null
     }
   },
+  watch: {
+    'feedForm.feed_time': {
+      handler(val) {
+        if (val) {
+          this.currentDate = new Date(val.replace(/-/g, '/'))
+        }
+      },
+      immediate: true
+    }
+  },
 
   mounted() {
     // this.dataRefresh()
@@ -187,6 +214,11 @@ export default {
   },
 
   methods: {
+
+    onConfirm(value) {
+      this.feedForm.feed_time = this.moment(value).format('YYYY-MM-DD HH:mm:ss')
+      this.showPicker = false
+    },
 
     showFeedChart() {
       feedChartReq().then(res => {
@@ -413,7 +445,7 @@ export default {
 }
 
 .dashboard-editor-container {
-  padding: 5px;
+  padding: 32px;
   background-color: rgb(240, 242, 245);
   position: relative;
 
@@ -431,9 +463,16 @@ export default {
   }
 }
 
-@media (max-width: 1024px) {
-  .chart-wrapper {
-    padding: 8px;
+@media screen and (max-width: 768px) {
+  .dashboard-editor-container {
+    padding: 16px;
   }
+  .pc-only { display: none !important; }
+  .mobile-only { display: inline-block !important; }
+}
+
+@media screen and (min-width: 769px) {
+  .pc-only { display: inline-block !important; }
+  .mobile-only { display: none !important; }
 }
 </style>

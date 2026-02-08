@@ -1,16 +1,16 @@
 <template>
   <div class="sign-up-container">
-    <el-form 
-      ref="ruleForm" 
-      :model="ruleForm" 
-      :rules="rules" 
-      label-position="top" 
+    <el-form
+      ref="ruleForm"
+      :model="ruleForm"
+      :rules="rules"
+      label-position="top"
       class="sign-up-form"
     >
       <el-form-item label="用户名" prop="username">
-        <el-input 
-          v-model="ruleForm.username" 
-          placeholder="请输入用户名" 
+        <el-input
+          v-model="ruleForm.username"
+          placeholder="请输入用户名"
           autocomplete="off"
         >
           <svg-icon slot="prefix" icon-class="user" class="input-icon" />
@@ -18,8 +18,8 @@
       </el-form-item>
 
       <el-form-item label="手机号" prop="phone">
-        <el-input 
-          v-model="ruleForm.phone" 
+        <el-input
+          v-model="ruleForm.phone"
           placeholder="请输入手机号"
         >
           <i slot="prefix" class="el-icon-mobile-phone input-icon" />
@@ -27,11 +27,11 @@
       </el-form-item>
 
       <el-form-item label="密码" prop="password">
-        <el-input 
-          v-model="ruleForm.password" 
-          type="password" 
-          placeholder="请输入密码" 
-          autocomplete="off" 
+        <el-input
+          v-model="ruleForm.password"
+          type="password"
+          placeholder="请输入密码"
+          autocomplete="off"
           show-password
         >
           <svg-icon slot="prefix" icon-class="password" class="input-icon" />
@@ -61,7 +61,7 @@ export default {
         callback()
       }
     }
-    
+
     const validatePass = (rule, value, callback) => {
       if (value === '') {
         callback(new Error('请输入密码'))
@@ -69,7 +69,7 @@ export default {
         callback()
       }
     }
-    
+
     const validatePhone = (rule, value, callback) => {
       if (!value) {
         callback(new Error('请输入手机号'))
@@ -103,13 +103,13 @@ export default {
         if (valid) {
           this.loading = true
           const data = { ...this.ruleForm }
-          
+
           signin(data).then(res => {
             this.loading = false
             if (res.code === 200) {
               this.$message.success('注册成功，正在登录...')
               this.$emit('updateSignUpDialog', false)
-              
+
               // 自动登录
               const loginData = {
                 username: this.ruleForm.username,
@@ -156,7 +156,7 @@ export default {
     font-size: 14px;
     color: #606266;
   }
-  
+
   ::v-deep .el-input__inner {
     height: 44px;
     line-height: 44px;
@@ -177,7 +177,7 @@ export default {
 
 .form-actions {
   margin-top: 35px;
-  
+
   .submit-btn {
     width: 100%;
     height: 44px;
@@ -187,12 +187,12 @@ export default {
     background: linear-gradient(90deg, #409EFF 0%, #36a3f7 100%);
     border: none;
     box-shadow: 0 4px 10px rgba(64, 158, 255, 0.3);
-    
+
     &:hover {
       opacity: 0.9;
       transform: translateY(-1px);
     }
-    
+
     &:active {
       transform: translateY(1px);
     }

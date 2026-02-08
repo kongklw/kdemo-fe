@@ -21,8 +21,25 @@
         <el-row :gutter="5">
           <el-col :xs="{ span: 12 }" :sm="{ span: 12 }" :md="{ span: 12 }" :lg="{ span: 4 }" :xl="{ span: 4 }">
             <el-form-item label="时间点" required>
-              <el-time-picker v-model="sleepForm.sleep_time" value-format="yyyy-MM-dd HH:mm:00" placeholder="时间点">
-              </el-time-picker>
+              <div @click="showPicker = true">
+                <el-input 
+                  :value="sleepForm.sleep_time" 
+                  readonly 
+                  placeholder="选择时间" 
+                  prefix-icon="el-icon-time"
+                />
+              </div>
+              <van-popup v-model="showPicker" position="bottom" get-container="body">
+                <van-datetime-picker
+                  v-model="currentDate"
+                  type="datetime"
+                  title="选择时间"
+                  :min-date="minDate"
+                  :max-date="maxDate"
+                  @confirm="onConfirm"
+                  @cancel="showPicker = false"
+                />
+              </van-popup>
             </el-form-item>
           </el-col>
 
@@ -127,6 +144,11 @@ export default {
         describe: ''
 
       },
+      showPicker: false,
+      minDate: new Date(2020, 0, 1),
+      maxDate: new Date(2030, 11, 31),
+      currentDate: new Date(),
+
       statusOptions: [{
         value: '醒着',
         label: '醒着'
@@ -161,6 +183,16 @@ export default {
 
     }
   },
+  watch: {
+    'sleepForm.sleep_time': {
+      handler(val) {
+        if (val) {
+           this.currentDate = new Date(val.replace(/-/g, '/'))
+        }
+      },
+      immediate: true
+    }
+  },
   mounted() {
   },
 
@@ -173,6 +205,11 @@ export default {
   },
 
   methods: {
+    onConfirm(value) {
+      this.sleepForm.sleep_time = this.moment(value).format('YYYY-MM-DD HH:mm:ss')
+      this.showPicker = false
+    },
+
     // 获取光标位置
     handleInputBlur(e) {
       this.cursorIndex = e.srcElement.selectionStart;

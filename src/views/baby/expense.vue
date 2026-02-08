@@ -1,7 +1,6 @@
 <template>
   <div class="dashboard-editor-container">
 
-
     <div class="pannel">
       <el-row :gutter="10" class="panel-group">
         <el-col :xs="24" :sm="24" :lg="12" class="card-panel-col">
@@ -9,7 +8,6 @@
             <div class="card-panel-icon-wrapper icon-money">
               <svg-icon icon-class="money" class-name="card-panel-icon" />
             </div>
-
 
             <div class="card-panel-description">
               <div class="card-panel-text">
@@ -32,18 +30,29 @@
       </el-row>
     </div>
 
-
-
     <!-- 查询form -->
     <div>
 
       <div class="batch-process">
-        <el-upload class="upload-demo inline-block" ref="upload" multiple action="" :http-request="upload"
-          :on-preview="handlePreview" :on-remove="handleRemove" :file-list="fileList" list-type="picture">
+        <el-upload
+          ref="upload"
+          class="upload-demo inline-block"
+          multiple
+          action=""
+          :http-request="upload"
+          :on-preview="handlePreview"
+          :on-remove="handleRemove"
+          :file-list="fileList"
+          list-type="picture"
+        >
           <el-button slot="trigger" size="small" type="primary">点击上传</el-button>
           <el-button style="margin-left: 10px;" size="small" type="primary" @click="batchProcess">批量AI处理</el-button>
-          <el-button style="margin-left: 20px;" size="small" type="primary"
-            @click="dialogFormVisible = true">单个添加</el-button>
+          <el-button
+            style="margin-left: 20px;"
+            size="small"
+            type="primary"
+            @click="dialogFormVisible = true"
+          >单个添加</el-button>
           <!-- <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div> -->
         </el-upload>
       </div>
@@ -52,9 +61,17 @@
         <el-form ref="formInline" :rules="rules" :inline="true" :model="formInline" class="demo-form-inline">
           <el-form-item label="月份" prop="monthrange" required>
 
-            <el-date-picker v-model="formInline.monthrange" type="monthrange" align="right" unlink-panels
-              range-separator="至" start-placeholder="开始月份" end-placeholder="结束月份" :picker-options="pickerOptions"
-              value-format="yyyy-MM-dd" />
+            <el-date-picker
+              v-model="formInline.monthrange"
+              type="monthrange"
+              align="right"
+              unlink-panels
+              range-separator="至"
+              start-placeholder="开始月份"
+              end-placeholder="结束月份"
+              :picker-options="pickerOptions"
+              value-format="yyyy-MM-dd"
+            />
           </el-form-item>
           <el-form-item label="物品名称" prop="name">
             <el-input v-model="formInline.name" placeholder="例如 尿不湿" />
@@ -68,15 +85,13 @@
             <el-button style="margin-left: 10px;" size="small" type="danger" @click="batchDelete">批量删除</el-button>
           </el-form-item>
 
-
         </el-form>
       </div>
     </div>
     <div>
       <!-- <el-button @click="clearFilter">清除所有过滤器</el-button> -->
-      <el-table ref="filterTable" @selection-change="handleSelectionChange" :data="tableData" style="width: 100%">
-        <el-table-column type="selection" prop="id" min-width="30px">
-        </el-table-column>
+      <el-table ref="filterTable" :data="tableData" style="width: 100%" @selection-change="handleSelectionChange">
+        <el-table-column type="selection" prop="id" min-width="30px" />
         <el-table-column prop="order_time" min-width="80px" label="消费日期" column-key="date" />
         <el-table-column prop="name" min-width="80px" label="物品名称" />
         <el-table-column prop="amount" min-width="70px" label="金额" :formatter="formatter" />
@@ -97,25 +112,42 @@
 
         <el-table-column prop="image_url" min-width="200px" label="图片">
           <template slot-scope="scope">
-            <el-image style="width: 100px; height: 100px" :preview-src-list="[getImageUrl(scope.row)]"
-              :src="getImageUrl(scope.row)" fit="scale-down" lazy></el-image>
+            <el-image
+              style="width: 100px; height: 100px"
+              :preview-src-list="[getImageUrl(scope.row)]"
+              :src="getImageUrl(scope.row)"
+              fit="scale-down"
+              lazy
+            />
           </template>
 
         </el-table-column>
 
-
       </el-table>
-      <el-pagination background layout="prev, pager, next" :total="pageInfo.totalPage" :page-sizes="pageSizes"
-        :page-size="pageInfo.pageSize" :current-page.sync="pageInfo.currentPage"
-        @current-change="handleCurrentChange" />
+      <el-pagination
+        background
+        layout="prev, pager, next"
+        :total="pageInfo.totalPage"
+        :page-sizes="pageSizes"
+        :page-size="pageInfo.pageSize"
+        :current-page.sync="pageInfo.currentPage"
+        @current-change="handleCurrentChange"
+      />
     </div>
     <!-- modal 框 -->
     <div>
       <el-dialog title="购买记录" :visible.sync="dialogFormVisible" width="80%" destroy-on-close>
         <el-form :model="expenseForm" :label-width="formLabelWidth">
           <el-form-item label="购买日期" required>
-            <el-date-picker v-model="expenseForm.order_time" type="date" placeholder="选择日期" align="left"
-              value-format="yyyy-MM-dd" :default-value="new Date()" style="width: 100%;" />
+            <el-date-picker
+              v-model="expenseForm.order_time"
+              type="date"
+              placeholder="选择日期"
+              align="left"
+              value-format="yyyy-MM-dd"
+              :default-value="new Date()"
+              style="width: 100%;"
+            />
           </el-form-item>
           <el-form-item label="名称" :label-width="formLabelWidth">
             <el-input v-model="expenseForm.name" autocomplete="off" />
@@ -148,9 +180,6 @@
 import {
   addExpenseReq, showExpenseListReq, uploadExpenseFile, batchProcessExpenseReq, batchDeleteExpenseReq
 } from '@/api/baby'
-
-
-
 
 export default {
   name: 'BabyExpense',
@@ -284,7 +313,6 @@ export default {
 
   created() {
     this.showExpenseList()
-
   },
 
   destroyed() {
@@ -294,10 +322,9 @@ export default {
   methods: {
 
     getImageUrl(row) {
-   
-      const url =this.$BASE_API+"/media/"+row.image_url
+      const url = this.$BASE_API + '/media/' + row.image_url
       // const url = this.$BASE_API + "/media/expense1.png"
-    
+
       return url
     },
 
@@ -307,36 +334,31 @@ export default {
         text: 'Loading',
         spinner: 'el-icon-loading',
         background: 'rgba(0, 0, 0, 0.7)'
-      });
+      })
 
-    
       const data = { 'fileList': this.myFileList }
       batchProcessExpenseReq(data).then(res => {
         if (res.code === 200) {
-        
-          loading.close();
+          loading.close()
           // alert('batch process successful')
           this.fileList = []
           this.myFileList = []
 
           this.showExpenseList()
-
         }
       }).catch(err => {
-        loading.close();
+        loading.close()
       })
     },
 
     batchDelete() {
       const data = { 'ids': this.multipleSelection }
       batchDeleteExpenseReq(data).then(res => {
-
         if (res.code === 200) {
           this.showExpenseList()
         }
       })
     },
-
 
     upload(param) {
       const formData = new FormData()
@@ -344,29 +366,26 @@ export default {
 
       uploadExpenseFile(formData).then(res => {
         if (res.code === 200) {
-
           const data = res.data
           this.myFileList.push(data)
-
         }
       })
-
     },
 
     handleRemove(file, fileList) {
-     
+
     },
     handlePreview(file) {
-    
+
     },
 
     showExpenseList() {
       const data = { ...this.pageInfo, ...this.formInline }
-    
+
       showExpenseListReq(data).then(res => {
         if (res.code === 200) {
           const data = res.data
-       
+
           this.tableData = data.expense_list
           this.search_amount = data.search_amount
           this.total_amount = data.total_amount
@@ -375,12 +394,10 @@ export default {
     },
 
     handleSelectionChange(val) {
-
       const idsArray = val.map(v => (
         v.id
-      ));
-      this.multipleSelection = idsArray;
-    
+      ))
+      this.multipleSelection = idsArray
     },
 
     onSubmit(formName) {
@@ -388,18 +405,15 @@ export default {
         if (valid) {
           this.showExpenseList()
         } else {
-      
           return false
         }
       })
-    
     },
 
     addExpenseEvent() {
       const data = this.expenseForm
-    
+
       addExpenseReq(data).then((res) => {
-       
         if (res.code === 200) {
           this.tableData = res.data
           this.dialogFormVisible = false
@@ -408,7 +422,7 @@ export default {
     },
 
     handleCurrentChange(val) {
-    
+
     },
 
     clearFilter() {

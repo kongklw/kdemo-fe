@@ -23,8 +23,25 @@
       <el-form label-position="left" :model="temperatureForm" :label-width="formLabelWidth" :inline="true">
 
         <el-form-item label="测量日期" required>
-          <el-date-picker v-model="temperatureForm.measure_date" type="date" placeholder="选择日期"
-            value-format="yyyy-MM-dd" style="width: 100%;" />
+          <div @click="showPicker = true">
+            <el-input 
+              :value="temperatureForm.measure_date" 
+              readonly 
+              placeholder="选择日期" 
+              prefix-icon="el-icon-date"
+            />
+          </div>
+          <van-popup v-model="showPicker" position="bottom" get-container="body">
+            <van-datetime-picker
+              v-model="currentDate"
+              type="date"
+              title="选择日期"
+              :min-date="minDate"
+              :max-date="maxDate"
+              @confirm="onConfirm"
+              @cancel="showPicker = false"
+            />
+          </van-popup>
         </el-form-item>
 
         <el-form-item label="体温" required>
@@ -96,6 +113,11 @@ export default {
         measure_date: this.moment().format('YYYY-MM-DD'),
         temperature: 36.5
       },
+      showPicker: false,
+      minDate: new Date(2020, 0, 1),
+      maxDate: new Date(2030, 11, 31),
+      currentDate: new Date(),
+
       temperature: "36.4",
       formLabelWidth: '80px',
       pageSizes: [20, 50, 100],
@@ -119,6 +141,16 @@ export default {
 
     }
   },
+  watch: {
+    'temperatureForm.measure_date': {
+      handler(val) {
+        if (val) {
+           this.currentDate = new Date(val.replace(/-/g, '/'))
+        }
+      },
+      immediate: true
+    }
+  },
   mounted() {
   },
 
@@ -131,6 +163,11 @@ export default {
   },
 
   methods: {
+
+    onConfirm(value) {
+      this.temperatureForm.measure_date = this.moment(value).format('YYYY-MM-DD')
+      this.showPicker = false
+    },
 
 
     open(row) {

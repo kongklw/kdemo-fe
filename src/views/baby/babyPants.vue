@@ -25,8 +25,25 @@
         <el-row>
           <el-col :xs="{ span: 24 }" :sm="{ span: 12 }" :md="{ span: 12 }" :lg="{ span: 6 }" :xl="{ span: 6 }">
             <el-form-item label="更换时间" label-position="left" required>
-              <el-date-picker v-model="babyPantsForm.use_date" type="datetime" placeholder="选择日期时间" align="left"
-                value-format="yyyy-MM-dd HH:mm:00" />
+              <div @click="showPicker = true">
+                <el-input 
+                  :value="babyPantsForm.use_date" 
+                  readonly 
+                  placeholder="选择日期时间" 
+                  prefix-icon="el-icon-time"
+                />
+              </div>
+              <van-popup v-model="showPicker" position="bottom" get-container="body">
+                <van-datetime-picker
+                  v-model="currentDate"
+                  type="datetime"
+                  title="选择时间"
+                  :min-date="minDate"
+                  :max-date="maxDate"
+                  @confirm="onConfirm"
+                  @cancel="showPicker = false"
+                />
+              </van-popup>
             </el-form-item>
           </el-col>
 
@@ -212,6 +229,11 @@ export default {
 
       },
 
+      showPicker: false,
+      minDate: new Date(2020, 0, 1),
+      maxDate: new Date(2030, 11, 31),
+      currentDate: new Date(),
+
       formInline: {
         use_date: this.moment().format('YYYY-MM-DD'),
         start_date: this.moment().subtract(1, "month").format('YYYY-MM-DD'),
@@ -332,6 +354,16 @@ export default {
 
     }
   },
+  watch: {
+    'babyPantsForm.use_date': {
+      handler(val) {
+        if (val) {
+           this.currentDate = new Date(val.replace(/-/g, '/'))
+        }
+      },
+      immediate: true
+    }
+  },
   mounted() {
   },
 
@@ -344,6 +376,11 @@ export default {
   },
 
   methods: {
+
+    onConfirm(value) {
+      this.babyPantsForm.use_date = this.moment(value).format('YYYY-MM-DD HH:mm:ss')
+      this.showPicker = false
+    },
 
     openAddBrandModel() {
       console.log('data')
