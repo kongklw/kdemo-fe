@@ -2,6 +2,7 @@
   <div class="app-container">
     <el-row>
       <el-button type="primary" @click="dialogFormVisible = true">Add Sport</el-button>
+      <el-button type="primary" @click="dialogFormVisible = true">Add Sport</el-button>
 
     </el-row>
 
