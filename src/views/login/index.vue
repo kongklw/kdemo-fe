@@ -15,12 +15,12 @@
 
       <el-form-item prop="username">
         <span class="svg-container">
-          <svg-icon icon-class="user" />
+          <i class="el-icon-mobile-phone" />
         </span>
         <el-input
           ref="username"
           v-model="loginForm.username"
-          placeholder="Username"
+          placeholder="手机号"
           name="username"
           type="text"
           tabindex="1"
@@ -86,7 +86,6 @@
 </template>
 
 <script>
-import { validUsername } from '@/utils/validate'
 import { SocialSign } from './components/SocialSignin'
 import SignUp from './components/SignUp.vue'
 import Cookies from 'js-cookie'
@@ -96,8 +95,8 @@ export default {
   components: { SignUp, SocialSign },
   data() {
     const validateUsername = (rule, value, callback) => {
-      if (!validUsername(value)) {
-        callback(new Error('Please enter the correct user name'))
+      if (!value) {
+        callback(new Error('请输入手机号'))
       } else {
         callback()
       }

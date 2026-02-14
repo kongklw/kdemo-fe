@@ -7,16 +7,6 @@
       label-position="top"
       class="sign-up-form"
     >
-      <el-form-item label="用户名" prop="username">
-        <el-input
-          v-model="ruleForm.username"
-          placeholder="请输入用户名"
-          autocomplete="off"
-        >
-          <svg-icon slot="prefix" icon-class="user" class="input-icon" />
-        </el-input>
-      </el-form-item>
-
       <el-form-item label="手机号" prop="phone">
         <el-input
           v-model="ruleForm.phone"
@@ -54,14 +44,6 @@ export default {
     parentSignUpDialog: Boolean
   },
   data() {
-    const validateUsername = (rule, value, callback) => {
-      if (!value) {
-        callback(new Error('请输入用户名'))
-      } else {
-        callback()
-      }
-    }
-
     const validatePass = (rule, value, callback) => {
       if (value === '') {
         callback(new Error('请输入密码'))
@@ -91,7 +73,6 @@ export default {
         phone: ''
       },
       rules: {
-        username: [{ validator: validateUsername, trigger: 'blur', required: true }],
         password: [{ validator: validatePass, trigger: 'blur', required: true }],
         phone: [{ validator: validatePhone, trigger: 'blur', required: true }]
       }
@@ -102,6 +83,11 @@ export default {
       this.$refs[formName].validate(valid => {
         if (valid) {
           this.loading = true
+          // 自动生成随机用户名: 用户_手机号后4位_随机字符串
+          const randomStr = Math.random().toString(36).substring(2, 6)
+          const phoneSuffix = this.ruleForm.phone.slice(-4)
+          this.ruleForm.username = `用户_${phoneSuffix}_${randomStr}`
+
           const data = { ...this.ruleForm }
 
           signin(data).then(res => {
