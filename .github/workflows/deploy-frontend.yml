@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'kdemo-fe/**'
 
 jobs:
   build-and-deploy:
@@ -17,20 +15,20 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 18
           cache: 'npm'
-          cache-dependency-path: 'kdemo-fe/package-lock.json'
+          cache-dependency-path: 'package-lock.json'
 
       - name: Install dependencies
-        working-directory: kdemo-fe
+        working-directory: .
         run: npm ci
 
       - name: Build
-        working-directory: kdemo-fe
+        working-directory: .
         run: npm run build:prod
 
       - name: Zip Dist
-        working-directory: kdemo-fe
+        working-directory: .
         run: zip -r dist.zip dist
 
       - name: Upload dist.zip to ECS
@@ -40,7 +38,7 @@ jobs:
           username: ${{ secrets.ECS_USER }}
           key: ${{ secrets.ECS_SSH_KEY }}
           port: ${{ secrets.ECS_PORT }}
-          source: "kdemo-fe/dist.zip"
+          source: "dist.zip"
           target: "${{ secrets.ECS_WORKDIR }}/frontend/"
 
       - name: Publish dist to nginx
