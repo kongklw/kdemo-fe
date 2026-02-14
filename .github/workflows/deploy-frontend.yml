@@ -1,0 +1,62 @@
+name: deploy-frontend
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'kdemo-fe/**'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: 'kdemo-fe/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: kdemo-fe
+        run: npm ci
+
+      - name: Build
+        working-directory: kdemo-fe
+        run: npm run build:prod
+
+      - name: Zip Dist
+        working-directory: kdemo-fe
+        run: zip -r dist.zip dist
+
+      - name: Upload dist.zip to ECS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.ECS_HOST }}
+          username: ${{ secrets.ECS_USER }}
+          key: ${{ secrets.ECS_SSH_KEY }}
+          port: ${{ secrets.ECS_PORT }}
+          source: "kdemo-fe/dist.zip"
+          target: "${{ secrets.ECS_WORKDIR }}/frontend/"
+
+      - name: Publish dist to nginx
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.ECS_HOST }}
+          username: ${{ secrets.ECS_USER }}
+          key: ${{ secrets.ECS_SSH_KEY }}
+          port: ${{ secrets.ECS_PORT }}
+          script: |
+            set -e
+            cd ${{ secrets.ECS_WORKDIR }}/frontend
+            unzip -o dist.zip
+            rm -rf ./* || true
+            cp -r dist/* .
+            rm -rf dist dist.zip
+            cd ${{ secrets.ECS_WORKDIR }}
+            if command -v docker-compose >/dev/null 2>&1; then dc="docker-compose"; else dc="docker compose"; fi
+            $dc restart nginx
