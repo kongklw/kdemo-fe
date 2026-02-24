@@ -9,10 +9,6 @@
       label-position="left"
     >
 
-      <div class="title-container">
-        <h3 class="title">Login Form</h3>
-      </div>
-
       <el-form-item prop="username">
         <span class="svg-container">
           <i class="el-icon-mobile-phone" />

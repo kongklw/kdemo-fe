@@ -1,7 +1,5 @@
 import request from '@/utils/request'
 
-
-
 export function geneContentReq(data) {
   return request({
     url: '/baby/ai_gen',
@@ -13,8 +11,8 @@ export function geneContentReq(data) {
 export function showGrowingListReq() {
   return request({
     url: '/baby/growing',
-    method: 'get',
-   
+    method: 'get'
+
   })
 }
 
@@ -42,7 +40,6 @@ export function addSleepReq(data) {
   })
 }
 
-
 export function uploadExpenseFile(data) {
   return request({
     url: '/file/upload',
@@ -67,9 +64,6 @@ export function batchDeleteExpenseReq(data) {
   })
 }
 
-
-
-
 export function showExpenseListReq(data) {
   return request({
     url: '/baby/expense_list',
@@ -82,6 +76,14 @@ export function addExpenseReq(data) {
   return request({
     url: '/baby/expense',
     method: 'post',
+    data
+  })
+}
+
+export function updateExpenseReq(data) {
+  return request({
+    url: '/baby/expense',
+    method: 'put',
     data
   })
 }
@@ -142,7 +144,6 @@ export function addBabyPantsReq(data) {
   })
 }
 
-
 export function deleteBabyPantsReq(data) {
   return request({
     url: '/baby/pants',
@@ -150,7 +151,6 @@ export function deleteBabyPantsReq(data) {
     data
   })
 }
-
 
 export function feedListReq(query) {
   return request({
@@ -215,8 +215,6 @@ export function feedChartReq() {
     // params: query
   })
 }
-
-
 
 export function dashboardReq() {
   return request({

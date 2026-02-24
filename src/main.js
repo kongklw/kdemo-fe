@@ -22,13 +22,16 @@ import * as filters from './filters' // global filters
 import moment from 'moment'
 
 // Vant UI (Mobile)
-import { DatetimePicker, Popup } from 'vant'
+import { DatetimePicker, Popup, SwipeCell, Button } from 'vant'
 import 'vant/lib/datetime-picker/style'
 import 'vant/lib/popup/style'
+import 'vant/lib/swipe-cell/style'
+import 'vant/lib/button/style'
 
 Vue.use(DatetimePicker)
 Vue.use(Popup)
-
+Vue.use(SwipeCell)
+Vue.use(Button)
 
 /**
  * If you don't want to use mock-server
