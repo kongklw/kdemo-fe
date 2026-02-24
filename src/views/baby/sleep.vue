@@ -5,8 +5,7 @@
     <div>
       <el-form ref="formInline" :rules="rules" :inline="true" :model="formInline" class="demo-form-inline">
         <el-form-item label="日期" prop="date" required>
-          <el-date-picker v-model="formInline.date" type="date" value-format="yyyy-MM-dd" placeholder="选择日期">
-          </el-date-picker>
+          <el-date-picker v-model="formInline.date" type="date" value-format="yyyy-MM-dd" placeholder="选择日期" />
         </el-form-item>
 
         <el-form-item>
@@ -22,10 +21,10 @@
           <el-col :xs="{ span: 12 }" :sm="{ span: 12 }" :md="{ span: 12 }" :lg="{ span: 4 }" :xl="{ span: 4 }">
             <el-form-item label="时间点" required>
               <div @click="showPicker = true">
-                <el-input 
-                  :value="sleepForm.sleep_time" 
-                  readonly 
-                  placeholder="选择时间" 
+                <el-input
+                  :value="sleepForm.sleep_time"
+                  readonly
+                  placeholder="选择时间"
                   prefix-icon="el-icon-time"
                 />
               </div>
@@ -33,7 +32,7 @@
                 <van-datetime-picker
                   v-model="currentDate"
                   type="datetime"
-                  title="选择时间"
+                  title="选择时间点"
                   :min-date="minDate"
                   :max-date="maxDate"
                   @confirm="onConfirm"
@@ -53,44 +52,52 @@
 
           <el-col :xs="{ span: 24 }" :sm="{ span: 12 }" :md="{ span: 12 }" :lg="{ span: 10 }" :xl="{ span: 12 }">
             <el-form-item label="睡眠描述">
-              <el-input type="textarea" ref="inputWord" v-model="sleepForm.describe" @blur="handleInputBlur"></el-input>
+              <el-input ref="inputWord" v-model="sleepForm.describe" type="textarea" @blur="handleInputBlur" />
             </el-form-item>
             <div class="main-word">
               <div class="main-word-left">
                 <span class="main-word-label">插入动态词包: </span>
-                <el-button v-for="n in commonWordList" :key="n.creativeWordId" class="button-word" type="text"
-                  @click="btnClick(n.name)">#{{ n.name }}</el-button>
+                <el-button
+                  v-for="n in commonWordList"
+                  :key="n.creativeWordId"
+                  class="button-word"
+                  type="text"
+                  @click="btnClick(n.name)"
+                >#{{ n.name }}</el-button>
               </div>
             </div>
           </el-col>
 
-          <el-col :xs="{ span: 24 }" :sm="{ span: 12 }" :md="{ span: 12 }" :lg="{ span: 4 }" :xl="{ span: 2 }"
-            :offset="2">
+          <el-col
+            :xs="{ span: 24 }"
+            :sm="{ span: 12 }"
+            :md="{ span: 12 }"
+            :lg="{ span: 4 }"
+            :xl="{ span: 2 }"
+            :offset="2"
+          >
             <el-form-item>
               <el-button type="primary" @click="addSleepEvent">添加记录</el-button>
             </el-form-item>
           </el-col>
 
-
         </el-row>
-
-
-
-
 
       </el-form>
     </div>
-
-
 
     <div>
       <!-- <el-button @click="clearFilter">清除所有过滤器</el-button> -->
       <el-table ref="filterTable" :data="tableData" style="width: 100%">
         <el-table-column prop="sleep_time" label="时间点" column-key="sleep_time" />
 
-        <el-table-column prop="status" label="状态"
+        <el-table-column
+          prop="status"
+          label="状态"
           :filters="[{ text: '醒着', value: '醒着' }, { text: '熟睡', value: '熟睡' }, { text: '哼唧', value: '哼唧' }, { text: '开心', value: '开心' }, { text: '普通', value: '普通' }, { text: '难过', value: '难过' }, { text: '其他', value: '其他' }]"
-          :filter-method="filterTag" filter-placement="bottom-end">
+          :filter-method="filterTag"
+          filter-placement="bottom-end"
+        >
           <template slot-scope="scope">
             <el-tag :type="scope.row.status === '醒着' ? 'primary' : 'success'" disable-transitions>{{
               scope.row.status }}</el-tag>
@@ -101,11 +108,16 @@
         <el-table-column prop="amount" label="持续时间" />
 
       </el-table>
-      <el-pagination background layout="prev, pager, next" :total="pageInfo.totalPage" :page-sizes="pageSizes"
-        :page-size="pageInfo.pageSize" :current-page.sync="pageInfo.currentPage"
-        @current-change="handleCurrentChange" />
+      <el-pagination
+        background
+        layout="prev, pager, next"
+        :total="pageInfo.totalPage"
+        :page-sizes="pageSizes"
+        :page-size="pageInfo.pageSize"
+        :current-page.sync="pageInfo.currentPage"
+        @current-change="handleCurrentChange"
+      />
     </div>
-
 
   </div>
 </template>
@@ -124,22 +136,22 @@ export default {
   data() {
     return {
       commonWordList: [
-        { name: "喂水", creativeWordId: 1 },
-        { name: "喂奶", creativeWordId: 2 },
-        { name: "翻身", creativeWordId: 3 },
-        { name: "轻拍", creativeWordId: 4 },
-        { name: "奶嘴安抚", creativeWordId: 5 },
-        { name: "哼唧", creativeWordId: 6 },
-        { name: "侧漏", creativeWordId: 7 },
-        { name: "梦哭", creativeWordId: 8 },
-        { name: "梦笑", creativeWordId: 9 },
+        { name: '喂水', creativeWordId: 1 },
+        { name: '喂奶', creativeWordId: 2 },
+        { name: '翻身', creativeWordId: 3 },
+        { name: '轻拍', creativeWordId: 4 },
+        { name: '奶嘴安抚', creativeWordId: 5 },
+        { name: '哼唧', creativeWordId: 6 },
+        { name: '侧漏', creativeWordId: 7 },
+        { name: '梦哭', creativeWordId: 8 },
+        { name: '梦笑', creativeWordId: 9 }
 
       ],
-      cursorIndex: "", // 光标位置
+      cursorIndex: '', // 光标位置
 
       sleepForm: {
         sleep_time: this.moment().format('YYYY-MM-DD HH:mm:00'),
-        
+
         status: '熟睡',
         describe: ''
 
@@ -170,7 +182,7 @@ export default {
         pageSize: 20
       },
       formInline: {
-        date: this.moment().format('YYYY-MM-DD'),
+        date: this.moment().format('YYYY-MM-DD')
 
       },
       tableData: [],
@@ -187,7 +199,7 @@ export default {
     'sleepForm.sleep_time': {
       handler(val) {
         if (val) {
-           this.currentDate = new Date(val.replace(/-/g, '/'))
+          this.currentDate = new Date(val.replace(/-/g, '/'))
         }
       },
       immediate: true
@@ -212,27 +224,27 @@ export default {
 
     // 获取光标位置
     handleInputBlur(e) {
-      this.cursorIndex = e.srcElement.selectionStart;
+      this.cursorIndex = e.srcElement.selectionStart
     },
 
     btnClick(label) {
       // 将文本内容在光标位置进行拆分
-      const txt = this.sleepForm.describe;
-      const start = txt.substring(0, this.cursorIndex);
-      const end = txt.substring(this.cursorIndex, txt.length);
+      const txt = this.sleepForm.describe
+      const start = txt.substring(0, this.cursorIndex)
+      const end = txt.substring(this.cursorIndex, txt.length)
 
       // 插入关键词
-      this.sleepForm.describe = start + `#${label} ` + end;
+      this.sleepForm.describe = start + `#${label} ` + end
 
       // 获取文本框，设置焦点，处理光标位置
       if (this.$refs.inputWord) {
         // this.$refs.inputWord.focus();
         this.$nextTick(() => {
-          var a = this.$refs.inputWord.$el.firstElementChild;
-          a.focus();
-          a.selectionStart = this.cursorIndex + label.length + 2;
-          a.selectionEnd = this.cursorIndex + label.length + 2;
-        });
+          var a = this.$refs.inputWord.$el.firstElementChild
+          a.focus()
+          a.selectionStart = this.cursorIndex + label.length + 2
+          a.selectionEnd = this.cursorIndex + label.length + 2
+        })
       }
     },
 
@@ -241,18 +253,15 @@ export default {
       console.log('--------data----', data)
       showSleepListReq(data).then(res => {
         if (res.code === 200) {
-
           this.tableData = res.data
         }
       })
-
     },
 
     onSubmit(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
           this.showSleepList()
-
         } else {
           console.log('error submit!!')
           return false
