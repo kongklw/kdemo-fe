@@ -54,10 +54,16 @@ jobs:
           script: |
             set -e
             cd ${{ secrets.PROJECT_PATH }}/frontend
-            unzip -o dist.zip
-            rm -rf ./* || true
-            cp -r dist/* .
-            rm -rf dist dist.zip
+            
+            # Unzip and update files
+            if [ -f "dist.zip" ]; then
+              unzip -o dist.zip
+              # Copy content from dist subfolder to current folder
+              cp -rf dist/* .
+              # Cleanup
+              rm -rf dist dist.zip
+            fi
+            
             cd ${{ secrets.PROJECT_PATH }}
             if command -v docker-compose >/dev/null 2>&1; then dc="docker-compose"; else dc="docker compose"; fi
             $dc restart nginx
