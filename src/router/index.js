@@ -7,10 +7,10 @@ Vue.use(Router)
 import Layout from '@/layout'
 
 /* Router Modules */
-import componentsRouter from './modules/components'
-import chartsRouter from './modules/charts'
-import tableRouter from './modules/table'
-import nestedRouter from './modules/nested'
+// import componentsRouter from './modules/components'
+// import chartsRouter from './modules/charts'
+// import tableRouter from './modules/table'
+// import nestedRouter from './modules/nested'
 
 /**
  * Note: sub-menu only appear when route children.length >= 1
@@ -71,9 +71,108 @@ export const constantRoutes = [
     hidden: true
   },
   {
+    path: '/mobile',
+    component: () => import('@/layout/MobileLayout'),
+    redirect: '/mobile/home',
+    children: [
+      {
+        path: 'home',
+        component: () => import('@/views/mobile/Home'),
+        name: 'MobileHome',
+        meta: { title: '首页' }
+      },
+      {
+        path: 'mall',
+        component: () => import('@/views/mobile/Mall'),
+        name: 'MobileMall',
+        meta: { title: '商城' }
+      },
+      {
+        path: 'ai',
+        component: () => import('@/views/mobile/AI'),
+        name: 'MobileAI',
+        meta: { title: 'AI Park' }
+      },
+      {
+        path: 'message',
+        component: () => import('@/views/mobile/Message'),
+        name: 'MobileMessage',
+        meta: { title: '消息' }
+      },
+      {
+        path: 'me',
+        component: () => import('@/views/mobile/Me'),
+        name: 'MobileMe',
+        meta: { title: '我的' }
+      }
+    ]
+  },
+  // Mobile Functions (No TabBar)
+  {
+    path: '/mobile/functions',
+    component: () => import('@/layout/MobileFunctionLayout'),
+    hidden: true,
+    children: [
+      {
+        path: 'expense',
+        component: () => import('@/views/mobile/functions/Expense'),
+        name: 'MobileExpense',
+        meta: { title: '花费' }
+      },
+      {
+        path: 'sleep',
+        component: () => import('@/views/mobile/functions/Sleep'),
+        name: 'MobileSleep',
+        meta: { title: '睡眠' }
+      },
+      {
+        path: 'breastfeed',
+        component: () => import('@/views/mobile/functions/BreastFeed'),
+        name: 'MobileBreastFeed',
+        meta: { title: '喂奶' }
+      },
+      {
+        path: 'babypants',
+        component: () => import('@/views/mobile/functions/BabyPants'),
+        name: 'MobileBabyPants',
+        meta: { title: '尿不湿' }
+      },
+      {
+        path: 'temperature',
+        component: () => import('@/views/mobile/functions/Temperature'),
+        name: 'MobileTemperature',
+        meta: { title: '体温' }
+      },
+      {
+        path: 'todo',
+        component: () => import('@/views/mobile/functions/Todo'),
+        name: 'MobileTodo',
+        meta: { title: '待办' }
+      },
+      {
+        path: 'growing',
+        component: () => import('@/views/mobile/functions/Growing'),
+        name: 'MobileGrowing',
+        meta: { title: '成长' }
+      },
+      {
+        path: 'analysis',
+        component: () => import('@/views/mobile/functions/Analysis'),
+        name: 'MobileAnalysis',
+        meta: { title: '分析' }
+      },
+      {
+        path: 'langchain',
+        component: () => import('@/views/mobile/functions/Langchain'),
+        name: 'MobileLangchain',
+        meta: { title: 'Langchain' }
+      }
+    ]
+  },
+  {
     path: '/',
     component: Layout,
-    redirect: '/dashboard',
+    redirect: '/mobile/home',
     children: [
       {
         path: 'dashboard',
@@ -148,7 +247,7 @@ export const asyncRoutes = [
         name: 'Langchain',
         meta: { title: 'Langchain', icon: 'langchain', noCache: true }
 
-      },
+      }
       // {
       //   path: 'wenxin',
       //   component: () => import('@/views/ai/wenxin.vue'),
@@ -243,7 +342,6 @@ export const asyncRoutes = [
     ]
   },
 
-
   {
     path: '/sports',
     component: Layout,
@@ -272,7 +370,6 @@ export const asyncRoutes = [
 
     ]
   },
-
 
   // {
   //   path: '/permission',

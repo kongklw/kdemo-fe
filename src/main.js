@@ -22,18 +22,86 @@ import * as filters from './filters' // global filters
 import moment from 'moment'
 
 // Vant UI (Mobile)
-import { DatetimePicker, Popup, SwipeCell, Button, List } from 'vant'
+import { DatetimePicker, Popup, SwipeCell, Button, List, Tabbar, TabbarItem, Search, Grid, GridItem, Icon, NavBar, Cell, CellGroup, Tag, PullRefresh, DropdownMenu, DropdownItem, Form, Field, RadioGroup, Radio, Uploader, Dialog, Image as VanImage, Tab, Tabs, Stepper, Switch, Checkbox, CheckboxGroup, Empty, Card, Collapse, CollapseItem, Toast, Calendar, Loading, Divider } from 'vant'
 import 'vant/lib/datetime-picker/style'
 import 'vant/lib/popup/style'
 import 'vant/lib/swipe-cell/style'
 import 'vant/lib/button/style'
 import 'vant/lib/list/style'
+import 'vant/lib/tabbar/style'
+import 'vant/lib/tabbar-item/style'
+import 'vant/lib/search/style'
+import 'vant/lib/grid/style'
+import 'vant/lib/grid-item/style'
+import 'vant/lib/icon/style'
+import 'vant/lib/nav-bar/style'
+import 'vant/lib/cell/style'
+import 'vant/lib/cell-group/style'
+import 'vant/lib/tag/style'
+import 'vant/lib/pull-refresh/style'
+import 'vant/lib/dropdown-menu/style'
+import 'vant/lib/dropdown-item/style'
+import 'vant/lib/form/style'
+import 'vant/lib/field/style'
+import 'vant/lib/radio-group/style'
+import 'vant/lib/radio/style'
+import 'vant/lib/uploader/style'
+import 'vant/lib/dialog/style'
+import 'vant/lib/image/style'
+import 'vant/lib/tab/style'
+import 'vant/lib/tabs/style'
+import 'vant/lib/stepper/style'
+import 'vant/lib/switch/style'
+import 'vant/lib/checkbox/style'
+import 'vant/lib/checkbox-group/style'
+import 'vant/lib/empty/style'
+import 'vant/lib/card/style'
+import 'vant/lib/collapse/style'
+import 'vant/lib/collapse-item/style'
+import 'vant/lib/toast/style'
+import 'vant/lib/calendar/style'
+import 'vant/lib/loading/style'
+import 'vant/lib/divider/style'
 
 Vue.use(DatetimePicker)
 Vue.use(Popup)
 Vue.use(SwipeCell)
 Vue.use(Button)
 Vue.use(List)
+Vue.use(Tabbar)
+Vue.use(TabbarItem)
+Vue.use(Search)
+Vue.use(Grid)
+Vue.use(GridItem)
+Vue.use(Icon)
+Vue.use(NavBar)
+Vue.use(Cell)
+Vue.use(CellGroup)
+Vue.use(Tag)
+Vue.use(PullRefresh)
+Vue.use(DropdownMenu)
+Vue.use(DropdownItem)
+Vue.use(Form)
+Vue.use(Field)
+Vue.use(RadioGroup)
+Vue.use(Radio)
+Vue.use(Uploader)
+Vue.use(Dialog)
+Vue.use(VanImage)
+Vue.use(Tab)
+Vue.use(Tabs)
+Vue.use(Stepper)
+Vue.use(Switch)
+Vue.use(Checkbox)
+Vue.use(CheckboxGroup)
+Vue.use(Empty)
+Vue.use(Card)
+Vue.use(Collapse)
+Vue.use(CollapseItem)
+Vue.use(Toast)
+Vue.use(Calendar)
+Vue.use(Loading)
+Vue.use(Divider)
 
 /**
  * If you don't want to use mock-server
