@@ -88,6 +88,21 @@ export function updateExpenseReq(data) {
   })
 }
 
+export function getExpenseTagsReq() {
+  return request({
+    url: '/baby/expense_tags',
+    method: 'get'
+  })
+}
+
+export function addExpenseTagReq(data) {
+  return request({
+    url: '/baby/expense_tags',
+    method: 'post',
+    data
+  })
+}
+
 export function showTodoListReq(query) {
   return request({
     url: '/baby/todo',

@@ -192,15 +192,34 @@
           </el-form-item>
 
           <el-form-item label="标签" :label-width="formLabelWidth">
-            <el-select
-              v-model="expenseForm.tag"
-              placeholder="请选择或输入标签"
-              filterable
-              allow-create
-              default-first-option
+            <div class="tag-group">
+              <el-tag
+                v-for="tag in allTags"
+                :key="tag"
+                :effect="expenseForm.tag === tag ? 'dark' : 'plain'"
+                class="tag-item"
+                @click="selectTag(tag)"
+              >
+                {{ tag }}
+              </el-tag>
+              <el-button class="button-new-tag" size="small" icon="el-icon-plus" @click="showInput">标签</el-button>
+            </div>
+            <el-dialog
+              title="添加标签"
+              :visible.sync="tagDialogVisible"
+              :width="device === 'mobile' ? '90%' : '30%'"
+              append-to-body
             >
-              <el-option v-for="item in tagOptions" :key="item.value" :label="item.label" :value="item.value" />
-            </el-select>
+              <el-input
+                v-model="newTagName"
+                placeholder="请输入新标签名称"
+                @keyup.enter.native="handleInputConfirm"
+              />
+              <span slot="footer" class="dialog-footer">
+                <el-button @click="tagDialogVisible = false">取 消</el-button>
+                <el-button type="primary" @click="handleInputConfirm">确 定</el-button>
+              </span>
+            </el-dialog>
           </el-form-item>
 
           <el-form-item label="金额" :label-width="formLabelWidth">
@@ -221,8 +240,10 @@
 
 <script>
 import {
-  addExpenseReq, showExpenseListReq, uploadExpenseFile, batchProcessExpenseReq, batchDeleteExpenseReq, updateExpenseReq
+  addExpenseReq, showExpenseListReq, uploadExpenseFile, batchProcessExpenseReq, batchDeleteExpenseReq, updateExpenseReq,
+  getExpenseTagsReq, addExpenseTagReq
 } from '@/api/baby'
+import { mapGetters } from 'vuex'
 
 export default {
   name: 'BabyExpense',
@@ -282,6 +303,9 @@ export default {
         label: '其他'
       }
       ],
+      userTags: [],
+      tagDialogVisible: false,
+      newTagName: '',
       dialogFormVisible: false,
       formLabelWidth: '80px',
       pageSizes: [20, 50, 100],
@@ -372,6 +396,9 @@ export default {
     }
   },
   computed: {
+    ...mapGetters([
+      'device'
+    ]),
     monthrangeText() {
       const range = this.formInline && this.formInline.monthrange
       if (!Array.isArray(range) || range.length !== 2 || !range[0] || !range[1]) {
@@ -381,6 +408,14 @@ export default {
     },
     mobileMonthPickerTitle() {
       return this.mobileMonthPickStep === 'start' ? '选择开始月份' : '选择结束月份'
+    },
+    allTags() {
+      const defaultTags = this.tagOptions.map(t => t.value)
+      // Merge unique
+      // Check if userTags is array
+      const userTags = Array.isArray(this.userTags) ? this.userTags : []
+      const tags = new Set([...defaultTags, ...userTags])
+      return Array.from(tags)
     }
   },
 
@@ -403,6 +438,7 @@ export default {
 
   created() {
     // let van-list trigger initial load
+    this.fetchTags()
   },
 
   destroyed() {
@@ -494,6 +530,38 @@ export default {
       return this.$BASE_API + '/media/' + url
     },
 
+    fetchTags() {
+      getExpenseTagsReq().then(res => {
+        if (res.code === 200) {
+          this.userTags = res.data
+        }
+      })
+    },
+
+    selectTag(tag) {
+      this.expenseForm.tag = tag
+    },
+
+    showInput() {
+      this.tagDialogVisible = true
+      this.newTagName = ''
+    },
+
+    handleInputConfirm() {
+      const name = this.newTagName
+      if (name) {
+        addExpenseTagReq({ name }).then(res => {
+          if (res.code === 200) {
+            this.userTags.push(name)
+            this.tagDialogVisible = false
+            this.$message.success('Tag added')
+          } else {
+            this.$message.error(res.msg)
+          }
+        })
+      }
+    },
+
     batchProcess() {
       const loading = this.$loading({
         lock: true,
@@ -546,12 +614,23 @@ export default {
     },
 
     onLoad() {
+      // Prevent duplicate loading if already loading (except initial manual call which sets loading=true)
+      // Actually van-list handles this via v-model="loading", but we can be extra safe
+      // if (this.loading && this.tableData.length > 0) return
+
       const data = { ...this.pageInfo, ...this.formInline }
 
       showExpenseListReq(data).then(res => {
         if (res.code === 200) {
           const data = res.data
-          const list = data.expense_list || []
+          const list = data.list || data.expense_list || []
+
+          // Safety check: if list is empty, we are finished
+          if (list.length === 0) {
+            this.finished = true
+            this.loading = false
+            return
+          }
 
           // Append or Set data
           if (this.pageInfo.currentPage === 1) {
@@ -1209,5 +1288,23 @@ export default {
    }
    -ms-overflow-style: none;
    scrollbar-width: none;
+}
+
+.tag-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.tag-item {
+  cursor: pointer;
+  margin-right: 10px;
+  margin-bottom: 10px;
+}
+.button-new-tag {
+  margin-bottom: 10px;
+  height: 32px;
+  line-height: 30px;
+  padding-top: 0;
+  padding-bottom: 0;
 }
 </style>
