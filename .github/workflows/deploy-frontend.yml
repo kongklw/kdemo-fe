@@ -58,6 +58,8 @@ jobs:
             # Unzip and update files
             if [ -f "dist.zip" ]; then
               unzip -o dist.zip
+              # Clean up old files to ensure no caching issues
+              rm -rf static index.html favicon.ico
               # Copy content from dist subfolder to current folder
               cp -rf dist/* .
               # Cleanup
