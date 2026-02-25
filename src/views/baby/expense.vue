@@ -625,6 +625,12 @@ export default {
           const data = res.data
           const list = data.list || data.expense_list || []
 
+          // Update stats (always)
+          if (data.range_income !== undefined) this.range_income = data.range_income
+          if (data.range_expense !== undefined) this.range_expense = data.range_expense
+          if (data.all_income !== undefined) this.all_income = data.all_income
+          if (data.all_expense !== undefined) this.all_expense = data.all_expense
+
           // Safety check: if list is empty, we are finished
           if (list.length === 0) {
             this.finished = true
@@ -638,12 +644,6 @@ export default {
           } else {
             this.tableData.push(...list)
           }
-
-          // Update stats (always)
-          this.range_income = data.range_income
-          this.range_expense = data.range_expense
-          this.all_income = data.all_income
-          this.all_expense = data.all_expense
 
           if (data.total !== undefined) {
             this.pageInfo.totalPage = data.total
