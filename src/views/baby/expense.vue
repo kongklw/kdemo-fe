@@ -706,9 +706,18 @@ export default {
         data.id = this.currentEditId
         updateExpenseReq(data).then(res => {
           if (res.code === 200) {
-            this.showExpenseList()
+            // Update local list data directly to maintain scroll position
+            const index = this.tableData.findIndex(item => item.id === this.currentEditId)
+            if (index !== -1) {
+              const updatedItem = { ...this.tableData[index], ...data }
+              this.$set(this.tableData, index, updatedItem)
+            }
+
             this.dialogFormVisible = false
             this.currentEditId = null
+            this.$message.success('修改成功')
+
+            // Optionally refresh stats silently if needed, or just let them be updated on next load
           }
         })
       } else {
