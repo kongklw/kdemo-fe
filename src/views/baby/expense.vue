@@ -1,39 +1,54 @@
 <template>
   <div class="dashboard-editor-container">
 
-    <div class="pannel">
-      <el-row :gutter="10" class="panel-group">
-        <el-col :xs="24" :sm="24" :lg="12" class="card-panel-col">
-          <div class="card-panel" @click="handleSetLineChartData('purchases')">
-            <div class="card-panel-icon-wrapper icon-money">
-              <svg-icon icon-class="money" class-name="card-panel-icon" />
-            </div>
-
-            <div class="card-panel-description">
-              <div class="card-panel-text">
-                总花费
-              </div>
-              <label class="card-panel-num">{{ total_amount }}</label>
-              <!-- <count-to :start-val="0" :end-val="9280" :duration="3200" class="card-panel-num" /> -->
-            </div>
-
-            <div class="card-panel-description">
-              <div class="card-panel-text">
-                查询总花费
-              </div>
-              <label class="card-panel-num">{{ search_amount }} </label>
-              <!-- <count-to :start-val="0" :end-val="9280" :duration="3200" class="card-panel-num" /> -->
-            </div>
+    <!-- Unified Top Card -->
+    <div class="unified-card">
+      <!-- Top Bar -->
+      <div class="top-control-bar">
+        <div class="month-selector" @click="openMobileMonthPicker">
+          <i class="el-icon-date" style="margin-right: 5px;" />
+          <span>{{ monthrangeText || '点击选择月份' }}</span>
+        </div>
+        <div class="filter-toggle" @click="showFilter = !showFilter">
+          <div class="filter-icon-wrapper">
+            <i class="el-icon-filter" />
           </div>
-        </el-col>
+          <span class="filter-text">筛选</span>
+        </div>
+      </div>
 
-      </el-row>
-    </div>
+      <!-- Filter Panel -->
+      <transition name="el-zoom-in-top">
+        <div v-show="showFilter" class="filter-panel-container">
+          <el-input v-model="formInline.name" placeholder="物品名称" prefix-icon="el-icon-search" clearable size="small" />
+        </div>
+      </transition>
 
-    <!-- 查询form -->
-    <div>
+      <!-- Stats Panel -->
+      <div class="stats-panel">
+        <div class="stats-row">
+          <div class="stat-col">
+            <div class="stat-label">总收入</div>
+            <div class="stat-value">{{ all_income }}</div>
+          </div>
+          <div class="stat-col">
+            <div class="stat-label">总支出</div>
+            <div class="stat-value">{{ all_expense }}</div>
+          </div>
+          <div class="stat-col">
+            <div class="stat-label">查询总收入</div>
+            <div class="stat-value">{{ range_income }}</div>
+          </div>
+          <div class="stat-col">
+            <div class="stat-label">查询总支出</div>
+            <div class="stat-value">{{ range_expense }}</div>
+          </div>
+        </div>
+      </div>
 
-      <div class="batch-process">
+      <!-- Action Bar -->
+      <div class="action-bar-container">
+        <el-button style="margin-right: 10px;" size="small" type="danger" @click="batchDelete">批量删除</el-button>
         <el-upload
           ref="upload"
           class="upload-demo inline-block"
@@ -44,145 +59,110 @@
           :on-remove="handleRemove"
           :file-list="fileList"
           list-type="picture"
+          :show-file-list="false"
         >
           <el-button slot="trigger" size="small" type="primary">点击上传</el-button>
-          <el-button style="margin-left: 10px;" size="small" type="primary" @click="batchProcess">批量AI处理</el-button>
-          <el-button
-            style="margin-left: 20px;"
-            size="small"
-            type="primary"
-            @click="dialogFormVisible = true"
-          >单个添加</el-button>
-          <!-- <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div> -->
         </el-upload>
-      </div>
-
-      <div class="batch-process">
-        <el-form ref="formInline" :rules="rules" :inline="true" :model="formInline" class="demo-form-inline">
-          <el-form-item label="月份" prop="monthrange" required>
-            <!-- PC/手机统一：Vant 滑动选择（先选开始月份，再选结束月份） -->
-            <div class="monthrange-mobile" @click="openMobileMonthPicker">
-              <el-input
-                :value="monthrangeText"
-                readonly
-                placeholder="点击选择月份范围"
-                prefix-icon="el-icon-date"
-              />
-            </div>
-
-            <van-popup v-model="showMonthPicker" class="month-picker-popup" position="center" get-container="body">
-              <div class="month-picker-modal">
-                <div class="month-picker-toolbar">
-                  <button class="month-picker-action" type="button" @click="onMobileMonthCancel">取消</button>
-                  <div class="month-picker-title">{{ mobileMonthPickerTitle }}</div>
-                  <button class="month-picker-action primary" type="button" @click="onMobileMonthConfirm(mobileMonthDate)">确认</button>
-                </div>
-
-                <div class="month-picker-shortcuts">
-                  <button class="month-picker-shortcut" type="button" @click="applyMonthShortcut(1)">近1月</button>
-                  <button class="month-picker-shortcut" type="button" @click="applyMonthShortcut(3)">近3月</button>
-                  <button class="month-picker-shortcut" type="button" @click="applyMonthShortcut(6)">近半年</button>
-                  <button class="month-picker-shortcut" type="button" @click="applyMonthShortcut(12)">近1年</button>
-                </div>
-
-                <div class="month-picker-columns-labels">
-                  <span class="column-label">年</span>
-                  <span class="column-label">月</span>
-                </div>
-
-                <van-datetime-picker
-                  v-model="mobileMonthDate"
-                  type="year-month"
-                  :min-date="minMonthDate"
-                  :max-date="maxMonthDate"
-                  :show-toolbar="false"
-                />
-              </div>
-            </van-popup>
-          </el-form-item>
-          <el-form-item label="物品名称" prop="name">
-            <el-input v-model="formInline.name" placeholder="例如 尿不湿" />
-          </el-form-item>
-
-          <el-form-item>
-            <el-button type="primary" @click="onSubmit('formInline')">查询</el-button>
-          </el-form-item>
-
-          <el-form-item>
-            <el-button style="margin-left: 10px;" size="small" type="danger" @click="batchDelete">批量删除</el-button>
-          </el-form-item>
-
-        </el-form>
+        <el-button style="margin-left: 10px;" size="small" type="primary" @click="batchProcess">批量AI处理</el-button>
+        <el-button style="margin-left: 10px;" size="small" type="primary" @click="dialogFormVisible = true">单个添加</el-button>
       </div>
     </div>
+
+    <!-- Month Picker Popup -->
+    <van-popup v-model="showMonthPicker" class="month-picker-popup" position="center" get-container="body">
+      <div class="month-picker-modal">
+        <div class="month-picker-toolbar">
+          <button class="month-picker-action" type="button" @click="onMobileMonthCancel">取消</button>
+          <div class="month-picker-title">{{ mobileMonthPickerTitle }}</div>
+          <button class="month-picker-action primary" type="button" @click="onMobileMonthConfirm(mobileMonthDate)">确认</button>
+        </div>
+
+        <div class="month-picker-shortcuts">
+          <button class="month-picker-shortcut" type="button" @click="applyMonthShortcut(1)">近1月</button>
+          <button class="month-picker-shortcut" type="button" @click="applyMonthShortcut(3)">近3月</button>
+          <button class="month-picker-shortcut" type="button" @click="applyMonthShortcut(6)">近半年</button>
+          <button class="month-picker-shortcut" type="button" @click="applyMonthShortcut(12)">近1年</button>
+        </div>
+
+        <div class="month-picker-columns-labels">
+          <span class="column-label">年</span>
+          <span class="column-label">月</span>
+        </div>
+
+        <van-datetime-picker
+          v-model="mobileMonthDate"
+          type="year-month"
+          :min-date="minMonthDate"
+          :max-date="maxMonthDate"
+          :show-toolbar="false"
+        />
+      </div>
+    </van-popup>
     <div>
       <!-- <el-button @click="clearFilter">清除所有过滤器</el-button> -->
 
       <div class="expense-container">
-        <el-checkbox-group v-model="multipleSelection">
-          <van-swipe-cell v-for="item in tableData" :key="item.id" class="expense-swipe-cell">
-            <div class="expense-card">
-              <div class="card-header">
-                <span class="card-date">{{ item.order_time ? item.order_time.replace('T', ' ') : '' }}</span>
-                <el-button type="text" icon="el-icon-edit" class="edit-btn-text" @click.stop="handleEdit(item)">编辑</el-button>
+        <van-list
+          v-model="loading"
+          :finished="finished"
+          finished-text="没有更多了"
+          @load="onLoad"
+        >
+          <el-checkbox-group v-model="multipleSelection">
+            <van-swipe-cell v-for="item in tableData" :key="item.id" class="expense-swipe-cell">
+              <div class="expense-card">
+                <div class="card-header">
+                  <span class="card-date">{{ item.order_time ? item.order_time.replace('T', ' ') : '' }}</span>
+                  <el-button type="text" icon="el-icon-edit" class="edit-btn-text" @click.stop="handleEdit(item)">编辑</el-button>
+                </div>
+
+                <div class="card-body">
+                  <div class="card-checkbox-wrapper">
+                    <el-checkbox :label="item.id" class="hide-label" />
+                  </div>
+
+                  <div class="card-image-wrapper">
+                    <el-image
+                      class="card-image"
+                      :src="getImageUrl(item)"
+                      :preview-src-list="[getImageUrl(item)]"
+                      fit="cover"
+                    >
+                      <div slot="error" class="image-slot">
+                        <i class="el-icon-picture-outline" />
+                      </div>
+                    </el-image>
+                  </div>
+
+                  <div class="card-content">
+                    <div class="card-title">{{ item.name }}</div>
+                  </div>
+
+                  <div class="card-price-wrapper">
+                    <span class="price-symbol">¥</span>
+                    <span class="price-integer">{{ item.amount }}</span>
+                  </div>
+                </div>
+
+                <div class="card-footer">
+                  <el-tag size="mini" type="info" effect="plain">{{ item.tag || '无标签' }}</el-tag>
+                  <el-tag size="mini" :type="item.expense_type === 'income' ? 'success' : 'danger'" style="margin-left: 10px;">
+                    {{ item.expense_type === 'income' ? '收入' : '支出' }}
+                  </el-tag>
+                </div>
               </div>
-
-              <div class="card-body">
-                <div class="card-checkbox-wrapper">
-                  <el-checkbox :label="item.id" class="hide-label" />
-                </div>
-
-                <div class="card-image-wrapper">
-                  <el-image
-                    class="card-image"
-                    :src="getImageUrl(item)"
-                    :preview-src-list="[getImageUrl(item)]"
-                    fit="cover"
-                  >
-                    <div slot="error" class="image-slot">
-                      <i class="el-icon-picture-outline" />
-                    </div>
-                  </el-image>
-                </div>
-
-                <div class="card-content">
-                  <div class="card-title">{{ item.name }}</div>
-                </div>
-
-                <div class="card-price-wrapper">
-                  <span class="price-symbol">¥</span>
-                  <span class="price-integer">{{ item.amount }}</span>
-                </div>
-              </div>
-
-              <div class="card-footer">
-                <el-tag size="mini" type="info" effect="plain">{{ item.tag || '无标签' }}</el-tag>
-                <el-tag size="mini" :type="item.expense_type === 'income' ? 'success' : 'danger'" style="margin-left: 10px;">
-                  {{ item.expense_type === 'income' ? '收入' : '支出' }}
-                </el-tag>
-              </div>
-            </div>
-            <template #right>
-              <van-button square type="danger" text="删除" class="delete-button" @click="handleDelete(item)" />
-            </template>
-          </van-swipe-cell>
-        </el-checkbox-group>
+              <template #right>
+                <van-button square type="danger" text="删除" class="delete-button" @click="handleDelete(item)" />
+              </template>
+            </van-swipe-cell>
+          </el-checkbox-group>
+        </van-list>
 
         <!-- Empty state -->
-        <div v-if="tableData.length === 0" class="empty-state">
+        <div v-if="tableData.length === 0 && !loading" class="empty-state">
           暂无数据
         </div>
       </div>
-
-      <el-pagination
-        background
-        layout="prev, pager, next"
-        :total="pageInfo.totalPage"
-        :page-sizes="pageSizes"
-        :page-size="pageInfo.pageSize"
-        :current-page.sync="pageInfo.currentPage"
-        @current-change="handleCurrentChange"
-      />
     </div>
     <!-- modal 框 -->
     <div>
@@ -259,8 +239,14 @@ export default {
       ],
 
       myFileList: [],
-      search_amount: 0,
-      total_amount: 0,
+      // search_amount: 0,
+      // total_amount: 0,
+      range_income: 0,
+      range_expense: 0,
+      all_income: 0,
+      all_expense: 0,
+
+      showFilter: false, // Control filter panel visibility
 
       expenseForm: {
         order_time: this.moment().format('YYYY-MM-DD'),
@@ -323,6 +309,10 @@ export default {
       minMonthDate: new Date(2020, 0, 1),
       maxMonthDate: new Date(2030, 11, 1),
       currentEditId: null, // 当前编辑的 ID
+
+      // Infinite Scroll
+      loading: false,
+      finished: false,
 
       monthPickerOptions: {
         shortcuts: [
@@ -394,10 +384,25 @@ export default {
     }
   },
 
+  watch: {
+    'formInline.monthrange': {
+      handler(val) {
+        this.refreshList()
+      },
+      deep: true
+    },
+    'formInline.name': function(val) {
+      if (this.searchTimer) clearTimeout(this.searchTimer)
+      this.searchTimer = setTimeout(() => {
+        this.refreshList()
+      }, 500)
+    }
+  },
+
   mounted() {},
 
   created() {
-    this.showExpenseList()
+    // let van-list trigger initial load
   },
 
   destroyed() {
@@ -484,7 +489,9 @@ export default {
       if (!row || !row.image_url) {
         return ''
       }
-      return this.$BASE_API + '/media/' + row.image_url
+      // Fix: Replace backslashes with forward slashes for Windows compatibility
+      const url = row.image_url.replace(/\\/g, '/')
+      return this.$BASE_API + '/media/' + url
     },
 
     batchProcess() {
@@ -538,18 +545,59 @@ export default {
 
     },
 
-    showExpenseList() {
+    onLoad() {
       const data = { ...this.pageInfo, ...this.formInline }
 
       showExpenseListReq(data).then(res => {
         if (res.code === 200) {
           const data = res.data
+          const list = data.expense_list || []
 
-          this.tableData = data.expense_list
-          this.search_amount = data.search_amount
-          this.total_amount = data.total_amount
+          // Append or Set data
+          if (this.pageInfo.currentPage === 1) {
+            this.tableData = list
+          } else {
+            this.tableData.push(...list)
+          }
+
+          // Update stats (always)
+          this.range_income = data.range_income
+          this.range_expense = data.range_expense
+          this.all_income = data.all_income
+          this.all_expense = data.all_expense
+
+          if (data.total !== undefined) {
+            this.pageInfo.totalPage = data.total
+          }
+
+          // Loading done
+          this.loading = false
+
+          // Check finished
+          if (this.tableData.length >= data.total) {
+            this.finished = true
+          } else {
+            this.pageInfo.currentPage++
+          }
+        } else {
+          this.loading = false
+          this.finished = true
         }
+      }).catch(() => {
+        this.loading = false
+        this.finished = true
       })
+    },
+
+    refreshList() {
+      this.pageInfo.currentPage = 1
+      this.finished = false
+      this.loading = true
+      this.onLoad()
+    },
+
+    showExpenseList() {
+      this.refreshList()
     },
 
     handleSelectionChange(val) {
@@ -559,15 +607,15 @@ export default {
       this.multipleSelection = idsArray
     },
 
-    onSubmit(formName) {
-      this.$refs[formName].validate((valid) => {
-        if (valid) {
-          this.showExpenseList()
-        } else {
-          return false
-        }
-      })
-    },
+    // onSubmit(formName) {
+    //   this.$refs[formName].validate((valid) => {
+    //     if (valid) {
+    //       this.showExpenseList()
+    //     } else {
+    //       return false
+    //     }
+    //   })
+    // },
 
     addExpenseEvent() {
       const data = { ...this.expenseForm }
@@ -583,7 +631,7 @@ export default {
       } else {
         addExpenseReq(data).then((res) => {
           if (res.code === 200) {
-            this.tableData = res.data
+            this.showExpenseList()
             this.dialogFormVisible = false
           }
         })
@@ -623,10 +671,6 @@ export default {
       })
     },
 
-    handleCurrentChange(val) {
-
-    },
-
     clearFilter() {
       this.$refs.filterTable.clearFilter()
     },
@@ -654,7 +698,8 @@ export default {
   }
 
   .card-panel {
-    height: 90px;
+    min-height: 90px;
+    height: auto;
     cursor: pointer;
     font-size: 12px;
     position: relative;
@@ -1053,5 +1098,116 @@ export default {
   padding: 40px 0;
   color: #999;
   font-size: 14px;
+}
+
+.unified-card {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px 0 rgba(0,0,0,0.05);
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.top-control-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  background-color: #fff;
+  border-bottom: 1px solid #f0f0f0;
+
+  .month-selector {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    color: #333;
+    cursor: pointer;
+    font-weight: 500;
+  }
+
+  .filter-toggle {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    color: #666;
+    font-size: 14px;
+
+    .filter-icon-wrapper {
+       font-size: 16px;
+       margin-right: 4px;
+    }
+
+    .filter-text {
+       font-size: 14px;
+       margin-top: 0;
+    }
+  }
+}
+
+.filter-panel-container {
+   padding: 10px 15px;
+   background-color: #f9f9f9;
+   border-bottom: 1px solid #eee;
+}
+
+.stats-panel {
+  background: #fff;
+  padding: 12px;
+  margin-bottom: 12px;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
+
+  .stats-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .stat-col {
+    flex: 1;
+    text-align: center;
+    position: relative;
+
+    &:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      height: 60%;
+      width: 1px;
+      background-color: #eee;
+    }
+  }
+
+  .stat-label {
+    font-size: 12px;
+    color: #909399;
+    margin-bottom: 4px;
+  }
+
+  .stat-value {
+    font-size: 16px;
+    font-weight: 600;
+    color: #303133;
+  }
+}
+
+.action-bar-container {
+   padding: 10px 15px 20px 15px;
+   display: flex;
+   flex-wrap: nowrap;
+   align-items: center;
+   background: #fff;
+   margin-top: 0;
+   overflow-x: auto;
+   border-top: 1px solid #f5f5f5;
+
+   /* Hide scrollbar */
+   &::-webkit-scrollbar {
+     display: none;
+   }
+   -ms-overflow-style: none;
+   scrollbar-width: none;
 }
 </style>
