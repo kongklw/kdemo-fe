@@ -68,4 +68,4 @@ jobs:
             
             cd ${{ secrets.PROJECT_PATH }}
             if command -v docker-compose >/dev/null 2>&1; then dc="docker-compose"; else dc="docker compose"; fi
-            $dc restart nginx
+            $dc up -d --force-recreate nginx
