@@ -618,7 +618,11 @@ export default {
       // Actually van-list handles this via v-model="loading", but we can be extra safe
       // if (this.loading && this.tableData.length > 0) return
 
-      const data = { ...this.pageInfo, ...this.formInline }
+      const data = {
+        page_num: this.pageInfo.currentPage,
+        page_size: this.pageInfo.pageSize,
+        ...this.formInline
+      }
 
       showExpenseListReq(data).then(res => {
         if (res.code === 200) {
