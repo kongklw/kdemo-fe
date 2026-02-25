@@ -21,6 +21,13 @@
       <transition name="el-zoom-in-top">
         <div v-show="showFilter" class="filter-panel-container">
           <el-input v-model="formInline.name" placeholder="物品名称" prefix-icon="el-icon-search" clearable size="small" />
+          <div style="margin-top: 10px;">
+            <el-radio-group v-model="formInline.expense_type" size="small" @change="refreshList">
+              <el-radio-button label="">全部</el-radio-button>
+              <el-radio-button label="income">收入</el-radio-button>
+              <el-radio-button label="expense">支出</el-radio-button>
+            </el-radio-group>
+          </div>
         </div>
       </transition>
 
@@ -320,7 +327,8 @@ export default {
       // pageSize: "20",
       formInline: {
         monthrange: [this.moment().subtract(2, 'months').startOf().format('YYYY-MM-DD'), this.moment().format('YYYY-MM-DD')],
-        name: ''
+        name: '',
+        expense_type: ''
       },
       tableData: [],
       multipleSelection: [],
