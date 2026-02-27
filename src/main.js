@@ -22,7 +22,7 @@ import * as filters from './filters' // global filters
 import moment from 'moment'
 
 // Vant UI (Mobile)
-import { DatetimePicker, Popup, SwipeCell, Button, List, Tabbar, TabbarItem, Search, Grid, GridItem, Icon, NavBar, Cell, CellGroup, Tag, PullRefresh, DropdownMenu, DropdownItem, Form, Field, RadioGroup, Radio, Uploader, Dialog, Image as VanImage, Tab, Tabs, Stepper, Switch, Checkbox, CheckboxGroup, Empty, Card, Collapse, CollapseItem, Toast, Calendar, Loading, Divider } from 'vant'
+import { Picker, DatetimePicker, Popup, SwipeCell, Button, List, Tabbar, TabbarItem, Search, Grid, GridItem, Icon, NavBar, Cell, CellGroup, Tag, PullRefresh, DropdownMenu, DropdownItem, Form, Field, RadioGroup, Radio, Uploader, Dialog, Image as VanImage, Tab, Tabs, Stepper, Switch, Checkbox, CheckboxGroup, Empty, Card, Collapse, CollapseItem, Toast, Calendar, Loading, Divider } from 'vant'
 import 'vant/lib/datetime-picker/style'
 import 'vant/lib/popup/style'
 import 'vant/lib/swipe-cell/style'
@@ -62,7 +62,9 @@ import 'vant/lib/toast/style'
 import 'vant/lib/calendar/style'
 import 'vant/lib/loading/style'
 import 'vant/lib/divider/style'
+import 'vant/lib/picker/style'
 
+Vue.use(Picker)
 Vue.use(DatetimePicker)
 Vue.use(Popup)
 Vue.use(SwipeCell)

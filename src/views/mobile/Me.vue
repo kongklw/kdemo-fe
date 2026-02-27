@@ -88,7 +88,7 @@
               placeholder="点击选择日期"
               input-align="right"
               :rules="[{ required: true, message: '请选择日期' }]"
-              @click="showCalendar = true"
+              @click="showDatePicker = true"
             />
             <van-field
               readonly
@@ -133,16 +133,12 @@
               type="number"
               input-align="right"
             />
-            <van-field
-              readonly
-              clickable
-              name="is_only_child"
-              :value="editForm.is_only_child ? '是' : '否'"
-              label="独生子女"
-              placeholder="点击选择"
-              input-align="right"
-              @click="showOnlyChildPicker = true"
-            />
+
+            <van-cell center title="独生子女">
+              <template #right-icon>
+                <van-switch v-model="editForm.is_only_child" size="24" />
+              </template>
+            </van-cell>
           </van-cell-group>
 
           <div style="margin: 30px 16px;">
@@ -154,7 +150,17 @@
       </div>
 
       <!-- Pickers -->
-      <van-calendar v-model="showCalendar" :min-date="minDate" :max-date="maxDate" color="#FF6B6B" @confirm="onConfirmDate" />
+      <van-popup v-model="showDatePicker" position="bottom">
+        <van-datetime-picker
+          v-model="currentDate"
+          type="date"
+          title="选择年月日"
+          :min-date="minDate"
+          :max-date="maxDate"
+          @confirm="onConfirmDate"
+          @cancel="showDatePicker = false"
+        />
+      </van-popup>
 
       <van-popup v-model="showWeekPicker" position="bottom">
         <van-picker
@@ -171,15 +177,6 @@
           :columns="['小王子', '小公主']"
           @confirm="onConfirmGender"
           @cancel="showGenderPicker = false"
-        />
-      </van-popup>
-
-      <van-popup v-model="showOnlyChildPicker" position="bottom">
-        <van-picker
-          show-toolbar
-          :columns="onlyChildColumns"
-          @confirm="onConfirmOnlyChild"
-          @cancel="showOnlyChildPicker = false"
         />
       </van-popup>
 
@@ -206,12 +203,11 @@ export default {
         is_only_child: false
       },
       fileList: [],
-      showCalendar: false,
+      showDatePicker: false,
+      currentDate: new Date(),
       showWeekPicker: false,
       showGenderPicker: false,
-      showOnlyChildPicker: false,
       weekColumns: Array.from({ length: 42 }, (_, i) => `${i + 1}周`),
-      onlyChildColumns: ['是', '否'],
       minDate: new Date(2010, 0, 1),
       maxDate: new Date()
     }
@@ -256,6 +252,12 @@ export default {
       if (this.editForm.is_sensitive === undefined) this.editForm.is_sensitive = false
       if (this.editForm.is_only_child === undefined) this.editForm.is_only_child = false
 
+      if (this.editForm.birthday) {
+        this.currentDate = new Date(this.editForm.birthday)
+      } else {
+        this.currentDate = new Date()
+      }
+
       this.fileList = []
       if (this.babyInfo && this.babyInfo.image) {
         // Construct full URL if needed, assuming absolute URL from backend or relative
@@ -279,7 +281,7 @@ export default {
       const month = String(date.getMonth() + 1).padStart(2, '0')
       const day = String(date.getDate()).padStart(2, '0')
       this.editForm.birthday = `${year}-${month}-${day}`
-      this.showCalendar = false
+      this.showDatePicker = false
     },
     onConfirmWeek(value) {
       this.editForm.birth_week = parseInt(value)
@@ -288,10 +290,6 @@ export default {
     onConfirmGender(value) {
       this.editForm.gender = value === '小王子' ? 'M' : 'F'
       this.showGenderPicker = false
-    },
-    onConfirmOnlyChild(value) {
-      this.editForm.is_only_child = value === '是'
-      this.showOnlyChildPicker = false
     },
     async onSaveBabyInfo() {
       const formData = new FormData()
