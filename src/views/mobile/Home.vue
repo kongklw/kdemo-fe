@@ -1,22 +1,54 @@
 <template>
   <div class="mobile-home">
-    <!-- App Grid -->
-    <van-grid :column-num="4" :gutter="10" clickable :border="false">
-      <van-grid-item
-        v-for="item in menuItems"
-        :key="item.type"
-        class="grid-item-wrapper"
-        @click="handleNavigate(item.type)"
-      >
-        <div class="custom-grid-item">
-          <div class="icon-wrapper" :class="item.iconClass">
-            <svg-icon :icon-class="item.icon" class-name="grid-icon" />
+    <!-- Baby Info Banner -->
+    <div v-if="babyInfo.name" class="baby-info-card" @click="$router.push('/mobile/me')">
+      <div class="baby-card-content">
+        <div class="baby-info-left">
+          <div class="baby-title-row">
+            <span class="baby-title-text">宝宝 {{ babyAge }}</span>
+            <van-icon name="arrow" color="#888" size="14" />
           </div>
-          <span class="grid-text">{{ item.label }}</span>
-          <span v-if="item.value" class="grid-value">{{ item.value }}</span>
+          <div class="baby-growth-tip">
+            <span class="tip-label">宝宝变化:</span>
+            <span class="tip-content">有的宝宝在1岁后会越来越黏人，即使短暂的分离也会让他哭得撕心裂肺。你的...</span>
+            <van-icon name="arrow" color="#ff9a9e" size="12" />
+          </div>
+          <div class="baby-stats-row">
+            75.2-86.2cm | 8.2-13.0kg
+          </div>
         </div>
-      </van-grid-item>
-    </van-grid>
+        <div class="baby-info-right">
+          <div class="baby-avatar-large">
+            <img :src="babyInfo.image || 'https://img.yzcdn.cn/vant/cat.jpeg'">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div v-else class="baby-info-card" @click="$router.push('/mobile/me')">
+      <div class="baby-header" style="justify-content: center;">
+        <span class="baby-name">点击添加宝宝信息</span>
+        <van-icon name="add-o" />
+      </div>
+    </div>
+
+    <!-- App Grid -->
+    <div class="grid-section">
+      <van-grid :column-num="5" clickable :border="false">
+        <van-grid-item
+          v-for="item in menuItems"
+          :key="item.type"
+          class="grid-item-wrapper"
+          @click="handleNavigate(item.type)"
+        >
+          <div class="custom-grid-item">
+            <div class="icon-wrapper" :class="item.iconClass">
+              <svg-icon :icon-class="item.icon" class-name="grid-icon" />
+            </div>
+            <span class="grid-text">{{ item.label }}</span>
+          </div>
+        </van-grid-item>
+      </van-grid>
+    </div>
 
     <!-- Optional: Charts or Todo List below -->
     <div class="dashboard-widgets">
@@ -29,12 +61,13 @@
 </template>
 
 <script>
-import { dashboardReq } from '@/api/baby'
+import { dashboardReq, getBabyInfoReq } from '@/api/baby'
 
 export default {
   name: 'MobileHome',
   data() {
     return {
+      babyInfo: {},
       basicInfo: {
         total_milk_volumes: 0,
         total_amount: 0,
@@ -46,6 +79,31 @@ export default {
     }
   },
   computed: {
+    babyAge() {
+      if (!this.babyInfo || !this.babyInfo.birthday) return ''
+      const birth = new Date(this.babyInfo.birthday)
+      const now = new Date()
+
+      let years = now.getFullYear() - birth.getFullYear()
+      let months = now.getMonth() - birth.getMonth()
+      let days = now.getDate() - birth.getDate()
+
+      if (days < 0) {
+        months--
+        const prevMonth = new Date(now.getFullYear(), now.getMonth(), 0)
+        days += prevMonth.getDate()
+      }
+      if (months < 0) {
+        years--
+        months += 12
+      }
+
+      let ageStr = ''
+      if (years > 0) ageStr += `${years}岁`
+      if (months > 0) ageStr += `${months}个月`
+      if (days > 0) ageStr += `${days}天`
+      return ageStr || '今天出生'
+    },
     menuItems() {
       return [
         { type: 'BreastFeed', label: '奶量', icon: 'babygirl', value: `${this.basicInfo.total_milk_volumes || 0} ml`, iconClass: 'icon-people' },
@@ -62,8 +120,24 @@ export default {
   },
   mounted() {
     this.obtainDashboardData()
+    this.fetchBabyInfo()
   },
   methods: {
+    async fetchBabyInfo() {
+      try {
+        const res = await getBabyInfoReq()
+        if (res.data) {
+          this.babyInfo = res.data
+        }
+      } catch (e) {
+        console.error(e)
+      }
+    },
+    formatGender(val) {
+      if (val === 'M') return '小王子'
+      if (val === 'F') return '小公主'
+      return ''
+    },
     obtainDashboardData() {
       dashboardReq().then((res) => {
         if (res.code === 200) {
@@ -101,55 +175,115 @@ export default {
         case 'Langchain':
           this.$router.push('/mobile/functions/langchain')
           break
+        default:
+          break
       }
     }
   }
 }
 </script>
 
-<style lang="scss" scoped>
+<style scoped>
 .mobile-home {
-  padding-bottom: 20px;
+  padding-top: 20px;
+  background-color: #f7f8fa;
+  min-height: 100vh;
+}
+.baby-info-card {
+    background: linear-gradient(135deg, #FF9A9E 0%, #FECFEF 100%);
+    margin: 12px;
+    padding: 20px;
+    border-radius: 16px;
+    color: white;
+    box-shadow: 0 4px 12px rgba(255, 154, 158, 0.3);
+}
+.baby-card-content {
+    display: flex;
+    align-items: center;
+}
+.baby-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-right: 15px;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    flex-shrink: 0;
+}
+.baby-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.baby-info-text {
+    flex: 1;
+}
+.baby-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+.baby-name {
+    font-size: 20px;
+    font-weight: bold;
+}
+.baby-status {
+    font-size: 14px;
+    background: rgba(255,255,255,0.2);
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+.baby-age {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+.baby-details {
+    font-size: 14px;
+    opacity: 0.9;
+    display: flex;
+    gap: 10px;
 }
 
+/* Grid Section Styles */
+.grid-section {
+  background-color: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 12px;
+  padding: 0 6px;
+}
+.grid-item-wrapper {
+  /* No special styles needed here if using van-grid-item default,
+     but we can adjust if needed */
+}
 .custom-grid-item {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 10px 0;
-
-  .icon-wrapper {
-    width: 40px;
-    height: 40px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 8px;
-
-    &.icon-people { background-color: #40c9c6; }
-    &.icon-message { background-color: #36a3f7; }
-    &.icon-money { background-color: #f4516c; }
-
-    .grid-icon {
-      font-size: 24px;
-      color: #fff;
-    }
-  }
-
-  .grid-text {
-    font-size: 12px;
-    color: #333;
-    margin-bottom: 4px;
-  }
-
-  .grid-value {
-    font-size: 10px;
-    color: #999;
-  }
+  padding: 6px 0;
+  width: 100%;
+}
+.icon-wrapper {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2px;
+}
+.grid-icon {
+  font-size: 24px;
+}
+.grid-text {
+  font-size: 12px;
+  color: #333;
+  margin-top: 4px;
 }
 
+/* Dashboard Widgets */
 .dashboard-widgets {
   margin-top: 20px;
 }
