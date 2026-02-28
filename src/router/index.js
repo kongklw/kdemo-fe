@@ -166,6 +166,12 @@ export const constantRoutes = [
         component: () => import('@/views/mobile/functions/Langchain'),
         name: 'MobileLangchain',
         meta: { title: 'Langchain' }
+      },
+      {
+        path: 'album',
+        component: () => import('@/views/mobile/functions/Album'),
+        name: 'MobileAlbum',
+        meta: { title: '宝宝相册' }
       }
     ]
   },
@@ -337,8 +343,13 @@ export const asyncRoutes = [
         component: () => import('@/views/baby/analysis.vue'),
         name: 'Analysis',
         meta: { title: 'Analysis', icon: 'el-icon-data-analysis', noCache: true }
+      },
+      {
+        path: 'album',
+        component: () => import('@/views/baby/album.vue'),
+        name: 'Album',
+        meta: { title: 'Album', icon: 'el-icon-picture', noCache: true }
       }
-
     ]
   },
 

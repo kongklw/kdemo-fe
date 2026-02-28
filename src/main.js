@@ -22,7 +22,7 @@ import * as filters from './filters' // global filters
 import moment from 'moment'
 
 // Vant UI (Mobile)
-import { Picker, DatetimePicker, Popup, SwipeCell, Button, List, Tabbar, TabbarItem, Search, Grid, GridItem, Icon, NavBar, Cell, CellGroup, Tag, PullRefresh, DropdownMenu, DropdownItem, Form, Field, RadioGroup, Radio, Uploader, Dialog, Image as VanImage, Tab, Tabs, Stepper, Switch, Checkbox, CheckboxGroup, Empty, Card, Collapse, CollapseItem, Toast, Calendar, Loading, Divider } from 'vant'
+import { Picker, DatetimePicker, Popup, SwipeCell, Button, List, Tabbar, TabbarItem, Search, Grid, GridItem, Icon, NavBar, Cell, CellGroup, Tag, PullRefresh, DropdownMenu, DropdownItem, Form, Field, RadioGroup, Radio, Uploader, Dialog, Image as VanImage, Tab, Tabs, Stepper, Switch, Checkbox, CheckboxGroup, Empty, Card, Collapse, CollapseItem, Toast, Calendar, Loading, Divider, Popover } from 'vant'
 import 'vant/lib/datetime-picker/style'
 import 'vant/lib/popup/style'
 import 'vant/lib/swipe-cell/style'
@@ -63,6 +63,8 @@ import 'vant/lib/calendar/style'
 import 'vant/lib/loading/style'
 import 'vant/lib/divider/style'
 import 'vant/lib/picker/style'
+import 'vant/lib/image-preview/style'
+import 'vant/lib/popover/style'
 
 Vue.use(Picker)
 Vue.use(DatetimePicker)
@@ -97,6 +99,14 @@ Vue.use(Switch)
 Vue.use(Checkbox)
 Vue.use(CheckboxGroup)
 Vue.use(Empty)
+Vue.use(Card)
+Vue.use(Collapse)
+Vue.use(CollapseItem)
+Vue.use(Toast)
+Vue.use(Calendar)
+Vue.use(Loading)
+Vue.use(Divider)
+Vue.use(Popover)
 Vue.use(Card)
 Vue.use(Collapse)
 Vue.use(CollapseItem)

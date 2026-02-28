@@ -82,7 +82,7 @@
 </template>
 
 <script>
-import { SocialSign } from './components/SocialSignin'
+import SocialSign from './components/SocialSignin'
 import SignUp from './components/SignUp.vue'
 import Cookies from 'js-cookie'
 

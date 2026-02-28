@@ -114,7 +114,8 @@ export default {
         { type: 'Analysis', label: '分析', icon: 'data-analysis', value: '', iconClass: 'icon-money' },
         { type: 'Langchain', label: 'Langchain', icon: 'langchain', value: 'Chatbot', iconClass: 'icon-money' },
         { type: 'Todo', label: '待办', icon: 'todo', value: this.basicInfo.todo_count, iconClass: 'icon-money' },
-        { type: 'Growing', label: '成长', icon: 'tree3', value: this.basicInfo.growing_moments, iconClass: 'icon-money' }
+        { type: 'Growing', label: '成长', icon: 'tree3', value: this.basicInfo.growing_moments, iconClass: 'icon-money' },
+        { type: 'Album', label: '相册', icon: 'funny2', value: '照片', iconClass: 'icon-money' }
       ]
     }
   },
@@ -174,6 +175,9 @@ export default {
           break
         case 'Langchain':
           this.$router.push('/mobile/functions/langchain')
+          break
+        case 'Album':
+          this.$router.push('/mobile/functions/album')
           break
         default:
           break
