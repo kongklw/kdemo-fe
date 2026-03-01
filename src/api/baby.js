@@ -88,6 +88,37 @@ export function updateExpenseReq(data) {
   })
 }
 
+export function getDailyHabitReq() {
+  return request({
+    url: '/baby/daily_habit',
+    method: 'get'
+  })
+}
+
+export function addDailyHabitReq(data) {
+  return request({
+    url: '/baby/daily_habit',
+    method: 'post',
+    data
+  })
+}
+
+export function updateDailyHabitReq(data) {
+  return request({
+    url: '/baby/daily_habit',
+    method: 'put',
+    data
+  })
+}
+
+export function deleteDailyHabitReq(data) {
+  return request({
+    url: '/baby/daily_habit',
+    method: 'delete',
+    data
+  })
+}
+
 export function getExpenseTagsReq() {
   return request({
     url: '/baby/expense_tags',
@@ -120,7 +151,7 @@ export function updateBabyInfoReq(data) {
 
 export function getBabyAlbumsReq(params) {
   return request({
-    url: '/baby/albums',
+    url: '/baby/albums/',
     method: 'get',
     params
   })
@@ -128,7 +159,7 @@ export function getBabyAlbumsReq(params) {
 
 export function addBabyAlbumReq(data) {
   return request({
-    url: '/baby/albums',
+    url: '/baby/albums/',
     method: 'post',
     data,
     headers: {
@@ -139,7 +170,7 @@ export function addBabyAlbumReq(data) {
 
 export function deleteBabyAlbumReq(id) {
   return request({
-    url: `/baby/albums/${id}`,
+    url: `/baby/albums/${id}/`,
     method: 'delete'
   })
 }
