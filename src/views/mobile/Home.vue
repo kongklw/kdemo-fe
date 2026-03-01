@@ -33,11 +33,17 @@
 
     <!-- App Grid -->
     <div class="grid-section">
-      <van-grid :column-num="5" clickable :border="false">
-        <van-grid-item
-          v-for="item in menuItems"
+      <draggable
+        v-model="draggableItems"
+        class="custom-grid"
+        :delay="300"
+        :delay-on-touch-only="true"
+        @end="onDragEnd"
+      >
+        <div
+          v-for="item in draggableItems"
           :key="item.type"
-          class="grid-item-wrapper"
+          class="custom-grid-item-wrapper"
           @click="handleNavigate(item.type)"
         >
           <div class="custom-grid-item">
@@ -45,9 +51,10 @@
               <svg-icon :icon-class="item.icon" class-name="grid-icon" />
             </div>
             <span class="grid-text">{{ item.label }}</span>
+            <span v-if="item.value" class="grid-value">{{ item.value }}</span>
           </div>
-        </van-grid-item>
-      </van-grid>
+        </div>
+      </draggable>
     </div>
 
     <!-- Optional: Charts or Todo List below -->
@@ -61,10 +68,19 @@
 </template>
 
 <script>
-import { dashboardReq, getBabyInfoReq } from '@/api/baby'
+import { dashboardReq, getBabyInfoReq, saveAppOrderReq } from '@/api/baby'
+import draggable from 'vuedraggable'
+
+const DEFAULT_APP_ORDER = [
+  'BreastFeed', 'Temperature', 'BabyPants', 'Sleep', 'Expense',
+  'Analysis', 'Langchain', 'Todo', 'Growing', 'Album'
+]
 
 export default {
   name: 'MobileHome',
+  components: {
+    draggable
+  },
   data() {
     return {
       babyInfo: {},
@@ -74,8 +90,10 @@ export default {
         current_temperature: '',
         babyPantsCount: 0,
         todo_count: 0,
-        growing_moments: 0
-      }
+        growing_moments: 0,
+        app_order: []
+      },
+      draggableItems: []
     }
   },
   computed: {
@@ -103,20 +121,14 @@ export default {
       if (months > 0) ageStr += `${months}个月`
       if (days > 0) ageStr += `${days}天`
       return ageStr || '今天出生'
-    },
-    menuItems() {
-      return [
-        { type: 'BreastFeed', label: '奶量', icon: 'babygirl', value: `${this.basicInfo.total_milk_volumes || 0} ml`, iconClass: 'icon-people' },
-        { type: 'Temperature', label: '体温', icon: 'bodyTemperature', value: this.basicInfo.current_temperature, iconClass: 'icon-message' },
-        { type: 'BabyPants', label: '尿不湿', icon: 'babyPants', value: `${this.basicInfo.babyPantsCount || 0} 个`, iconClass: 'icon-message' },
-        { type: 'Sleep', label: '睡眠', icon: 'sleep2', value: '记录', iconClass: 'icon-message' },
-        { type: 'Expense', label: '花费', icon: 'money', value: this.basicInfo.total_amount, iconClass: 'icon-money' },
-        { type: 'Analysis', label: '分析', icon: 'data-analysis', value: '', iconClass: 'icon-money' },
-        { type: 'Langchain', label: 'Langchain', icon: 'langchain', value: 'Chatbot', iconClass: 'icon-money' },
-        { type: 'Todo', label: '待办', icon: 'todo', value: this.basicInfo.todo_count, iconClass: 'icon-money' },
-        { type: 'Growing', label: '成长', icon: 'tree3', value: this.basicInfo.growing_moments, iconClass: 'icon-money' },
-        { type: 'Album', label: '相册', icon: 'funny2', value: '照片', iconClass: 'icon-money' }
-      ]
+    }
+  },
+  watch: {
+    basicInfo: {
+      handler() {
+        this.updateDraggableItems()
+      },
+      deep: true
     }
   },
   mounted() {
@@ -124,6 +136,64 @@ export default {
     this.fetchBabyInfo()
   },
   methods: {
+    getAppItem(type) {
+      const info = this.basicInfo || {}
+      switch (type) {
+        case 'BreastFeed':
+          return { type, label: '奶量', icon: 'babygirl', value: `${info.total_milk_volumes || 0} ml`, iconClass: 'icon-people' }
+        case 'Temperature':
+          return { type, label: '体温', icon: 'bodyTemperature', value: info.current_temperature, iconClass: 'icon-message' }
+        case 'BabyPants':
+          return { type, label: '尿不湿', icon: 'babyPants', value: `${info.babyPantsCount || 0} 个`, iconClass: 'icon-message' }
+        case 'Sleep':
+          return { type, label: '睡眠', icon: 'sleep2', value: '记录', iconClass: 'icon-message' }
+        case 'Expense':
+          return { type, label: '花费', icon: 'money', value: info.total_amount, iconClass: 'icon-money' }
+        case 'Analysis':
+          return { type, label: '分析', icon: 'data-analysis', value: '', iconClass: 'icon-money' }
+        case 'Langchain':
+          return { type, label: 'Langchain', icon: 'langchain', value: 'Chatbot', iconClass: 'icon-money' }
+        case 'Todo':
+          return { type, label: '待办', icon: 'todo', value: info.todo_count, iconClass: 'icon-money' }
+        case 'Growing':
+          return { type, label: '成长', icon: 'tree3', value: info.growing_moments, iconClass: 'icon-money' }
+        case 'Album':
+          return { type, label: '相册', icon: 'funny2', value: '照片', iconClass: 'icon-money' }
+        default:
+          return null
+      }
+    },
+    updateDraggableItems() {
+      let order = [...(this.basicInfo.app_order || [])]
+      if (order.length === 0) {
+        order = [...DEFAULT_APP_ORDER]
+      }
+
+      // Ensure all default apps are present
+      const currentSet = new Set(order)
+      DEFAULT_APP_ORDER.forEach(app => {
+        if (!currentSet.has(app)) {
+          order.push(app)
+        }
+      })
+
+      // Filter out invalid ones if any
+      const items = order.map(type => this.getAppItem(type)).filter(item => item !== null)
+      this.draggableItems = items
+    },
+    onDragEnd() {
+      const newOrder = this.draggableItems.map(item => item.type)
+      this.basicInfo.app_order = newOrder // Optimistic update
+      saveAppOrderReq({ app_order: newOrder }).then(res => {
+        if (res.code === 200) {
+          // Success
+        } else {
+          this.$toast.fail('保存排序失败')
+        }
+      }).catch(() => {
+        this.$toast.fail('保存排序失败')
+      })
+    },
     async fetchBabyInfo() {
       try {
         const res = await getBabyInfoReq()
@@ -367,5 +437,21 @@ export default {
 /* Dashboard Widgets */
 .dashboard-widgets {
   margin-top: 20px;
+}
+
+.custom-grid {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.custom-grid-item-wrapper {
+  width: 20%;
+  box-sizing: border-box;
+}
+
+.grid-value {
+  font-size: 10px;
+  color: #999;
+  margin-top: 2px;
 }
 </style>

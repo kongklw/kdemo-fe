@@ -178,6 +178,14 @@ export function addFeedReq(data) {
   })
 }
 
+export function updateFeedReq(data) {
+  return request({
+    url: '/baby/feed',
+    method: 'put',
+    data
+  })
+}
+
 export function feedListReq(params) {
   return request({
     url: '/baby/feed',
@@ -281,5 +289,13 @@ export function dashboardReq() {
   return request({
     url: '/baby/dashboard',
     method: 'get'
+  })
+}
+
+export function saveAppOrderReq(data) {
+  return request({
+    url: '/baby/dashboard',
+    method: 'post',
+    data
   })
 }

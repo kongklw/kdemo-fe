@@ -13,24 +13,33 @@
       </template>
     </van-nav-bar>
 
-    <van-pull-refresh v-model="refreshing" @refresh="onRefresh">
+    <van-pull-refresh v-model="refreshing" class="growing-refresh" @refresh="onRefresh">
       <van-list
         v-model="loading"
         :finished="finished"
         finished-text="没有更多了"
         @load="onLoad"
       >
-        <van-collapse v-model="activeNames">
-          <van-collapse-item
-            v-for="item in list"
-            :key="item.id"
-            :name="item.id"
-            :title="item.title"
-            :value="item.created_time"
-          >
-            <div class="content-text">{{ item.content }}</div>
-          </van-collapse-item>
-        </van-collapse>
+        <div class="growing-list">
+          <van-collapse v-model="activeNames" :border="false">
+            <van-collapse-item
+              v-for="item in list"
+              :key="item.id"
+              :name="item.id"
+              class="growing-item"
+            >
+              <template #title>
+                <div class="item-title">
+                  <span class="title-text">{{ item.title }}</span>
+                </div>
+              </template>
+              <template #value>
+                <span class="item-date">{{ item.created_time }}</span>
+              </template>
+              <div class="content-text">{{ item.content }}</div>
+            </van-collapse-item>
+          </van-collapse>
+        </div>
       </van-list>
     </van-pull-refresh>
 
@@ -40,58 +49,82 @@
       position="bottom"
       :style="{ height: '80%' }"
       round
+      safe-area-inset-bottom
+      class="growing-popup"
     >
-      <div class="popup-content">
-        <van-nav-bar
-          title="添加记录"
-          left-text="取消"
-          right-text="保存"
-          @click-left="showAddDialog = false"
-          @click-right="onAddSave"
-        />
-        <div class="form-content">
-          <van-form ref="addForm">
-            <van-field
-              v-model="form.title"
-              name="title"
-              label="标题"
-              placeholder="请输入标题"
-              :rules="[{ required: true, message: '请填写标题' }]"
-            />
-            <van-field
-              ref="contentInput"
-              v-model="form.content"
-              name="content"
-              label="内容"
-              type="textarea"
-              placeholder="请输入内容"
-              rows="5"
-              autosize
-              show-word-limit
-              @blur="handleInputBlur"
-            />
+      <div class="popup-container">
+        <div class="popup-header">
+          <div class="header-btn" @click="showAddDialog = false">
+            <van-icon name="cross" size="22" color="#333" />
+          </div>
+          <div class="header-title">添加成长记录</div>
+          <div class="header-btn" style="visibility: hidden" />
+        </div>
+
+        <div class="popup-body">
+          <van-form ref="addForm" :show-error-message="false">
+            <div class="form-group">
+              <van-field
+                v-model="form.title"
+                name="title"
+                placeholder="请输入标题"
+                :rules="[{ required: true, message: '请填写标题' }]"
+                class="custom-field title-field"
+              />
+            </div>
+
+            <div class="form-group">
+              <van-field
+                ref="contentInput"
+                v-model="form.content"
+                name="content"
+                type="textarea"
+                placeholder="记录宝宝成长的每一个瞬间..."
+                rows="6"
+                autosize
+                show-word-limit
+                maxlength="500"
+                class="custom-field content-field"
+                @blur="handleInputBlur"
+              />
+            </div>
           </van-form>
 
           <div class="tools-area">
-            <div class="section-title">快捷词</div>
+            <div class="section-header">
+              <span class="section-title">快捷词</span>
+            </div>
             <div class="tags-container">
-              <van-tag
+              <span
                 v-for="word in commonWordList"
                 :key="word.creativeWordId"
-                plain
-                type="primary"
-                size="medium"
-                class="word-tag"
+                class="custom-tag"
                 @click="insertWord(word.name)"
               >
                 {{ word.name }}
-              </van-tag>
+              </span>
             </div>
 
             <div class="ai-btn-container">
-              <van-button icon="magic-stick" type="info" block plain @click="showAIDialog = true">AI 帮写</van-button>
+              <van-button
+                icon="magic-stick"
+                color="#7c4dff"
+                block
+                round
+                plain
+                class="ai-btn"
+                @click="showAIDialog = true"
+              >
+                AI 帮写
+              </van-button>
             </div>
           </div>
+        </div>
+
+        <div class="popup-footer">
+          <van-button block round color="#ff7043" class="save-btn" @click="onAddSave">
+            保存记录
+          </van-button>
         </div>
       </div>
     </van-popup>
@@ -268,48 +301,182 @@ export default {
   min-height: 100vh;
 }
 
+.growing-refresh {
+  min-height: calc(100vh - 46px);
+}
+
+.growing-list {
+  padding: 12px;
+}
+
+/* Card Style for Collapse Item */
+.growing-item {
+  margin-bottom: 12px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  background: #fff;
+}
+
+::v-deep .van-collapse-item__content {
+  padding: 0 16px 16px;
+  color: #666;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+::v-deep .van-cell {
+  padding: 16px;
+  background-color: #fff;
+  align-items: center;
+  font-size: 16px;
+
+  &::after {
+    display: none; /* Remove inner border */
+  }
+}
+
+.item-title {
+  display: flex;
+  align-items: center;
+}
+
+.title-text {
+  font-weight: 600;
+  color: #333;
+  margin-right: 8px;
+}
+
+.item-date {
+  font-size: 13px;
+  color: #999;
+}
+
 .content-text {
   white-space: pre-wrap;
-  line-height: 1.5;
-  color: #333;
+  word-break: break-all;
 }
 
 .popup-content {
+  /* removed */
+}
+
+/* Popup Styles */
+.growing-popup {
+  overflow: hidden;
+}
+
+.popup-container {
   height: 100%;
   display: flex;
   flex-direction: column;
+  background-color: #f7f8fa;
 }
 
-.form-content {
+.popup-header {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 50px;
+  padding: 0 16px;
+  background-color: #fff;
+}
+
+.header-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: #333;
+}
+
+.popup-body {
   flex: 1;
   overflow-y: auto;
   padding: 16px;
 }
 
+.form-group {
+  margin-bottom: 12px;
+  background-color: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.02);
+}
+
+.custom-field {
+  padding: 16px;
+  background-color: transparent;
+}
+
+.title-field ::v-deep .van-field__control {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.content-field ::v-deep .van-field__control {
+  font-size: 15px;
+  line-height: 1.6;
+}
+
 .tools-area {
   margin-top: 20px;
-  padding: 0 10px;
+  padding: 0 4px;
+}
+
+.section-header {
+  margin-bottom: 12px;
+  padding-left: 4px;
 }
 
 .section-title {
   font-size: 14px;
-  color: #666;
-  margin-bottom: 10px;
+  color: #999;
+  font-weight: 500;
 }
 
 .tags-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 20px;
+  gap: 10px;
+  margin-bottom: 24px;
 }
 
-.word-tag {
-  padding: 4px 10px;
+.custom-tag {
+  padding: 6px 12px;
+  background-color: #e3f2fd;
+  color: #1976d2;
+  border-radius: 20px;
+  font-size: 13px;
+  transition: all 0.2s;
+
+  &:active {
+    opacity: 0.7;
+    transform: scale(0.95);
+  }
 }
 
 .ai-btn-container {
-  margin-top: 10px;
+  margin-top: 12px;
+}
+
+.ai-btn {
+  height: 44px;
+  font-weight: 500;
+  border-width: 1.5px;
+}
+
+.popup-footer {
+  flex-shrink: 0;
+  padding: 12px 16px;
+  padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  background-color: #fff;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.03);
+}
+
+.save-btn {
+  height: 44px;
+  font-weight: 600;
+  font-size: 16px;
 }
 
 .ai-dialog-content {
