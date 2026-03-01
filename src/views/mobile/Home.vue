@@ -61,7 +61,7 @@
     <div class="dashboard-widgets">
       <!-- Todo List Preview -->
       <van-cell-group title="待办事项" inset>
-        <van-cell title="查看更多待办" is-link to="/mobile/todo" />
+        <van-cell title="查看更多待办" is-link to="/mobile/functions/todo" />
       </van-cell-group>
     </div>
   </div>
