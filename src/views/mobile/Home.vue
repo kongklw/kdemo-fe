@@ -250,6 +250,83 @@ export default {
     gap: 10px;
 }
 
+/* Added styles for the new layout structure */
+.baby-info-left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-right: 12px;
+  overflow: hidden; /* Prevent text overflow from pushing width */
+}
+
+.baby-info-right {
+  flex-shrink: 0;
+}
+
+.baby-avatar-large {
+  width: 90px;
+  height: 110px; /* Slightly rectangular portrait aspect ratio */
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  background-color: #fff; /* Fallback */
+}
+
+.baby-avatar-large img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.baby-title-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.baby-title-text {
+  font-size: 20px;
+  font-weight: bold;
+  margin-right: 6px;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.baby-growth-tip {
+  font-size: 12px;
+  background: rgba(255,255,255,0.25);
+  padding: 8px 10px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: flex-start;
+  line-height: 1.4;
+  backdrop-filter: blur(5px);
+}
+
+.tip-label {
+  font-weight: bold;
+  margin-right: 4px;
+  white-space: nowrap;
+}
+
+.tip-content {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* Limit to 2 lines */
+  -webkit-box-orient: vertical;
+}
+
+.baby-stats-row {
+  font-size: 13px;
+  opacity: 0.95;
+  font-weight: 500;
+}
+
 /* Grid Section Styles */
 .grid-section {
   background-color: #fff;
