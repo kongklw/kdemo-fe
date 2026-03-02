@@ -375,11 +375,6 @@ export default {
         const dateStr = EXIF.getTag(this, 'DateTimeOriginal')
         if (dateStr) {
           // Format: "YYYY:MM:DD HH:MM:SS" -> "YYYY-MM-DD HH:mm:ss"
-          // Note: IOS sometimes uses different format or none.
-          // Standard EXIF is "YYYY:MM:DD HH:MM:SS"
-          // Actually replace first two colons with dashes: YYYY-MM-DD
-          // The string is "2023:01:01 12:00:00"
-          // substring(0, 10) is "2023:01:01" -> replace : with -
           const datePart = dateStr.substring(0, 10).replace(/:/g, '-')
           const timePart = dateStr.substring(11, 19)
           const finalStr = `${datePart} ${timePart}`
@@ -388,6 +383,51 @@ export default {
           self.currentDate = new Date(finalStr.replace(/-/g, '/')) // Safari/IOS needs / for date parsing
 
           Toast('已根据照片自动设置时间')
+        }
+      })
+    },
+    compressImage(file) {
+      return new Promise((resolve) => {
+        if (!file || file.size < 1024 * 1024) { // Less than 1MB, no compression
+          resolve(file)
+          return
+        }
+
+        const reader = new FileReader()
+        reader.readAsDataURL(file)
+        reader.onload = (e) => {
+          const img = new Image()
+          img.src = e.target.result
+          img.onload = () => {
+            const canvas = document.createElement('canvas')
+            const ctx = canvas.getContext('2d')
+
+            const MAX_WIDTH = 1920
+            const MAX_HEIGHT = 1920
+            let width = img.width
+            let height = img.height
+
+            if (width > height) {
+              if (width > MAX_WIDTH) {
+                height *= MAX_WIDTH / width
+                width = MAX_WIDTH
+              }
+            } else {
+              if (height > MAX_HEIGHT) {
+                width *= MAX_HEIGHT / height
+                height = MAX_HEIGHT
+              }
+            }
+
+            canvas.width = width
+            canvas.height = height
+            ctx.drawImage(img, 0, 0, width, height)
+
+            canvas.toBlob((blob) => {
+              const newFile = new File([blob], file.name, { type: file.type })
+              resolve(newFile)
+            }, file.type, 0.8)
+          }
         }
       })
     },
@@ -407,15 +447,16 @@ export default {
         this.newTag = ''
       }
     },
-    onAddSave() {
+    async onAddSave() {
       if (this.fileList.length === 0 && !this.form.content) {
         Toast('请至少填写内容或上传照片')
         return
       }
 
       Toast.loading({
-        message: '发布中...',
-        forbidClick: true
+        message: '处理中...',
+        forbidClick: true,
+        duration: 0
       })
 
       const formData = new FormData()
@@ -427,9 +468,19 @@ export default {
         formData.append('tags', JSON.stringify(this.form.tags))
       }
 
-      this.fileList.forEach(file => {
-        formData.append('images', file.file)
-      })
+      if (this.fileList.length > 0) {
+        try {
+          const compressedFiles = await Promise.all(
+            this.fileList.map(item => this.compressImage(item.file))
+          )
+          compressedFiles.forEach(file => {
+            formData.append('images', file)
+          })
+        } catch (error) {
+          Toast.fail('图片处理失败')
+          return
+        }
+      }
 
       addBabyAlbumReq(formData).then(() => {
         Toast.success('发布成功')
