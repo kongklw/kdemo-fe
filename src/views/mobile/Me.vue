@@ -1,6 +1,6 @@
 <template>
   <div class="mobile-me">
-    <div class="user-profile">
+    <!-- <div class="user-profile">
       <van-image
         round
         width="5rem"
@@ -8,7 +8,7 @@
         src="https://img.yzcdn.cn/vant/cat.jpeg"
       />
       <div class="username">Admin</div>
-    </div>
+    </div> -->
 
     <div v-if="babyInfo.id" class="baby-card-wrapper" @click="openEditPopup">
       <div class="baby-card-inner">

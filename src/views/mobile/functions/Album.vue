@@ -74,29 +74,47 @@
                 </div>
 
                 <div v-if="item.photos && item.photos.length" class="content-images">
-                  <!-- Single Image -->
-                  <van-image
-                    v-if="item.photos.length === 1"
-                    width="100%"
-                    height="200"
-                    fit="cover"
-                    :src="item.photos[0].image"
-                    radius="8"
-                    @click="previewImage(item.photos[0].image, item.photos)"
-                  />
-                  <!-- Multiple Images Grid -->
-                  <div v-else class="image-grid">
+                  <!-- Single Media -->
+                  <div v-if="item.photos.length === 1">
+                    <div v-if="item.photos[0].is_video" style="position: relative;" @click="previewVideo(item.photos[0].image)">
+                      <video
+                        :src="item.photos[0].image"
+                        style="width: 100%; max-height: 300px; border-radius: 8px; background: #000; object-fit: contain;"
+                        preload="metadata"
+                      />
+                      <van-icon name="play-circle-o" size="50" color="rgba(255,255,255,0.8)" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none;" />
+                    </div>
                     <van-image
-                      v-for="photo in item.photos"
-                      :key="photo.id"
-                      width="32%"
-                      height="100"
+                      v-else
+                      width="100%"
+                      height="200"
                       fit="cover"
-                      :src="photo.image"
-                      radius="4"
-                      style="margin-bottom: 4px;"
-                      @click="previewImage(photo.image, item.photos)"
+                      :src="item.photos[0].image"
+                      radius="8"
+                      @click="previewImage(item.photos[0].image, item.photos)"
                     />
+                  </div>
+                  <!-- Multiple Media Grid -->
+                  <div v-else class="image-grid" style="display: flex; flex-wrap: wrap; gap: 4px;">
+                    <div v-for="photo in item.photos" :key="photo.id" style="width: 32%; height: 100px; position: relative;">
+                      <div v-if="photo.is_video" style="width: 100%; height: 100%;" @click="previewVideo(photo.image)">
+                        <video
+                          :src="photo.image"
+                          style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px; background: #000;"
+                          preload="metadata"
+                        />
+                        <van-icon name="play-circle-o" size="30" color="rgba(255,255,255,0.8)" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none;" />
+                      </div>
+                      <van-image
+                        v-else
+                        width="100%"
+                        height="100%"
+                        fit="cover"
+                        :src="photo.image"
+                        radius="4"
+                        @click="previewImage(photo.image, item.photos)"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -145,9 +163,23 @@
       />
       <div class="form-content">
         <van-form ref="addForm">
-          <van-field name="uploader" label="照片">
+          <van-field name="uploader" label="照片/视频">
             <template #input>
-              <van-uploader v-model="fileList" multiple :max-count="9" :after-read="onRead" />
+              <van-uploader
+                v-model="fileList"
+                multiple
+                :max-count="9"
+                :after-read="onRead"
+                accept="image/*,video/*"
+                :max-size="100 * 1024 * 1024"
+                @oversize="onOversize"
+              >
+                <template #preview-cover="{ file }">
+                  <div v-if="file && file.file && file.file.type && file.file.type.startsWith('video/')" style="position: absolute; bottom: 0; right: 0; background: rgba(0,0,0,0.5); padding: 2px;">
+                    <van-icon name="play-circle-o" color="#fff" />
+                  </div>
+                </template>
+              </van-uploader>
             </template>
           </van-field>
           <van-field
@@ -232,6 +264,15 @@
         </van-form>
       </div>
     </van-popup>
+    <van-popup v-model="showVideoPreviewOverlay" closeable position="bottom" :style="{ height: '100%', background: 'black', display: 'flex', alignItems: 'center', justifyContent: 'center' }">
+      <video
+        v-if="currentVideoUrl"
+        :src="currentVideoUrl"
+        controls
+        style="width: 100%; max-height: 100%;"
+        autoplay
+      />
+    </van-popup>
   </div>
 </template>
 
@@ -271,6 +312,8 @@ export default {
       showAddDialog: false,
       showDatePicker: false,
       showTagDialog: false,
+      showVideoPreviewOverlay: false,
+      currentVideoUrl: '',
       newTag: '',
       currentDate: new Date(),
       fileList: [],
@@ -365,11 +408,17 @@ export default {
       this.form.happened_at = parseTime(value, '{y}-{m}-{d} {h}:{i}:{s}')
       this.showDatePicker = false
     },
+    onOversize() {
+      Toast.fail('文件大小不能超过 100MB')
+    },
     onRead(file) {
       const files = Array.isArray(file) ? file : [file]
       if (files.length === 0) return
 
       const firstFile = files[0].file
+      // Skip EXIF for video
+      if (firstFile.type.startsWith('video/')) return
+
       const self = this
       EXIF.getData(firstFile, function() {
         const dateStr = EXIF.getTag(this, 'DateTimeOriginal')
@@ -388,6 +437,11 @@ export default {
     },
     compressImage(file) {
       return new Promise((resolve) => {
+        // Skip video compression
+        if (file.type.startsWith('video/')) {
+          resolve(file)
+          return
+        }
         if (!file || file.size < 1024 * 1024) { // Less than 1MB, no compression
           resolve(file)
           return
@@ -489,6 +543,10 @@ export default {
       }).catch(() => {
         Toast.fail('发布失败')
       })
+    },
+    previewVideo(url) {
+      this.currentVideoUrl = url
+      this.showVideoPreviewOverlay = true
     },
     previewImage(current, photos) {
       const images = photos.map(p => p.image)

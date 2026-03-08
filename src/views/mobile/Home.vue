@@ -5,7 +5,7 @@
       <div class="baby-card-content">
         <div class="baby-info-left">
           <div class="baby-title-row">
-            <span class="baby-title-text">宝宝 {{ babyAge }}</span>
+            <span class="baby-title-text">{{ babyInfo.name || '宝宝' }} {{ babyAge }}</span>
             <van-icon name="arrow" color="#888" size="14" />
           </div>
           <div class="baby-growth-tip">
@@ -99,28 +99,80 @@ export default {
   computed: {
     babyAge() {
       if (!this.babyInfo || !this.babyInfo.birthday) return ''
-      const birth = new Date(this.babyInfo.birthday)
+
+      // Parse YYYY-MM-DD manually
+      const parts = this.babyInfo.birthday.split('-')
+      const birthYear = parseInt(parts[0], 10)
+      const birthMonth = parseInt(parts[1], 10) - 1 // 0-indexed
+      const birthDay = parseInt(parts[2], 10)
+
+      const birth = new Date(birthYear, birthMonth, birthDay)
       const now = new Date()
 
-      let years = now.getFullYear() - birth.getFullYear()
-      let months = now.getMonth() - birth.getMonth()
-      let days = now.getDate() - birth.getDate()
+      // Reset time part
+      now.setHours(0, 0, 0, 0)
+      birth.setHours(0, 0, 0, 0)
 
-      if (days < 0) {
-        months--
-        const prevMonth = new Date(now.getFullYear(), now.getMonth(), 0)
-        days += prevMonth.getDate()
+      if (now < birth) return '待产中'
+
+      // 1. Calculate Years
+      let years = 0
+      // Baseline date after adding years
+      let tempDate = new Date(birthYear, birthMonth, birthDay)
+
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        const nextYear = birthYear + years + 1
+        // Handle Feb 29 -> Feb 28 in common years
+        const isLeap = (y) => (y % 4 === 0 && y % 100 !== 0) || (y % 400 === 0)
+        const nextMaxDay = (birthMonth === 1 && birthDay === 29 && !isLeap(nextYear)) ? 28 : birthDay
+
+        const nextDate = new Date(nextYear, birthMonth, nextMaxDay)
+
+        if (nextDate > now) break
+        years++
+        tempDate = nextDate
       }
-      if (months < 0) {
-        years--
-        months += 12
+
+      // 2. Calculate Months
+      let months = 0
+      // Calculate based on (Birth Year + Years) to avoid drift
+      // e.g. Jan 31 -> Feb 28 -> March 31 (Good), not Feb 28 -> March 28 (Bad)
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        const totalMonths = months + 1
+
+        let targetYear = birthYear + years
+        let targetMonth = birthMonth + totalMonths
+
+        // Normalize month/year overflow
+        targetYear += Math.floor(targetMonth / 12)
+        targetMonth = targetMonth % 12
+
+        // Clamp day
+        const daysInMonth = new Date(targetYear, targetMonth + 1, 0).getDate()
+        const targetDay = Math.min(birthDay, daysInMonth)
+
+        const nextDate = new Date(targetYear, targetMonth, targetDay)
+
+        if (nextDate > now) break
+        months++
+        tempDate = nextDate
       }
+
+      // 3. Calculate Days
+      // tempDate is now the date at (Birth + Years + Months)
+      const diffTime = now - tempDate
+      const days = Math.floor(diffTime / (1000 * 60 * 60 * 24))
 
       let ageStr = ''
       if (years > 0) ageStr += `${years}岁`
       if (months > 0) ageStr += `${months}个月`
       if (days > 0) ageStr += `${days}天`
-      return ageStr || '今天出生'
+
+      if (!ageStr) return '今天出生'
+
+      return ageStr
     }
   },
   watch: {
@@ -198,7 +250,8 @@ export default {
       try {
         const res = await getBabyInfoReq()
         if (res.data) {
-          this.babyInfo = res.data
+          // Handle array response if backend returns a list
+          this.babyInfo = Array.isArray(res.data) ? (res.data[0] || {}) : res.data
         }
       } catch (e) {
         console.error(e)
