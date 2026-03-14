@@ -172,6 +172,31 @@ export const constantRoutes = [
         component: () => import('@/views/mobile/functions/Album'),
         name: 'MobileAlbum',
         meta: { title: '宝宝相册' }
+      },
+      {
+        path: 'vaccine',
+        component: () => import('@/views/mobile/functions/VaccineSchedule'),
+        name: 'MobileVaccineSchedule',
+        meta: { title: '疫苗时间表' }
+      },
+      {
+        path: 'bodymetrics',
+        component: () => import('@/views/mobile/functions/BodyMetrics'),
+        name: 'MobileBodyMetrics',
+        meta: { title: '身高体重' }
+      },
+      {
+        path: 'bodymetrics/add',
+        component: () => import('@/views/mobile/functions/BodyMetricsEdit'),
+        name: 'MobileBodyMetricsAdd',
+        meta: { title: '添加生长记录' },
+        props: { mode: 'add' }
+      },
+      {
+        path: 'bodymetrics/edit/:id',
+        component: () => import('@/views/mobile/functions/BodyMetricsEdit'),
+        name: 'MobileBodyMetricsEdit',
+        meta: { title: '修改生长记录' }
       }
     ]
   },

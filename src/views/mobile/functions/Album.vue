@@ -40,7 +40,7 @@
         @load="onLoad"
       >
         <div class="timeline-container">
-          <div v-for="(item, index) in list" :key="index" class="timeline-row">
+          <div v-for="item in list" :key="item.id" class="timeline-row">
             <!-- Date Column -->
             <div class="date-col">
               <div class="day">{{ item.happened_at | parseDay }}</div>
@@ -376,12 +376,37 @@ export default {
         this.refreshing = false
       }
 
-      getBabyAlbumsReq().then(res => {
-        this.list = res.data.map(item => ({
+      const pageSize = 20
+      const page = Math.floor(this.list.length / pageSize) + 1
+
+      getBabyAlbumsReq({ page_num: page, page_size: pageSize }).then(res => {
+        if (res.code !== 200) {
+          this.finished = true
+          this.loading = false
+          return
+        }
+
+        const data = res.data || {}
+        const newData = Array.isArray(data) ? data : (data.list || [])
+        const total = Array.isArray(data) ? null : (data.total || null)
+
+        const normalized = newData.map(item => ({
           ...item,
-          showPopover: false // for menu
+          showPopover: false
         }))
-        this.finished = true
+
+        if (normalized.length === 0) {
+          this.finished = true
+        } else {
+          this.list = [...this.list, ...normalized]
+          if (normalized.length < pageSize) {
+            this.finished = true
+          }
+          if (typeof total === 'number' && this.list.length >= total) {
+            this.finished = true
+          }
+        }
+
         this.loading = false
       }).catch(() => {
         this.loading = false
@@ -391,6 +416,7 @@ export default {
     onRefresh() {
       this.finished = false
       this.loading = true
+      this.refreshing = true
       this.onLoad()
     },
     openAddDialog() {

@@ -175,6 +175,75 @@ export function deleteBabyAlbumReq(id) {
   })
 }
 
+// Body Metrics
+export function getGrowthRecordsReq(params) {
+  return request({
+    url: '/baby/growth_records/',
+    method: 'get',
+    params
+  })
+}
+
+export function addGrowthRecordReq(data) {
+  return request({
+    url: '/baby/growth_records/',
+    method: 'post',
+    data,
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
+}
+
+export function deleteGrowthRecordReq(id) {
+  return request({
+    url: `/baby/growth_records/${id}/`,
+    method: 'delete'
+  })
+}
+
+export function getGrowthRecordDetailReq(id) {
+  return request({
+    url: `/baby/growth_records/${id}/`,
+    method: 'get'
+  })
+}
+
+export function updateGrowthRecordReq(id, data) {
+  return request({
+    url: `/baby/growth_records/${id}/`,
+    method: 'put',
+    data,
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
+}
+
+// Vaccine Schedule
+export function getVaccineScheduleReq() {
+  return request({
+    url: '/baby/vaccines/schedule/',
+    method: 'get'
+  })
+}
+
+export function toggleVaccineReq(data) {
+  return request({
+    url: '/baby/vaccines/toggle/',
+    method: 'post',
+    data
+  })
+}
+
+export function addPaidVaccineReq(data) {
+  return request({
+    url: '/baby/vaccines/add_paid/',
+    method: 'post',
+    data
+  })
+}
+
 // Baby Pants
 export function addBabyPantsReq(data) {
   return request({

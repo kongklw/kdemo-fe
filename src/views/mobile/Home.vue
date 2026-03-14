@@ -73,7 +73,7 @@ import draggable from 'vuedraggable'
 
 const DEFAULT_APP_ORDER = [
   'BreastFeed', 'Temperature', 'BabyPants', 'Sleep', 'Expense',
-  'Analysis', 'Langchain', 'Todo', 'Growing', 'Album'
+  'Analysis', 'Langchain', 'Todo', 'Growing', 'BodyMetrics', 'Album', 'VaccineSchedule'
 ]
 
 export default {
@@ -209,8 +209,12 @@ export default {
           return { type, label: '待办', icon: 'todo', value: info.todo_count, iconClass: 'icon-money' }
         case 'Growing':
           return { type, label: '成长', icon: 'tree3', value: info.growing_moments, iconClass: 'icon-money' }
+        case 'BodyMetrics':
+          return { type, label: '身高体重', icon: 'size', value: '曲线', iconClass: 'icon-money' }
         case 'Album':
           return { type, label: '相册', icon: 'funny2', value: '照片', iconClass: 'icon-money' }
+        case 'VaccineSchedule':
+          return { type, label: '疫苗时间表', icon: 'tab', value: '', iconClass: 'icon-money' }
         default:
           return null
       }
@@ -301,6 +305,12 @@ export default {
           break
         case 'Album':
           this.$router.push('/mobile/functions/album')
+          break
+        case 'BodyMetrics':
+          this.$router.push('/mobile/functions/bodymetrics')
+          break
+        case 'VaccineSchedule':
+          this.$router.push('/mobile/functions/vaccine')
           break
         default:
           break
