@@ -218,7 +218,11 @@ export default {
         this.detailTab = 0
         return
       }
-      this.$router.push('/mobile/home')
+      if (window.history.length > 1) {
+        this.$router.back()
+        return
+      }
+      this.$router.replace('/mobile/home')
     },
     onLearn() {
       Toast('功能开发中')
