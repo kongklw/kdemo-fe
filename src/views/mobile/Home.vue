@@ -81,6 +81,11 @@ export default {
   components: {
     draggable
   },
+  beforeRouteEnter(to, from, next) {
+    next(vm => {
+      vm.refresh()
+    })
+  },
   data() {
     return {
       babyInfo: {},
@@ -184,10 +189,17 @@ export default {
     }
   },
   mounted() {
-    this.obtainDashboardData()
-    this.fetchBabyInfo()
+    this.updateDraggableItems()
+    this.refresh()
+  },
+  activated() {
+    this.refresh()
   },
   methods: {
+    refresh() {
+      this.obtainDashboardData()
+      this.fetchBabyInfo()
+    },
     getAppItem(type) {
       const info = this.basicInfo || {}
       switch (type) {
@@ -256,6 +268,8 @@ export default {
         if (res.data) {
           // Handle array response if backend returns a list
           this.babyInfo = Array.isArray(res.data) ? (res.data[0] || {}) : res.data
+        } else {
+          this.babyInfo = {}
         }
       } catch (e) {
         console.error(e)
