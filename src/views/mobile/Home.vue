@@ -72,7 +72,7 @@ import { dashboardReq, getBabyInfoReq, saveAppOrderReq } from '@/api/baby'
 import draggable from 'vuedraggable'
 
 const DEFAULT_APP_ORDER = [
-  'BreastFeed', 'Temperature', 'BabyPants', 'Sleep', 'Expense',
+  'BreastFeed', 'Temperature', 'BabyPants', 'Sleep', 'Expense', 'Period',
   'Analysis', 'Langchain', 'Todo', 'Growing', 'BodyMetrics', 'Album', 'VaccineSchedule'
 ]
 
@@ -227,6 +227,8 @@ export default {
           return { type, label: '相册', icon: 'funny2', value: '照片', iconClass: 'icon-money' }
         case 'VaccineSchedule':
           return { type, label: '疫苗时间表', icon: 'tab', value: '', iconClass: 'icon-money' }
+        case 'Period':
+          return { type, label: '经期记录', icon: 'tab', value: '记录', iconClass: 'icon-money' }
         default:
           return null
       }
@@ -325,6 +327,9 @@ export default {
           break
         case 'VaccineSchedule':
           this.$router.push('/mobile/functions/vaccine')
+          break
+        case 'Period':
+          this.$router.push('/mobile/functions/period')
           break
         default:
           break

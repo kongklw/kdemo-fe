@@ -244,6 +244,45 @@ export function addPaidVaccineReq(data) {
   })
 }
 
+export function getPeriodOverviewReq(params) {
+  return request({
+    url: '/baby/period/overview',
+    method: 'get',
+    params
+  })
+}
+
+export function savePeriodLogReq(data) {
+  return request({
+    url: '/baby/period/log',
+    method: 'post',
+    data
+  })
+}
+
+export function getPeriodLogReq(params) {
+  return request({
+    url: '/baby/period/log',
+    method: 'get',
+    params
+  })
+}
+
+export function getPeriodSettingsReq() {
+  return request({
+    url: '/baby/period/settings',
+    method: 'get'
+  })
+}
+
+export function savePeriodSettingsReq(data) {
+  return request({
+    url: '/baby/period/settings',
+    method: 'post',
+    data
+  })
+}
+
 // Baby Pants
 export function addBabyPantsReq(data) {
   return request({

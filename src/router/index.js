@@ -186,6 +186,12 @@ export const constantRoutes = [
         meta: { title: '身高体重' }
       },
       {
+        path: 'period',
+        component: () => import('@/views/mobile/functions/PeriodTracker'),
+        name: 'MobilePeriodTracker',
+        meta: { title: '经期记录' }
+      },
+      {
         path: 'bodymetrics/add',
         component: () => import('@/views/mobile/functions/BodyMetricsEdit'),
         name: 'MobileBodyMetricsAdd',
