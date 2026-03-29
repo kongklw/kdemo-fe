@@ -59,6 +59,27 @@
 
     <!-- Optional: Charts or Todo List below -->
     <div class="dashboard-widgets">
+      <van-cell-group title="生日提醒" inset>
+        <template v-if="birthdayReminders.length === 0">
+          <van-cell
+            title="15天内暂无生日"
+            is-link
+            to="/mobile/functions/birthday"
+          />
+        </template>
+        <template v-else>
+          <van-cell
+            v-for="item in birthdayReminders"
+            :key="'b-' + item.id"
+            :title="item.name"
+            :label="formatBirthdayLabel(item)"
+            :value="`${item.next_birthday_in_days}天`"
+            is-link
+            to="/mobile/functions/birthday"
+          />
+        </template>
+      </van-cell-group>
+
       <!-- Todo List Preview -->
       <van-cell-group title="待办事项" inset>
         <van-cell title="查看更多待办" is-link to="/mobile/functions/todo" />
@@ -68,12 +89,12 @@
 </template>
 
 <script>
-import { dashboardReq, getBabyInfoReq, saveAppOrderReq } from '@/api/baby'
+import { dashboardReq, getBabyInfoReq, getBirthdayListReq, saveAppOrderReq } from '@/api/baby'
 import draggable from 'vuedraggable'
 
 const DEFAULT_APP_ORDER = [
   'BreastFeed', 'Temperature', 'BabyPants', 'Sleep', 'Expense', 'Period',
-  'Analysis', 'Langchain', 'Todo', 'Growing', 'BodyMetrics', 'Album', 'VaccineSchedule'
+  'Birthday', 'Analysis', 'Langchain', 'Todo', 'Growing', 'BodyMetrics', 'Album', 'VaccineSchedule'
 ]
 
 export default {
@@ -98,7 +119,8 @@ export default {
         growing_moments: 0,
         app_order: []
       },
-      draggableItems: []
+      draggableItems: [],
+      birthdayReminders: []
     }
   },
   computed: {
@@ -199,6 +221,32 @@ export default {
     refresh() {
       this.obtainDashboardData()
       this.fetchBabyInfo()
+      this.fetchBirthdayReminders()
+    },
+    async fetchBirthdayReminders() {
+      try {
+        const res = await getBirthdayListReq()
+        if (res && res.code === 200) {
+          const items = Array.isArray(res.data) ? res.data : []
+          this.birthdayReminders = items
+            .filter(x => typeof x.next_birthday_in_days === 'number' && x.next_birthday_in_days >= 0 && x.next_birthday_in_days <= 15)
+            .sort((a, b) => (a.next_birthday_in_days || 0) - (b.next_birthday_in_days || 0))
+            .slice(0, 5)
+        } else {
+          this.birthdayReminders = []
+        }
+      } catch (e) {
+        this.birthdayReminders = []
+      }
+    },
+    formatBirthdayLabel(item) {
+      const nextText = item.next_birthday_date ? `下次：${item.next_birthday_date}` : '下次：-'
+      if (item.calendar_type === 'lunar') {
+        const y = item.lunar_year ? `${item.lunar_year}年` : ''
+        const leapText = item.lunar_is_leap ? '闰' : ''
+        return `${nextText} · 农历：${y}${leapText}${item.lunar_month}月${item.lunar_day}日`
+      }
+      return `${nextText} · 阳历：${item.solar_date}`
     },
     getAppItem(type) {
       const info = this.basicInfo || {}
@@ -229,6 +277,8 @@ export default {
           return { type, label: '疫苗时间表', icon: 'tab', value: '', iconClass: 'icon-money' }
         case 'Period':
           return { type, label: '经期记录', icon: 'tab', value: '记录', iconClass: 'icon-money' }
+        case 'Birthday':
+          return { type, label: '生日', icon: 'birthday', value: '', iconClass: 'icon-money' }
         default:
           return null
       }
@@ -330,6 +380,9 @@ export default {
           break
         case 'Period':
           this.$router.push('/mobile/functions/period')
+          break
+        case 'Birthday':
+          this.$router.push('/mobile/functions/birthday')
           break
         default:
           break

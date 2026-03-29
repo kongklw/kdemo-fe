@@ -192,6 +192,12 @@ export const constantRoutes = [
         meta: { title: '经期记录' }
       },
       {
+        path: 'birthday',
+        component: () => import('@/views/mobile/functions/Birthday'),
+        name: 'MobileBirthday',
+        meta: { title: '生日' }
+      },
+      {
         path: 'bodymetrics/add',
         component: () => import('@/views/mobile/functions/BodyMetricsEdit'),
         name: 'MobileBodyMetricsAdd',

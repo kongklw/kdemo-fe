@@ -438,3 +438,34 @@ export function saveAppOrderReq(data) {
     data
   })
 }
+
+export function getBirthdayListReq() {
+  return request({
+    url: '/baby/birthday',
+    method: 'get'
+  })
+}
+
+export function addBirthdayReq(data) {
+  return request({
+    url: '/baby/birthday',
+    method: 'post',
+    data
+  })
+}
+
+export function updateBirthdayReq(data) {
+  return request({
+    url: '/baby/birthday',
+    method: 'put',
+    data
+  })
+}
+
+export function deleteBirthdayReq(id) {
+  return request({
+    url: '/baby/birthday',
+    method: 'delete',
+    data: { id }
+  })
+}
