@@ -59,7 +59,7 @@
 
     <!-- Optional: Charts or Todo List below -->
     <div class="dashboard-widgets">
-      <van-cell-group title="生日提醒" inset>
+      <van-cell-group title="生日提醒" inset class="birthday-group">
         <template v-if="birthdayReminders.length === 0">
           <van-cell
             title="15天内暂无生日"
@@ -71,12 +71,28 @@
           <van-cell
             v-for="item in birthdayReminders"
             :key="'b-' + item.id"
-            :title="item.name"
-            :label="formatBirthdayLabel(item)"
-            :value="`${item.next_birthday_in_days}天`"
+            class="birthday-reminder-cell"
             is-link
             to="/mobile/functions/birthday"
-          />
+          >
+            <template #title>
+              <div class="birthday-reminder-title">
+                <div class="birthday-reminder-left">
+                  <span class="birthday-dot" :class="item.calendar_type === 'lunar' ? 'is-lunar' : 'is-solar'" />
+                  <span class="birthday-reminder-name">{{ item.name }}</span>
+                  <span v-if="item.relation" class="birthday-reminder-relation">{{ item.relation }}</span>
+                </div>
+                <span class="birthday-reminder-pill">还有{{ item.next_birthday_in_days }}天</span>
+              </div>
+            </template>
+            <template #label>
+              <div class="birthday-reminder-sub">
+                <span class="birthday-reminder-next">下次 {{ item.next_birthday_date || '-' }}</span>
+                <span class="birthday-reminder-sep">·</span>
+                <span class="birthday-reminder-cal">{{ formatReminderCalendar(item) }}</span>
+              </div>
+            </template>
+          </van-cell>
         </template>
       </van-cell-group>
 
@@ -240,13 +256,21 @@ export default {
       }
     },
     formatBirthdayLabel(item) {
-      const nextText = item.next_birthday_date ? `下次：${item.next_birthday_date}` : '下次：-'
+      const nextText = item.next_birthday_date ? `下次 ${item.next_birthday_date}` : '下次 -'
       if (item.calendar_type === 'lunar') {
         const y = item.lunar_year ? `${item.lunar_year}年` : ''
         const leapText = item.lunar_is_leap ? '闰' : ''
-        return `${nextText} · 农历：${y}${leapText}${item.lunar_month}月${item.lunar_day}日`
+        return `${nextText} · 农历 ${y}${leapText}${item.lunar_month}月${item.lunar_day}日`
       }
-      return `${nextText} · 阳历：${item.solar_date}`
+      return `${nextText} · 阳历 ${item.solar_date}`
+    },
+    formatReminderCalendar(item) {
+      if (item.calendar_type === 'lunar') {
+        const y = item.lunar_year ? `${item.lunar_year}年` : ''
+        const leapText = item.lunar_is_leap ? '闰' : ''
+        return `农历 ${y}${leapText}${item.lunar_month}月${item.lunar_day}日`
+      }
+      return `阳历 ${item.solar_date || '-'}`
     },
     getAppItem(type) {
       const info = this.basicInfo || {}
@@ -394,13 +418,14 @@ export default {
 
 <style scoped>
 .mobile-home {
-  padding-top: 20px;
+  padding-top: 0;
   background-color: #f7f8fa;
   min-height: 100vh;
+  --page-gutter: 3px;
 }
 .baby-info-card {
     background: linear-gradient(135deg, #FF9A9E 0%, #FECFEF 100%);
-    margin: 12px;
+    margin: 12px var(--page-gutter);
     padding: 20px;
     border-radius: 16px;
     color: white;
@@ -537,7 +562,7 @@ export default {
   background-color: #fff;
   border-radius: 12px;
   overflow: hidden;
-  margin-bottom: 12px;
+  margin: 0 var(--page-gutter) 12px;
   padding: 0 6px;
 }
 .grid-item-wrapper {
@@ -571,7 +596,7 @@ export default {
 
 /* Dashboard Widgets */
 .dashboard-widgets {
-  margin-top: 20px;
+  margin-top: 0;
 }
 
 .custom-grid {
@@ -588,5 +613,90 @@ export default {
   font-size: 10px;
   color: #999;
   margin-top: 2px;
+}
+
+.birthday-reminder-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.birthday-reminder-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.birthday-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 77, 125, 0.9);
+  box-shadow: 0 6px 14px rgba(255, 77, 125, 0.22);
+  flex-shrink: 0;
+}
+.birthday-dot.is-solar {
+  background: rgba(42, 123, 255, 0.9);
+  box-shadow: 0 6px 14px rgba(42, 123, 255, 0.22);
+}
+.birthday-reminder-name {
+  font-weight: 700;
+  color: #1f2329;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.birthday-reminder-relation {
+  font-size: 12px;
+  color: #646a73;
+  background: #f7f8fa;
+  border-radius: 999px;
+  padding: 2px 8px;
+  flex-shrink: 0;
+}
+.birthday-reminder-pill {
+  flex-shrink: 0;
+  font-size: 12px;
+  color: #ffffff;
+  background: linear-gradient(135deg, rgba(255, 77, 125, 0.95), rgba(255, 154, 77, 0.9));
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+.birthday-group ::v-deep .birthday-reminder-cell .van-cell__title {
+  flex: 1;
+  min-width: 0;
+}
+.birthday-reminder-sub {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.birthday-reminder-next {
+  color: #8b949e;
+  flex-shrink: 0;
+}
+.birthday-reminder-sep {
+  color: #c9cdd4;
+  flex-shrink: 0;
+}
+.birthday-reminder-cal {
+  color: #646a73;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.birthday-group ::v-deep .van-cell-group__title {
+  padding-left: var(--page-gutter);
+  padding-right: var(--page-gutter);
+  font-weight: 700;
+  color: #1f2329;
+}
+
+.dashboard-widgets ::v-deep .van-cell-group--inset {
+  margin-left: var(--page-gutter);
+  margin-right: var(--page-gutter);
 }
 </style>

@@ -14,23 +14,45 @@
         <van-swipe-cell v-for="item in list" :key="item.id" class="list-item">
           <van-cell center>
             <template #title>
-              <div class="cell-title">
-                <div class="name">
-                  <span class="name-text">{{ item.name }}</span>
-                  <van-tag v-if="item.calendar_type === 'lunar'" type="primary" size="medium" class="tag">农历</van-tag>
-                  <van-tag v-else type="success" size="medium" class="tag">阳历</van-tag>
+              <div class="birthday-card" :class="item.calendar_type === 'lunar' ? 'theme-lunar' : 'theme-solar'">
+                <div class="birthday-main">
+                  <div class="line1">
+                    <div class="line1-left">
+                      <span class="name">{{ item.name }}</span>
+                      <span v-if="item.relation" class="chip chip-muted">{{ item.relation }}</span>
+                      <span class="chip chip-accent">{{ item.constellation || '-' }}</span>
+                      <span v-if="item.age_text" class="chip chip-strong">{{ item.age_text }}</span>
+                    </div>
+                  </div>
+                  <div class="line2">
+                    <div class="date-item">
+                      <span class="date-label">农历</span>
+                      <span class="date-value">{{ item.lunar_date_iso || '-' }}</span>
+                    </div>
+                    <div class="date-item">
+                      <span class="date-label">阳历</span>
+                      <span class="date-value">{{ item.solar_date || '-' }}</span>
+                    </div>
+                  </div>
+                  <div class="line3">
+                    <span v-if="item.next_birthday_date" class="next">
+                      <van-icon name="clock-o" class="next-icon" />
+                      <span class="next-label">下次生日</span>
+                      <span class="next-date">{{ item.next_birthday_date }}</span>
+                      <span class="next-days">（还有{{ item.next_birthday_in_days }}天）</span>
+                    </span>
+                    <span v-else class="next">下次生日：-</span>
+                  </div>
                 </div>
-              </div>
-            </template>
-            <template #label>
-              <div class="cell-desc">
-                <span v-if="item.calendar_type === 'lunar'">生日：{{ formatLunar(item) }}</span>
-                <span v-else>生日：{{ formatSolar(item) }}</span>
-                <span v-if="item.relation" class="sep">·</span>
-                <span v-if="item.relation">{{ item.relation }}</span>
-              </div>
-              <div v-if="item.next_birthday_date" class="cell-next">
-                下次：{{ item.next_birthday_date }}（还有 {{ item.next_birthday_in_days }} 天）
+                <div class="stamp-wrap">
+                  <div class="stamp">
+                    <div class="stamp-text">{{ item.calendar_type === 'lunar' ? '农历' : '阳历' }}</div>
+                    <div class="stamp-sub">过生日</div>
+                  </div>
+                  <div class="edit-btn" @click.stop="openEditDialog(item)">
+                    <van-icon name="edit" />
+                  </div>
+                </div>
               </div>
             </template>
           </van-cell>
@@ -44,7 +66,7 @@
     <van-popup v-model="showAddDialog" position="bottom" :style="{ height: '58%' }" round>
       <div class="add-dialog-content">
         <van-nav-bar
-          title="添加生日"
+          :title="form.id ? '编辑生日' : '添加生日'"
           left-text="取消"
           right-text="保存"
           @click-left="showAddDialog = false"
@@ -111,7 +133,7 @@
 <script>
 import moment from 'moment'
 import { Toast, Dialog } from 'vant'
-import { getBirthdayListReq, addBirthdayReq, deleteBirthdayReq } from '@/api/baby'
+import { getBirthdayListReq, addBirthdayReq, updateBirthdayReq, deleteBirthdayReq } from '@/api/baby'
 
 export default {
   name: 'MobileBirthday',
@@ -127,6 +149,7 @@ export default {
 
       isLunar: true,
       form: {
+        id: null,
         name: '',
         relation: '',
         lunar_year: new Date().getFullYear(),
@@ -190,6 +213,7 @@ export default {
     openAddDialog() {
       this.isLunar = true
       this.form = {
+        id: null,
         name: '',
         relation: '',
         lunar_year: new Date().getFullYear(),
@@ -199,6 +223,21 @@ export default {
         solar_date: ''
       }
       this.formSolarDate = new Date()
+      this.showAddDialog = true
+    },
+    openEditDialog(item) {
+      this.isLunar = item.calendar_type === 'lunar'
+      this.form = {
+        id: item.id,
+        name: item.name || '',
+        relation: item.relation || '',
+        lunar_year: item.lunar_year || new Date().getFullYear(),
+        lunar_month: item.lunar_month || 1,
+        lunar_day: item.lunar_day || 1,
+        lunar_is_leap: !!item.lunar_is_leap,
+        solar_date: item.solar_date || ''
+      }
+      this.formSolarDate = item.solar_date ? new Date(item.solar_date) : new Date()
       this.showAddDialog = true
     },
     openDatePicker() {
@@ -238,12 +277,17 @@ export default {
       }
 
       const payload = {
+        id: this.form.id || undefined,
         name,
         relation: (this.form.relation || '').trim()
       }
 
       if (this.isLunar) {
         payload.calendar_type = 'lunar'
+        if (!this.form.lunar_year) {
+          Toast('请选择年份')
+          return
+        }
         payload.lunar_year = this.form.lunar_year
         payload.lunar_month = this.form.lunar_month
         payload.lunar_day = this.form.lunar_day
@@ -258,7 +302,7 @@ export default {
       }
 
       try {
-        const res = await addBirthdayReq(payload)
+        const res = this.form.id ? await updateBirthdayReq(payload) : await addBirthdayReq(payload)
         if (res && res.code === 200) {
           Toast('保存成功')
           this.showAddDialog = false
@@ -303,31 +347,212 @@ export default {
 .list-group {
   margin-top: 12px;
 }
-.cell-title .name {
+.birthday-card {
+  --accent: #ff4d7d;
+  --accent2: #ff9a4d;
+  --accentSoft: rgba(255, 77, 125, 0.12);
+  background:
+    radial-gradient(120px 80px at 12% 18%, rgba(255, 77, 125, 0.18), rgba(255, 77, 125, 0) 60%),
+    radial-gradient(140px 90px at 80% 10%, rgba(255, 154, 77, 0.18), rgba(255, 154, 77, 0) 60%),
+    linear-gradient(180deg, #ffffff 0%, #fff7fb 100%);
+  border-radius: 18px;
+  padding: 14px 14px;
+  box-shadow: 0 10px 26px rgba(31, 35, 41, 0.08);
+  position: relative;
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  overflow: hidden;
+}
+.birthday-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 10px;
+  bottom: 10px;
+  width: 6px;
+  border-radius: 4px;
+  background: linear-gradient(180deg, rgba(255, 77, 125, 0.95), rgba(255, 154, 77, 0.55));
+}
+.birthday-card.theme-solar {
+  --accent: #2a7bff;
+  --accent2: #22c9c3;
+  --accentSoft: rgba(42, 123, 255, 0.12);
+  background:
+    radial-gradient(120px 80px at 12% 18%, rgba(42, 123, 255, 0.18), rgba(42, 123, 255, 0) 60%),
+    radial-gradient(140px 90px at 80% 10%, rgba(34, 201, 195, 0.16), rgba(34, 201, 195, 0) 60%),
+    linear-gradient(180deg, #ffffff 0%, #f4fbff 100%);
+}
+.birthday-card.theme-solar::before {
+  background: linear-gradient(180deg, rgba(42, 123, 255, 0.95), rgba(34, 201, 195, 0.60));
+}
+.birthday-main {
+  flex: 1;
+  min-width: 0;
+  padding-left: 8px;
+}
+.line1 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.line1-left {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   gap: 8px;
+  min-width: 0;
 }
-.name-text {
-  font-size: 15px;
-  font-weight: 600;
+.name {
+  font-size: 16px;
+  font-weight: 800;
   color: #1f2329;
+  letter-spacing: 0.2px;
 }
-.tag {
-  transform: translateY(-1px);
+.chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  line-height: 18px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
 }
-.cell-desc {
+.chip-muted {
+  color: #59606a;
+  background: rgba(89, 96, 106, 0.10);
+}
+.chip-accent {
+  color: var(--accent);
+  background: var(--accentSoft);
+  border: 1px solid rgba(255, 77, 125, 0.18);
+}
+.birthday-card.theme-solar .chip-accent {
+  border-color: rgba(42, 123, 255, 0.18);
+}
+.chip-strong {
+  color: #1f2329;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(31, 35, 41, 0.06);
+  font-weight: 700;
+}
+.line2 {
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.date-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.date-label {
+  font-size: 11px;
+  color: rgba(31, 35, 41, 0.55);
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(31, 35, 41, 0.05);
+}
+.date-value {
   font-size: 12px;
   color: #646a73;
-  line-height: 18px;
+  white-space: nowrap;
 }
-.cell-next {
-  margin-top: 4px;
+.line3 {
+  margin-top: 10px;
   font-size: 12px;
-  color: #ff5a75;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-.sep {
-  margin: 0 6px;
+.next {
+  white-space: nowrap;
+  color: #1f2329;
+}
+.next-icon {
+  margin-right: 4px;
+  color: var(--accent);
+}
+.next-label {
+  color: #8b949e;
+  margin-right: 6px;
+}
+.next-date {
+  color: var(--accent);
+  font-weight: 700;
+  margin-right: 6px;
+}
+.next-days {
+  color: #646a73;
+}
+.stamp-wrap {
+  position: relative;
+  width: 92px;
+  height: 72px;
+  flex-shrink: 0;
+}
+.stamp {
+  position: absolute;
+  right: 0;
+  top: 18px;
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 77, 125, 0.28);
+  color: var(--accent);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transform: rotate(-16deg);
+  background:
+    radial-gradient(20px 20px at 30% 26%, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0) 70%),
+    linear-gradient(135deg, rgba(255, 77, 125, 0.12) 0%, rgba(255, 154, 77, 0.10) 100%);
+}
+.birthday-card.theme-solar .stamp {
+  border-color: rgba(42, 123, 255, 0.28);
+  background:
+    radial-gradient(20px 20px at 30% 26%, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0) 70%),
+    linear-gradient(135deg, rgba(42, 123, 255, 0.12) 0%, rgba(34, 201, 195, 0.10) 100%);
+}
+.stamp::after {
+  content: '';
+  position: absolute;
+  inset: 7px;
+  border-radius: 50%;
+  border: 1px dashed rgba(255, 77, 125, 0.30);
+}
+.birthday-card.theme-solar .stamp::after {
+  border-color: rgba(42, 123, 255, 0.30);
+}
+.stamp-text {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+.stamp-sub {
+  font-size: 10px;
+  opacity: 0.75;
+  margin-top: 2px;
+}
+.edit-btn {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 10px 22px rgba(31, 35, 41, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
 }
 .action-button {
   height: 100%;
