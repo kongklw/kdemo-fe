@@ -370,6 +370,8 @@ export default {
 .mobile-vaccine-schedule {
   min-height: 100vh;
   background: #f7f8fa;
+  overflow-x: hidden;
+  max-width: 100vw;
 }
 
 .baby-card {

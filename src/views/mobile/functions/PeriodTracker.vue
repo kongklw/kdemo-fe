@@ -5,7 +5,10 @@
     <div class="calendar-wrap">
       <div class="calendar-header">
         <van-icon name="arrow-left" class="nav-icon" @click="prevMonth" />
-        <div class="month-text">{{ currentMonthLabel }}</div>
+        <div class="month-text" @click="openMonthJump">
+          <span class="month-label">{{ currentMonthLabel }}</span>
+          <van-icon name="arrow-down" class="month-down" />
+        </div>
         <van-icon name="arrow" class="nav-icon" @click="nextMonth" />
       </div>
 
@@ -13,7 +16,7 @@
         <div class="weekday-row">
           <div v-for="w in weekdays" :key="w" class="weekday">{{ w }}</div>
         </div>
-        <div class="grid-area" :style="gridAreaStyle">
+        <div class="grid-area" :style="gridAreaStyle" @touchstart="onCalendarTouchStart" @touchmove="onCalendarTouchMove" @touchend="onCalendarTouchEnd">
           <div class="grid-pad">
             <div class="day-grid month-grid" :style="monthGridStyle">
               <div v-for="(d, idx) in monthDays" :key="idx" class="day" :class="dayClass(d)" @click="selectDay(d)">
@@ -41,6 +44,16 @@
         </div>
       </div>
     </div>
+
+    <van-popup v-model="showMonthJump" position="bottom" round>
+      <van-picker
+        show-toolbar
+        title="选择要跳转的年月"
+        :columns="monthJumpColumns"
+        @confirm="onMonthJumpConfirm"
+        @cancel="showMonthJump = false"
+      />
+    </van-popup>
 
     <div class="predict">
       <div class="predict-text">预测排卵日 {{ predictOvulationText }}</div>
@@ -101,7 +114,7 @@
             </div>
           </div>
           <div class="divider" />
-          <div class="list-item" @click="openEditor('symptoms')">
+          <div class="list-item" @click="openRecordPopup('symptoms')">
             <div class="li-left">
               <div class="li-ico ico-symptom">●</div>
               <div class="li-text">症状</div>
@@ -112,7 +125,7 @@
             </div>
           </div>
           <div class="divider" />
-          <div class="list-item" @click="openEditor('basal_temp')">
+          <div class="list-item" @click="openRecordPopup('basal_temp')">
             <div class="li-left">
               <div class="li-ico ico-temp">℃</div>
               <div class="li-text">基础体温</div>
@@ -124,7 +137,7 @@
             </div>
           </div>
           <div class="divider" />
-          <div class="list-item" @click="openEditor('weight_kg')">
+          <div class="list-item" @click="openRecordPopup('weight_kg')">
             <div class="li-left">
               <div class="li-ico ico-weight">kg</div>
               <div class="li-text">体重</div>
@@ -270,6 +283,76 @@
         />
       </div>
     </van-dialog>
+
+    <van-popup v-model="showRecordPopup" position="bottom" :style="{ height: '100%' }" class="record-popup" safe-area-inset-bottom>
+      <div class="record-shell">
+        <div class="record-top">{{ recordPopupTitle }}</div>
+        <div ref="recordCarousel" class="record-carousel" @scroll.passive="onRecordCarouselScroll">
+          <div v-for="(c, idx) in recordRenderCards" :key="c.renderKey" class="record-card-wrap">
+            <div class="record-card" :class="[{ active: idx === recordActiveIndex }, `card-${c.key}`]">
+              <div class="record-card-head" :class="`head-${c.key}`">
+                <div class="record-card-head-title">
+                  <span>{{ c.title }}</span>
+                  <van-icon v-if="c.key !== 'symptoms'" name="info-o" class="head-info" @click.stop="onRecordInfo(c.key)" />
+                </div>
+              </div>
+              <div class="record-card-body">
+                <template v-if="c.key === 'symptoms'">
+                  <div v-for="sec in symptomSections" :key="sec.title" class="symptom-sec">
+                    <div class="symptom-sec-title">{{ sec.title }}</div>
+                    <div class="symptom-pills">
+                      <div
+                        v-for="item in sec.items"
+                        :key="item"
+                        class="symptom-pill"
+                        :class="{ on: selectedSymptoms.includes(item) }"
+                        @click="toggleSymptom(item)"
+                      >
+                        {{ item }}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="symptom-sec">
+                    <div class="symptom-sec-title">自定义症状</div>
+                    <van-field
+                      v-model="customSymptomText"
+                      type="textarea"
+                      rows="2"
+                      autosize
+                      class="symptom-custom"
+                      placeholder="此处可输入自定义状态"
+                    />
+                  </div>
+                </template>
+
+                <template v-else-if="c.key === 'basal_temp'">
+                  <div class="picker-value">{{ tempPreview }}<span class="picker-unit">°C</span></div>
+                  <div class="picker-row">
+                    <van-picker class="picker-col" :columns="tempIntColumns" :default-index="tempIntIndex" :show-toolbar="false" @change="onTempIntChange" />
+                    <div class="picker-dot">.</div>
+                    <van-picker class="picker-col" :columns="tempDecColumns" :default-index="tempDecIndex" :show-toolbar="false" @change="onTempDecChange" />
+                  </div>
+                  <div class="picker-hint">体温记录将同步至“基础体温管理”</div>
+                </template>
+
+                <template v-else>
+                  <div class="picker-value">{{ weightPreview }}<span class="picker-unit">kg</span></div>
+                  <div class="picker-row">
+                    <van-picker class="picker-col" :columns="weightIntColumns" :default-index="weightIntIndex" :show-toolbar="false" @change="onWeightIntChange" />
+                    <div class="picker-dot">.</div>
+                    <van-picker class="picker-col" :columns="weightDecColumns" :default-index="weightDecIndex" :show-toolbar="false" @change="onWeightDecChange" />
+                  </div>
+                </template>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="record-bottom">
+          <div class="record-page">{{ recordPopupIndex + 1 }}/3</div>
+          <van-button round block type="default" class="record-done" @click="confirmRecordPopup">完成</van-button>
+        </div>
+      </div>
+    </van-popup>
   </div>
 </template>
 
@@ -289,9 +372,30 @@ export default {
       isWeekOnly: false,
       weekOnlyGap: { top: 80, bottom: 220 },
       collapseProgress: 0,
+      calendarTouchStartX: 0,
+      calendarTouchStartY: 0,
+      calendarTouchLock: '',
       extraData: { predict_next_ovulation: null, predict_next_period_start: null },
       saveTimer: null,
       showGlossary: false,
+      showMonthJump: false,
+      monthJumpYearIndex: 0,
+      monthJumpMonthIndex: 0,
+      showRecordPopup: false,
+      recordPopupIndex: 0,
+      recordActiveIndex: 0,
+      recordScrollRaf: 0,
+      recordScrollEndTimer: 0,
+      selectedSymptoms: [],
+      customSymptomText: '',
+      tempInt: '36',
+      tempDec: '50',
+      tempIntIndex: 1,
+      tempDecIndex: 50,
+      weightInt: '55',
+      weightDec: '00',
+      weightIntIndex: 25,
+      weightDecIndex: 0,
       form: {
         is_period: false,
         flow_level: 0,
@@ -312,6 +416,13 @@ export default {
       editorField: '',
       editorTitle: '',
       editorValue: '',
+      symptomSections: [
+        { title: '经期症状', items: ['冷汗淋漓', '腹部酸痛', '恶心呕吐', '肛门坠胀', '四肢厥冷', '面色苍白', '乳房胀痛', '全身乏力', '下肢疼痛', '休克'] },
+        { title: '头部', items: ['头痛', '眩晕', '粉刺', '呕吐', '失眠'] },
+        { title: '腰腹', items: ['小腹坠胀', '腹痛', '腰酸', '腹泻', '便秘', '食欲不振'] },
+        { title: '私处', items: ['瘙痒', '异味', '非经期出血'] },
+        { title: '全身', items: ['皮肤干燥', '身体酸痛', '浮肿', '感冒', '发热'] }
+      ],
       moodOptions: [
         { label: '太开心', value: 'happy', emoji: '😄' },
         { label: '还不错', value: 'good', emoji: '🙂' },
@@ -351,6 +462,20 @@ export default {
     },
     currentMonthLabel() {
       return this.curMonth.format('YYYY年M月')
+    },
+    monthJumpColumns() {
+      const years = Array.from({ length: 36 }, (_, i) => `${2000 + i}年`)
+      const months = Array.from({ length: 12 }, (_, i) => `${i + 1}月`)
+      const curYear = `${this.curMonth.year()}年`
+      const curMonth = `${this.curMonth.month() + 1}月`
+      const defaultYearIndex = years.indexOf(curYear)
+      const defaultMonthIndex = months.indexOf(curMonth)
+      const yi = this.showMonthJump ? this.monthJumpYearIndex : (defaultYearIndex >= 0 ? defaultYearIndex : 0)
+      const mi = this.showMonthJump ? this.monthJumpMonthIndex : (defaultMonthIndex >= 0 ? defaultMonthIndex : 0)
+      return [
+        { values: years, defaultIndex: Math.max(0, Math.min(years.length - 1, yi)) },
+        { values: months, defaultIndex: Math.max(0, Math.min(months.length - 1, mi)) }
+      ]
     },
     monthDays() {
       const first = this.curMonth.clone()
@@ -461,6 +586,47 @@ export default {
         opacity: showWeek ? '1' : '0',
         pointerEvents: showWeek ? 'auto' : 'none'
       }
+    },
+    recordCards() {
+      return [
+        { key: 'basal_temp', title: '基础体温' },
+        { key: 'weight_kg', title: '体重' },
+        { key: 'symptoms', title: '症状' }
+      ]
+    },
+    recordRenderCards() {
+      const base = this.recordCards
+      if (!base || base.length === 0) return []
+      const first = base[0]
+      const last = base[base.length - 1]
+      return [
+        Object.assign({}, last, { renderKey: `dup-prev-${last.key}` }),
+        ...base.map(c => Object.assign({}, c, { renderKey: `base-${c.key}` })),
+        Object.assign({}, first, { renderKey: `dup-next-${first.key}` })
+      ]
+    },
+    recordPopupTitle() {
+      const d = moment(this.selectedDate)
+      const suffix = this.selectedDate === this.todayStr ? ' 今天' : ''
+      return `${d.format('YYYY年M月D日')}${suffix}`
+    },
+    tempIntColumns() {
+      return Array.from({ length: 8 }, (_, i) => `${35 + i}`)
+    },
+    tempDecColumns() {
+      return Array.from({ length: 100 }, (_, i) => `${i}`.padStart(2, '0'))
+    },
+    weightIntColumns() {
+      return Array.from({ length: 151 }, (_, i) => `${30 + i}`)
+    },
+    weightDecColumns() {
+      return Array.from({ length: 100 }, (_, i) => `${i}`.padStart(2, '0'))
+    },
+    tempPreview() {
+      return `${this.tempInt}.${this.tempDec}`
+    },
+    weightPreview() {
+      return `${this.weightInt}.${this.weightDec}`
     }
   },
   mounted() {
@@ -476,8 +642,57 @@ export default {
       this.saveTimer = null
       this.saveLog(true)
     }
+    if (this.recordScrollRaf) {
+      cancelAnimationFrame(this.recordScrollRaf)
+      this.recordScrollRaf = 0
+    }
+    if (this.recordScrollEndTimer) {
+      clearTimeout(this.recordScrollEndTimer)
+      this.recordScrollEndTimer = 0
+    }
   },
   methods: {
+    onCalendarTouchStart(e) {
+      const t = e && e.touches && e.touches[0]
+      if (!t) return
+      this.calendarTouchStartX = t.clientX
+      this.calendarTouchStartY = t.clientY
+      this.calendarTouchLock = ''
+    },
+    onCalendarTouchMove(e) {
+      const t = e && e.touches && e.touches[0]
+      if (!t) return
+      const dx = t.clientX - this.calendarTouchStartX
+      const dy = t.clientY - this.calendarTouchStartY
+      if (!this.calendarTouchLock) {
+        if (Math.abs(dx) < 10 && Math.abs(dy) < 10) return
+        this.calendarTouchLock = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y'
+      }
+      if (this.calendarTouchLock === 'x') {
+        if (e.cancelable) e.preventDefault()
+      }
+    },
+    onCalendarTouchEnd(e) {
+      const t = e && e.changedTouches && e.changedTouches[0]
+      if (!t) return
+      const dx = t.clientX - this.calendarTouchStartX
+      const dy = t.clientY - this.calendarTouchStartY
+      this.calendarTouchStartX = 0
+      this.calendarTouchStartY = 0
+      this.calendarTouchLock = ''
+      if (Math.abs(dx) < 50) return
+      if (Math.abs(dx) < Math.abs(dy) * 1.2) return
+      if (dx < 0) this.nextMonth()
+      else this.prevMonth()
+    },
+    setMonthAndClamp(nextMonth) {
+      const base = nextMonth.clone().startOf('month')
+      const curDay = moment(this.selectedDate).date()
+      const clamped = base.clone().date(Math.min(curDay, base.daysInMonth()))
+      this.curMonth = base
+      this.selectedDate = clamped.format('YYYY-MM-DD')
+      this.load()
+    },
     getDefaultForm() {
       return {
         is_period: false,
@@ -524,12 +739,27 @@ export default {
       this.load()
     },
     prevMonth() {
-      this.curMonth = this.curMonth.clone().add(-1, 'month')
-      this.load()
+      this.setMonthAndClamp(this.curMonth.clone().add(-1, 'month'))
     },
     nextMonth() {
-      this.curMonth = this.curMonth.clone().add(1, 'month')
-      this.load()
+      this.setMonthAndClamp(this.curMonth.clone().add(1, 'month'))
+    },
+    openMonthJump() {
+      const yearIndex = this.curMonth.year() - 2000
+      const monthIndex = this.curMonth.month()
+      this.monthJumpYearIndex = Math.max(0, Math.min(35, yearIndex))
+      this.monthJumpMonthIndex = Math.max(0, Math.min(11, monthIndex))
+      this.showMonthJump = true
+    },
+    onMonthJumpConfirm(values) {
+      const year = parseInt(values && values[0], 10)
+      const month = parseInt(values && values[1], 10)
+      if (!year || !month) {
+        this.showMonthJump = false
+        return
+      }
+      this.showMonthJump = false
+      this.setMonthAndClamp(moment(`${year}-${month}-01`, 'YYYY-M-DD'))
     },
     onPeriodToggle(val) {
       if (!val) {
@@ -552,6 +782,135 @@ export default {
       const next = Math.max(0, Math.min(1, p))
       this.collapseProgress = next
       this.isWeekOnly = next >= 1
+    },
+    openRecordPopup(field) {
+      this.initRecordPopupState()
+      const map = { basal_temp: 0, weight_kg: 1, symptoms: 2 }
+      this.recordPopupIndex = map[field] != null ? map[field] : 0
+      this.showRecordPopup = true
+      this.$nextTick(() => this.scrollRecordCarouselTo(this.recordPopupIndex))
+    },
+    initRecordPopupState() {
+      const curSymptoms = (this.form.symptoms || '').split(/[，,、\s]+/).map(s => s.trim()).filter(Boolean)
+      const known = new Set(this.symptomSections.reduce((acc, s) => acc.concat(s.items), []))
+      this.selectedSymptoms = curSymptoms.filter(s => known.has(s))
+      this.customSymptomText = curSymptoms.filter(s => !known.has(s)).join('，')
+
+      const t = parseFloat(this.form.basal_temp)
+      const temp = Number.isFinite(t) ? t : 36.5
+      const tInt = Math.floor(temp)
+      const tDec = Math.round((temp - tInt) * 100)
+      this.tempInt = `${tInt}`
+      this.tempDec = `${tDec}`.padStart(2, '0')
+      const ti = this.tempIntColumns.indexOf(this.tempInt)
+      const td = this.tempDecColumns.indexOf(this.tempDec)
+      this.tempIntIndex = ti >= 0 ? ti : 0
+      this.tempDecIndex = td >= 0 ? td : 0
+
+      const w = parseFloat(this.form.weight_kg)
+      const weight = Number.isFinite(w) ? w : 55
+      const wInt = Math.floor(weight)
+      const wDec = Math.round((weight - wInt) * 100)
+      this.weightInt = `${wInt}`
+      this.weightDec = `${wDec}`.padStart(2, '0')
+      const wi = this.weightIntColumns.indexOf(this.weightInt)
+      const wd = this.weightDecColumns.indexOf(this.weightDec)
+      this.weightIntIndex = wi >= 0 ? wi : 0
+      this.weightDecIndex = wd >= 0 ? wd : 0
+    },
+    scrollRecordCarouselTo(index) {
+      const el = this.$refs.recordCarousel
+      const baseLen = this.recordCards.length
+      const renderIndex = Math.max(0, Math.min(baseLen - 1, index)) + 1
+      if (!el || !el.children || !el.children[renderIndex]) return
+      const child = el.children[renderIndex]
+      const left = child.offsetLeft - (el.clientWidth - child.clientWidth) / 2
+      el.scrollTo({ left, behavior: 'auto' })
+      this.recordPopupIndex = Math.max(0, Math.min(baseLen - 1, index))
+      this.recordActiveIndex = renderIndex
+    },
+    onRecordCarouselScroll() {
+      if (this.recordScrollRaf) return
+      this.recordScrollRaf = window.requestAnimationFrame(() => {
+        this.recordScrollRaf = 0
+        const el = this.$refs.recordCarousel
+        if (!el || !el.children || el.children.length === 0) return
+        const center = el.scrollLeft + el.clientWidth / 2
+        let best = 0
+        let bestDist = Infinity
+        for (let i = 0; i < el.children.length; i++) {
+          const c = el.children[i]
+          const cCenter = c.offsetLeft + c.clientWidth / 2
+          const dist = Math.abs(center - cCenter)
+          if (dist < bestDist) {
+            bestDist = dist
+            best = i
+          }
+        }
+        const baseLen = this.recordCards.length
+        const lastRenderIndex = baseLen + 1
+        let logical = 0
+        if (best === 0) logical = baseLen - 1
+        else if (best === lastRenderIndex) logical = 0
+        else logical = best - 1
+        this.recordActiveIndex = best
+        this.recordPopupIndex = logical
+      })
+      if (this.recordScrollEndTimer) clearTimeout(this.recordScrollEndTimer)
+      this.recordScrollEndTimer = setTimeout(() => {
+        this.recordScrollEndTimer = 0
+        const baseLen = this.recordCards.length
+        const lastRenderIndex = baseLen + 1
+        if (this.recordActiveIndex === 0) this.scrollRecordCarouselTo(baseLen - 1)
+        else if (this.recordActiveIndex === lastRenderIndex) this.scrollRecordCarouselTo(0)
+      }, 140)
+    },
+    toggleSymptom(item) {
+      const idx = this.selectedSymptoms.indexOf(item)
+      if (idx >= 0) {
+        this.selectedSymptoms = this.selectedSymptoms.filter(x => x !== item)
+      } else {
+        this.selectedSymptoms = [...this.selectedSymptoms, item]
+      }
+    },
+    onTempIntChange(picker, value) {
+      void picker
+      this.tempInt = `${value}`
+    },
+    onTempDecChange(picker, value) {
+      void picker
+      this.tempDec = `${value}`.padStart(2, '0')
+    },
+    onWeightIntChange(picker, value) {
+      void picker
+      this.weightInt = `${value}`
+    },
+    onWeightDecChange(picker, value) {
+      void picker
+      this.weightDec = `${value}`.padStart(2, '0')
+    },
+    onRecordInfo(key) {
+      if (key === 'basal_temp') Toast('基础体温用于分析排卵与周期变化')
+      if (key === 'weight_kg') Toast('体重用于趋势分析')
+    },
+    confirmRecordPopup() {
+      const symptoms = [...this.selectedSymptoms]
+      const custom = (this.customSymptomText || '').trim()
+      if (custom) {
+        const more = custom.split(/[，,、\n]+/).map(s => s.trim()).filter(Boolean)
+        symptoms.push(...more)
+      }
+      const nextSymptoms = Array.from(new Set(symptoms)).join('，')
+
+      const temp = parseFloat(this.tempPreview)
+      const nextTemp = Number.isFinite(temp) ? temp.toFixed(2) : ''
+
+      const w = parseFloat(this.weightPreview)
+      const nextWeight = Number.isFinite(w) ? w.toFixed(2) : ''
+
+      this.form = Object.assign({}, this.form, { symptoms: nextSymptoms, basal_temp: nextTemp, weight_kg: nextWeight })
+      this.showRecordPopup = false
+      this.queueSave()
     },
     getDayTag(d) {
       if (!d.date) return ''
@@ -743,15 +1102,18 @@ export default {
 </script>
 
 <style scoped>
-.mobile-period{min-height:100vh;background:#f6f7f9}
+.mobile-period{min-height:100vh;background:#f6f7f9;overflow-x:hidden;max-width:100vw}
 .calendar-wrap{background:#fff;padding-bottom:6px;position:relative}
-.calendar-header{display:flex;align-items:center;justify-content:center;padding:10px 0 6px}
+.calendar-header{display:flex;align-items:center;justify-content:center;gap:10px;padding:10px 0 6px}
 .nav-icon{color:#111}
+.month-text{display:flex;align-items:center;gap:4px;color:#111;font-size:18px;font-weight:600;line-height:20px}
+.month-label{display:inline-block}
+.month-down{color:#9aa0a6;font-size:14px}
 .calendar-wrap{background:#fff;padding-bottom:6px;position:sticky;top:46px;z-index:10}
 .calendar-wrap{background:#fff;padding-bottom:6px;position:sticky;top:46px;z-index:10}
 .calendar-body{padding-top:2px}
 .weekday-row{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;padding:0 14px 6px}
-.grid-area{position:relative;overflow:hidden}
+.grid-area{position:relative;overflow:hidden;touch-action:pan-y}
 .grid-pad{position:relative;height:100%;padding:0 14px 12px}
 .day-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:10px}
 .month-grid{position:absolute;top:0;left:0;right:0}
@@ -802,8 +1164,8 @@ export default {
 .card-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0}
 .row-label{color:#333;font-size:18px}
 .row-desc{margin-left:8px;color:#9aa0a6;font-size:12px;font-weight:400}
-.row-values{display:flex;align-items:center;gap:10px}
-.flow{width:14px;height:14px;border-radius:50%;background:#d7dbe2}
+.row-values{display:flex;align-items:center;justify-content:space-between;width:146px;min-height:22px}
+.flow{width:18px;height:18px;border-radius:50%;background:#d7dbe2}
 .flow.active{background:#ff5a75}
 .pain{width:18px;height:18px;display:flex;align-items:center;justify-content:center}
 .pain-icon{width:16px;height:16px;display:block;background:#c0c5cd;-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M13 2L3 14h7l-1 8 12-14h-7l-1-6z'/%3E%3C/svg%3E");-webkit-mask-repeat:no-repeat;-webkit-mask-position:center;-webkit-mask-size:contain;mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M13 2L3 14h7l-1 8 12-14h-7l-1-6z'/%3E%3C/svg%3E");mask-repeat:no-repeat;mask-position:center;mask-size:contain}
@@ -844,4 +1206,38 @@ export default {
 .glossary-item{padding:10px 0}
 .glossary-title{font-size:16px;font-weight:700;color:#111}
 .glossary-text{margin-top:6px;font-size:13px;line-height:18px;color:#666}
+.record-popup{background:#f6f7f9}
+.record-shell{height:100%;display:flex;flex-direction:column;background:#f6f7f9}
+.record-top{padding:14px 0 10px;text-align:center;color:#666;font-size:16px}
+.record-carousel{flex:1;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding:0 12px 8px}
+.record-carousel::-webkit-scrollbar{display:none}
+.record-card-wrap{flex:0 0 86%;scroll-snap-align:center;padding:0 10px;box-sizing:border-box}
+.record-card{height:100%;min-height:520px;background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 12px 26px rgba(0,0,0,.08);transform:scale(.94);transition:transform .2s ease,box-shadow .2s ease;display:flex;flex-direction:column}
+.record-card.active{transform:scale(1);box-shadow:0 18px 34px rgba(0,0,0,.12)}
+.record-card-head{height:54px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;font-weight:700}
+.record-card-head-title{display:flex;align-items:center;gap:6px}
+.head-info{color:rgba(255,255,255,.92);font-size:16px}
+.head-symptoms{background:#4cc7e6}
+.head-basal_temp{background:#39c98b}
+.head-weight_kg{background:#8b7cff}
+.record-card-body{flex:1;overflow:auto;padding:14px 16px 20px}
+.symptom-sec{margin-bottom:16px}
+.symptom-sec-title{font-size:16px;font-weight:700;color:#111;margin:6px 0 10px}
+.symptom-pills{display:flex;flex-wrap:wrap;gap:10px}
+.symptom-pill{padding:10px 14px;border-radius:999px;background:#eef0f4;color:#111;font-size:14px;line-height:18px;font-weight:500}
+.symptom-pill.on{background:#d2efff;color:#0b5e9a}
+.symptom-custom{border-radius:14px;overflow:hidden;background:#f2f3f5}
+::v-deep .symptom-custom .van-field__control{background:#f2f3f5;padding:12px 12px 10px}
+.picker-value{text-align:left;font-size:34px;font-weight:700;color:#111;margin:6px 0 14px}
+.picker-unit{font-size:16px;font-weight:600;color:#666;margin-left:6px}
+.picker-row{display:flex;align-items:center;justify-content:center;gap:10px;padding:10px 0 8px}
+.picker-col{width:44%}
+.picker-dot{font-size:30px;font-weight:700;color:#111;transform:translateY(-4px)}
+.picker-hint{margin-top:14px;text-align:center;color:#9aa0a6;font-size:12px}
+::v-deep .record-popup .van-picker__mask{background:linear-gradient(180deg, rgba(255,255,255,.9), rgba(255,255,255,.25)),linear-gradient(0deg, rgba(255,255,255,.9), rgba(255,255,255,.25))}
+::v-deep .record-popup .van-picker-column__item{color:#6b7280}
+::v-deep .record-popup .van-picker-column__item--selected{color:#111;font-weight:800}
+.record-bottom{padding:6px 18px 18px}
+.record-page{text-align:center;color:#9aa0a6;font-size:12px;margin-bottom:10px}
+.record-done{background:#fff;border:1px solid #e7e9ee;color:#111}
 </style>
