@@ -196,7 +196,17 @@ export default {
       try {
         const res = await getBirthdayListReq()
         if (res && res.code === 200) {
-          this.list = Array.isArray(res.data) ? res.data : []
+          const items = Array.isArray(res.data) ? res.data.slice() : []
+          items.sort((a, b) => {
+            const A = typeof a.next_birthday_in_days === 'number' ? a.next_birthday_in_days : Number.POSITIVE_INFINITY
+            const B = typeof b.next_birthday_in_days === 'number' ? b.next_birthday_in_days : Number.POSITIVE_INFINITY
+            if (A !== B) return A - B
+            const ad = a.next_birthday_date || ''
+            const bd = b.next_birthday_date || ''
+            if (ad !== bd) return ad.localeCompare(bd)
+            return (a.id || 0) - (b.id || 0)
+          })
+          this.list = items
         } else {
           Toast(res?.msg || '加载失败')
         }
