@@ -158,13 +158,12 @@ export function getBabyAlbumsReq(params) {
 }
 
 export function addBabyAlbumReq(data) {
+  const isFormData = typeof FormData !== 'undefined' && data instanceof FormData
   return request({
     url: '/baby/albums/',
     method: 'post',
     data,
-    headers: {
-      'Content-Type': 'multipart/form-data'
-    }
+    headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : undefined
   })
 }
 
@@ -172,6 +171,22 @@ export function deleteBabyAlbumReq(id) {
   return request({
     url: `/baby/albums/${id}/`,
     method: 'delete'
+  })
+}
+
+export function initMediaUploadReq(data) {
+  return request({
+    url: '/file/presign/init',
+    method: 'post',
+    data
+  })
+}
+
+export function completeMediaUploadReq(data) {
+  return request({
+    url: '/file/presign/complete',
+    method: 'post',
+    data
   })
 }
 

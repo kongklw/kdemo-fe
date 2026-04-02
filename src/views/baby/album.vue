@@ -107,8 +107,9 @@
 </template>
 
 <script>
-import { getBabyAlbumsReq, addBabyAlbumReq, deleteBabyAlbumReq } from '@/api/baby'
+import { getBabyAlbumsReq, addBabyAlbumReq, deleteBabyAlbumReq, initMediaUploadReq, completeMediaUploadReq } from '@/api/baby'
 import { parseTime } from '@/utils'
+import axios from 'axios'
 
 export default {
   name: 'BabyAlbum',
@@ -163,36 +164,93 @@ export default {
     handleRemove(file, fileList) {
       this.fileList = fileList
     },
-    createData() {
+    async createData() {
       this.loading = true
-      const formData = new FormData()
-      formData.append('content', this.temp.content)
-      formData.append('happened_at', this.temp.happened_at)
-      formData.append('visibility', this.temp.visibility)
+      try {
+        const assetIds = []
+        let presignDisabled = false
+        for (let i = 0; i < this.fileList.length; i++) {
+          const file = this.fileList[i] && this.fileList[i].raw
+          if (!file) continue
+          const isVideo = file && file.type && file.type.startsWith('video/')
+          const initRes = await initMediaUploadReq({
+            purpose: 'baby_album',
+            filename: file.name,
+            content_type: file.type,
+            size: file.size,
+            is_video: isVideo
+          })
 
-      // Handle tags - ensure it's sent as a way backend understands
-      // Since backend expects JSON string or list, but FormData converts everything to string
-      // We can append tags one by one or as a JSON string
-      if (this.temp.tags && this.temp.tags.length > 0) {
-        // Send as JSON string to be safe with the backend logic I wrote
-        // "['tag1', 'tag2']"
-        // Or I can change backend to handle getlist('tags')
-        // My backend logic:
-        // if tags.startswith('['): data['tags'] = json.loads(tags)
-        // else: data['tags'] = [t.strip() for t in tags.split(',') if t.strip()]
+          if (!initRes || initRes.code !== 200 || !initRes.data) {
+            const msg = (initRes && initRes.msg) || '获取上传地址失败'
+            if (initRes && initRes.code === 400 && msg === 'S3 media not enabled') {
+              presignDisabled = true
+              break
+            }
+            throw new Error(msg)
+          }
 
-        // Let's send as JSON string
-        formData.append('tags', JSON.stringify(this.temp.tags))
-      }
+          const { asset_id: assetId, upload_url: uploadUrl, headers } = initRes.data
+          await axios.put(uploadUrl, file, {
+            headers: {
+              ...(headers || {}),
+              'Content-Type': file.type
+            },
+            timeout: 0
+          })
 
-      this.fileList.forEach(file => {
-        // file.raw is the actual File object
-        formData.append('images', file.raw)
-      })
+          const completeRes = await completeMediaUploadReq({ asset_id: assetId })
+          if (!completeRes || completeRes.code !== 200) {
+            throw new Error((completeRes && completeRes.msg) || '上传确认失败')
+          }
 
-      addBabyAlbumReq(formData).then(response => {
+          assetIds.push(assetId)
+        }
+
+        if (presignDisabled) {
+          const formData = new FormData()
+          formData.append('content', this.temp.content)
+          formData.append('happened_at', this.temp.happened_at)
+          formData.append('visibility', this.temp.visibility)
+          if (this.temp.tags && this.temp.tags.length > 0) {
+            formData.append('tags', JSON.stringify(this.temp.tags))
+          }
+          this.fileList.forEach(item => {
+            if (item && item.raw) {
+              formData.append('images', item.raw)
+            }
+          })
+
+          const saveRes = await addBabyAlbumReq(formData)
+          if (!saveRes || saveRes.code !== 200) {
+            throw new Error((saveRes && saveRes.msg) || '创建失败')
+          }
+
+          this.dialogFormVisible = false
+          this.$notify({
+            title: 'Success',
+            message: 'Created Successfully',
+            type: 'success',
+            duration: 2000
+          })
+          this.getList()
+          return
+        }
+
+        const payload = {
+          content: this.temp.content,
+          happened_at: this.temp.happened_at,
+          visibility: this.temp.visibility,
+          tags: this.temp.tags || [],
+          media_asset_ids: assetIds
+        }
+
+        const saveRes = await addBabyAlbumReq(payload)
+        if (!saveRes || saveRes.code !== 200) {
+          throw new Error((saveRes && saveRes.msg) || '创建失败')
+        }
+
         this.dialogFormVisible = false
-        this.loading = false
         this.$notify({
           title: 'Success',
           message: 'Created Successfully',
@@ -200,9 +258,16 @@ export default {
           duration: 2000
         })
         this.getList()
-      }).catch(() => {
+      } catch (e) {
+        this.$notify({
+          title: 'Error',
+          message: e && e.message ? e.message : '创建失败',
+          type: 'error',
+          duration: 2000
+        })
+      } finally {
         this.loading = false
-      })
+      }
     },
     handleDelete(id) {
       this.$confirm('此操作将永久删除该记录, 是否继续?', '提示', {

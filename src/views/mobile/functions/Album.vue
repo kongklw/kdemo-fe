@@ -277,10 +277,11 @@
 </template>
 
 <script>
-import { getBabyAlbumsReq, addBabyAlbumReq, deleteBabyAlbumReq, getBabyInfoReq } from '@/api/baby'
+import { getBabyAlbumsReq, addBabyAlbumReq, deleteBabyAlbumReq, getBabyInfoReq, initMediaUploadReq, completeMediaUploadReq } from '@/api/baby'
 import { parseTime } from '@/utils'
 import { ImagePreview, Toast, Dialog } from 'vant'
 import EXIF from 'exif-js'
+import axios from 'axios'
 
 export default {
   name: 'MobileAlbum',
@@ -539,36 +540,104 @@ export default {
         duration: 0
       })
 
-      const formData = new FormData()
-      formData.append('content', this.form.content)
-      formData.append('happened_at', this.form.happened_at)
-      formData.append('visibility', this.form.visibility)
+      try {
+        const assetIds = []
+        let presignDisabled = false
+        let files = []
 
-      if (this.form.tags && this.form.tags.length > 0) {
-        formData.append('tags', JSON.stringify(this.form.tags))
-      }
+        if (this.fileList.length > 0) {
+          files = await Promise.all(this.fileList.map(item => this.compressImage(item.file)))
+          for (let i = 0; i < files.length; i++) {
+            const file = files[i]
+            const isVideo = file && file.type && file.type.startsWith('video/')
+            const initRes = await initMediaUploadReq({
+              purpose: 'baby_album',
+              filename: file.name,
+              content_type: file.type,
+              size: file.size,
+              is_video: isVideo
+            })
 
-      if (this.fileList.length > 0) {
-        try {
-          const compressedFiles = await Promise.all(
-            this.fileList.map(item => this.compressImage(item.file))
-          )
-          compressedFiles.forEach(file => {
-            formData.append('images', file)
-          })
-        } catch (error) {
-          Toast.fail('图片处理失败')
+            if (!initRes || initRes.code !== 200 || !initRes.data) {
+              const msg = (initRes && initRes.msg) || '获取上传地址失败'
+              if (initRes && initRes.code === 400 && msg === 'S3 media not enabled') {
+                presignDisabled = true
+                break
+              }
+              throw new Error(msg)
+            }
+
+            const { asset_id: assetId, upload_url: uploadUrl, headers } = initRes.data
+            if (!assetId || !uploadUrl) {
+              throw new Error('获取上传地址失败')
+            }
+
+            await axios.put(uploadUrl, file, {
+              headers: {
+                ...(headers || {}),
+                'Content-Type': file.type
+              },
+              timeout: 0
+            })
+
+            const completeRes = await completeMediaUploadReq({ asset_id: assetId })
+            if (!completeRes || completeRes.code !== 200) {
+              throw new Error((completeRes && completeRes.msg) || '上传确认失败')
+            }
+
+            assetIds.push(assetId)
+            Toast.loading({
+              message: `上传中 ${assetIds.length}/${files.length}`,
+              forbidClick: true,
+              duration: 0
+            })
+          }
+        }
+
+        if (presignDisabled) {
+          const formData = new FormData()
+          formData.append('content', this.form.content)
+          formData.append('happened_at', this.form.happened_at)
+          formData.append('visibility', this.form.visibility)
+          if (this.form.tags && this.form.tags.length > 0) {
+            formData.append('tags', JSON.stringify(this.form.tags))
+          }
+          if (files.length > 0) {
+            files.forEach(file => {
+              formData.append('images', file)
+            })
+          }
+
+          const saveRes = await addBabyAlbumReq(formData)
+          if (!saveRes || saveRes.code !== 200) {
+            throw new Error((saveRes && saveRes.msg) || '发布失败')
+          }
+
+          Toast.success('发布成功')
+          this.showAddDialog = false
+          this.onRefresh()
           return
         }
-      }
 
-      addBabyAlbumReq(formData).then(() => {
+        const payload = {
+          content: this.form.content,
+          happened_at: this.form.happened_at,
+          visibility: this.form.visibility,
+          tags: this.form.tags || [],
+          media_asset_ids: assetIds
+        }
+
+        const saveRes = await addBabyAlbumReq(payload)
+        if (!saveRes || saveRes.code !== 200) {
+          throw new Error((saveRes && saveRes.msg) || '发布失败')
+        }
+
         Toast.success('发布成功')
         this.showAddDialog = false
         this.onRefresh()
-      }).catch(() => {
-        Toast.fail('发布失败')
-      })
+      } catch (e) {
+        Toast.fail(e && e.message ? e.message : '发布失败')
+      }
     },
     previewVideo(url) {
       this.currentVideoUrl = url
