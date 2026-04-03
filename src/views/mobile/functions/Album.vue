@@ -11,7 +11,7 @@
           round
           width="80"
           height="80"
-          :src="babyInfo.image_full || babyInfo.image || defaultAvatar"
+          :src="resolveApiUrl(babyInfo.image_full || babyInfo.image) || defaultAvatar"
           fit="cover"
           class="avatar"
         />
@@ -81,7 +81,7 @@
                         width="100%"
                         height="200"
                         fit="cover"
-                        :src="item.photos[0].poster || item.photos[0].image"
+                        :src="resolveApiUrl(item.photos[0].poster || item.photos[0].image)"
                         radius="8"
                       />
                       <van-icon name="play-circle-o" size="50" color="rgba(255,255,255,0.8)" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none;" />
@@ -91,7 +91,7 @@
                       width="100%"
                       height="200"
                       fit="cover"
-                      :src="item.photos[0].thumb || item.photos[0].image"
+                      :src="resolveApiUrl(item.photos[0].thumb || item.photos[0].image)"
                       radius="8"
                       @click="previewImage(item.photos[0].image, item.photos)"
                     />
@@ -104,7 +104,7 @@
                           width="100%"
                           height="100%"
                           fit="cover"
-                          :src="photo.poster || photo.image"
+                          :src="resolveApiUrl(photo.poster || photo.image)"
                           radius="4"
                         />
                         <van-icon name="play-circle-o" size="30" color="rgba(255,255,255,0.8)" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none;" />
@@ -114,7 +114,7 @@
                         width="100%"
                         height="100%"
                         fit="cover"
-                        :src="photo.thumb || photo.image"
+                        :src="resolveApiUrl(photo.thumb || photo.image)"
                         radius="4"
                         @click="previewImage(photo.image, item.photos)"
                       />
@@ -272,7 +272,7 @@
       <video
         v-if="currentVideo"
         ref="videoPlayer"
-        :poster="currentVideo.poster"
+        :poster="resolveApiUrl(currentVideo.poster)"
         controls
         style="width: 100%; max-height: 100%;"
         autoplay
@@ -375,6 +375,17 @@ export default {
     this.getBabyInfo()
   },
   methods: {
+    resolveApiUrl(raw) {
+      const url = (raw || '').toString().trim()
+      if (!url) return ''
+      if (/^(https?:)?\/\//i.test(url)) return url
+      if (/^(data:|blob:)/i.test(url)) return url
+      const base = (process.env.VUE_APP_BASE_API || '').toString().trim()
+      if (!base) return url
+      if (url.startsWith(base)) return url
+      if (url.startsWith('/')) return `${base}${url}`
+      return `${base}/${url}`
+    },
     getBabyInfo() {
       getBabyInfoReq().then(res => {
         if (res.data) {
@@ -681,8 +692,8 @@ export default {
 
       this.cleanupVideoPlayer()
 
-      const hlsUrl = photo.hls
-      const mp4Url = photo.image
+      const hlsUrl = this.resolveApiUrl(photo.hls)
+      const mp4Url = this.resolveApiUrl(photo.image)
 
       if (hlsUrl && video.canPlayType('application/vnd.apple.mpegurl')) {
         video.src = hlsUrl
@@ -710,10 +721,10 @@ export default {
       })
     },
     previewImage(current, photos) {
-      const images = photos.map(p => p.image)
+      const images = (photos || []).map(p => this.resolveApiUrl((p && p.image) || '')).filter(Boolean)
       ImagePreview({
         images,
-        startPosition: images.indexOf(current)
+        startPosition: images.indexOf(this.resolveApiUrl(current))
       })
     },
     onSelectAction(action, id) {
