@@ -190,6 +190,13 @@ export function completeMediaUploadReq(data) {
   })
 }
 
+export function getAlbumVideoPlaybackReq(streamId) {
+  return request({
+    url: `/baby/albums/video/${streamId}/playback`,
+    method: 'get'
+  })
+}
+
 // Body Metrics
 export function getGrowthRecordsReq(params) {
   return request({

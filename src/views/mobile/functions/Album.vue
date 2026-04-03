@@ -76,12 +76,13 @@
                 <div v-if="item.photos && item.photos.length" class="content-images">
                   <!-- Single Media -->
                   <div v-if="item.photos.length === 1">
-                    <div v-if="item.photos[0].is_video" style="position: relative;" @click="previewVideo(item.photos[0].image)">
-                      <video
-                        :src="item.photos[0].image"
-                        :poster="item.photos[0].poster"
-                        style="width: 100%; max-height: 300px; border-radius: 8px; background: #000; object-fit: contain;"
-                        preload="metadata"
+                    <div v-if="item.photos[0].is_video" style="position: relative;" @click="previewVideo(item.photos[0])">
+                      <van-image
+                        width="100%"
+                        height="200"
+                        fit="cover"
+                        :src="item.photos[0].poster || item.photos[0].image"
+                        radius="8"
                       />
                       <van-icon name="play-circle-o" size="50" color="rgba(255,255,255,0.8)" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none;" />
                     </div>
@@ -90,7 +91,7 @@
                       width="100%"
                       height="200"
                       fit="cover"
-                      :src="item.photos[0].image"
+                      :src="item.photos[0].thumb || item.photos[0].image"
                       radius="8"
                       @click="previewImage(item.photos[0].image, item.photos)"
                     />
@@ -98,12 +99,13 @@
                   <!-- Multiple Media Grid -->
                   <div v-else class="image-grid" style="display: flex; flex-wrap: wrap; gap: 4px;">
                     <div v-for="photo in item.photos" :key="photo.id" style="width: 32%; height: 100px; position: relative;">
-                      <div v-if="photo.is_video" style="width: 100%; height: 100%;" @click="previewVideo(photo.image)">
-                        <video
-                          :src="photo.image"
-                          :poster="photo.poster"
-                          style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px; background: #000;"
-                          preload="metadata"
+                      <div v-if="photo.is_video" style="width: 100%; height: 100%;" @click="previewVideo(photo)">
+                        <van-image
+                          width="100%"
+                          height="100%"
+                          fit="cover"
+                          :src="photo.poster || photo.image"
+                          radius="4"
                         />
                         <van-icon name="play-circle-o" size="30" color="rgba(255,255,255,0.8)" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none;" />
                       </div>
@@ -112,7 +114,7 @@
                         width="100%"
                         height="100%"
                         fit="cover"
-                        :src="photo.image"
+                        :src="photo.thumb || photo.image"
                         radius="4"
                         @click="previewImage(photo.image, item.photos)"
                       />
@@ -268,8 +270,9 @@
     </van-popup>
     <van-popup v-model="showVideoPreviewOverlay" closeable position="bottom" :style="{ height: '100%', background: 'black', display: 'flex', alignItems: 'center', justifyContent: 'center' }">
       <video
-        v-if="currentVideoUrl"
-        :src="currentVideoUrl"
+        v-if="currentVideo"
+        ref="videoPlayer"
+        :poster="currentVideo.poster"
         controls
         style="width: 100%; max-height: 100%;"
         autoplay
@@ -285,6 +288,7 @@ import { parseTime } from '@/utils'
 import { ImagePreview, Toast, Dialog } from 'vant'
 import EXIF from 'exif-js'
 import axios from 'axios'
+import Hls from 'hls.js'
 
 export default {
   name: 'MobileAlbum',
@@ -317,7 +321,8 @@ export default {
       showDatePicker: false,
       showTagDialog: false,
       showVideoPreviewOverlay: false,
-      currentVideoUrl: '',
+      currentVideo: null,
+      hls: null,
       newTag: '',
       currentDate: new Date(),
       fileList: [],
@@ -356,6 +361,14 @@ export default {
       if (years === 0 && months === 0) age += days + '天'
 
       return age || '出生当天'
+    }
+  },
+  watch: {
+    showVideoPreviewOverlay(val) {
+      if (!val) {
+        this.cleanupVideoPlayer()
+        this.currentVideo = null
+      }
     }
   },
   created() {
@@ -642,9 +655,59 @@ export default {
         Toast.fail(e && e.message ? e.message : '发布失败')
       }
     },
-    previewVideo(url) {
-      this.currentVideoUrl = url
+    cleanupVideoPlayer() {
+      try {
+        if (this.hls) {
+          this.hls.destroy()
+          this.hls = null
+        }
+      } catch (e) {
+        this.hls = null
+      }
+      const video = this.$refs.videoPlayer
+      if (video) {
+        try {
+          video.pause()
+        } catch (e) { void e }
+        try {
+          video.removeAttribute('src')
+          video.load()
+        } catch (e) { void e }
+      }
+    },
+    attachVideoPlayer(photo) {
+      const video = this.$refs.videoPlayer
+      if (!video || !photo) return
+
+      this.cleanupVideoPlayer()
+
+      const hlsUrl = photo.hls
+      const mp4Url = photo.image
+
+      if (hlsUrl && video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = hlsUrl
+      } else if (hlsUrl && Hls && Hls.isSupported && Hls.isSupported()) {
+        this.hls = new Hls({
+          maxBufferLength: 30,
+          maxMaxBufferLength: 60
+        })
+        this.hls.loadSource(hlsUrl)
+        this.hls.attachMedia(video)
+      } else {
+        video.src = mp4Url
+      }
+
+      const p = video.play()
+      if (p && typeof p.catch === 'function') {
+        p.catch(() => null)
+      }
+    },
+    previewVideo(photo) {
+      this.currentVideo = photo
       this.showVideoPreviewOverlay = true
+      this.$nextTick(() => {
+        this.attachVideoPlayer(photo)
+      })
     },
     previewImage(current, photos) {
       const images = photos.map(p => p.image)

@@ -6,10 +6,14 @@
       left-arrow
       fixed
       placeholder
+      :border="false"
+      class="growing-nav"
       @click-left="onClickLeft"
     >
       <template #right>
-        <van-icon name="plus" size="18" @click="openAddDialog" />
+        <div class="nav-add" @click="openAddDialog">
+          <van-icon name="plus" size="18" />
+        </div>
       </template>
     </van-nav-bar>
 
@@ -20,6 +24,9 @@
         finished-text="没有更多了"
         @load="onLoad"
       >
+        <div v-if="loading && list.length === 0" class="growing-skeleton">
+          <van-skeleton v-for="n in 6" :key="n" title :row="2" class="skeleton-item" />
+        </div>
         <div class="growing-list">
           <van-collapse v-model="activeNames" :border="false">
             <van-collapse-item
@@ -27,19 +34,28 @@
               :key="item.id"
               :name="item.id"
               class="growing-item"
+              :class="{ 'is-open': isOpen(item.id) }"
             >
               <template #title>
                 <div class="item-title">
                   <span class="title-text">{{ item.title }}</span>
+                  <span v-if="isToday(item.created_time)" class="today-pill">今天</span>
+                </div>
+                <div v-if="!isOpen(item.id) && item.content" class="item-preview">
+                  {{ item.content }}
                 </div>
               </template>
               <template #value>
-                <span class="item-date">{{ item.created_time }}</span>
+                <div class="item-meta">
+                  <van-icon name="calendar-o" class="meta-icon" />
+                  <span class="item-date">{{ formatDate(item.created_time) }}</span>
+                </div>
               </template>
               <div class="content-text">{{ item.content }}</div>
             </van-collapse-item>
           </van-collapse>
         </div>
+        <van-empty v-if="!loading && finished && list.length === 0" description="还没有记录，点右上角 + 添加" />
       </van-list>
     </van-pull-refresh>
 
@@ -147,6 +163,7 @@
 <script>
 import { showGrowingListReq, addGrowingReq, geneContentReq } from '@/api/baby'
 import { Toast } from 'vant'
+import moment from 'moment'
 
 export default {
   name: 'MobileGrowing',
@@ -188,6 +205,17 @@ export default {
   methods: {
     onClickLeft() {
       this.$router.back()
+    },
+    formatDate(val) {
+      if (!val) return ''
+      return moment(val).format('YYYY-MM-DD')
+    },
+    isToday(val) {
+      if (!val) return false
+      return moment(val).isSame(moment(), 'day')
+    },
+    isOpen(id) {
+      return Array.isArray(this.activeNames) && this.activeNames.includes(id)
     },
 
     onLoad() {
@@ -296,8 +324,18 @@ export default {
 
 <style lang="scss" scoped>
 .mobile-growing {
-  padding-bottom: 20px;
-  background-color: #f7f8fa;
+  --g-primary: #ff6b6b;
+  --g-primary-2: #ff8a5c;
+  --g-bg: #f7f8fa;
+  --g-bg-top: #fff2ec;
+  --g-surface: #ffffff;
+  --g-text: #2b3445;
+  --g-title: #263246;
+  --g-muted: #6b7280;
+  --g-muted-2: #9ca3af;
+
+  padding-bottom: 28px;
+  background: linear-gradient(180deg, var(--g-bg-top) 0%, var(--g-bg) 55%, var(--g-bg) 100%);
   min-height: 100vh;
 }
 
@@ -305,56 +343,159 @@ export default {
   min-height: calc(100vh - 46px);
 }
 
+.growing-nav {
+  ::v-deep .van-nav-bar__content {
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(10px);
+  }
+
+  ::v-deep .van-nav-bar__title {
+    color: var(--g-text);
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+
+  ::v-deep .van-nav-bar__text,
+  ::v-deep .van-icon-arrow-left {
+    color: #2563eb;
+  }
+}
+
+.nav-add {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--g-primary), var(--g-primary-2));
+  color: #fff;
+  box-shadow: 0 8px 16px rgba(255, 107, 107, 0.22);
+}
+
 .growing-list {
   padding: 12px;
 }
 
-/* Card Style for Collapse Item */
+.growing-skeleton {
+  padding: 12px;
+}
+
+.skeleton-item {
+  margin-bottom: 12px;
+  padding: 14px 14px;
+  border-radius: 16px;
+  background: var(--g-surface);
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.06);
+}
+
 .growing-item {
   margin-bottom: 12px;
-  border-radius: 12px;
+  border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  background: #fff;
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.06);
+  background:
+    linear-gradient(var(--g-surface), var(--g-surface)) padding-box,
+    linear-gradient(135deg, rgba(255, 107, 107, 0.28), rgba(255, 138, 92, 0.22), rgba(37, 99, 235, 0.14)) border-box;
+  border: 1px solid transparent;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.growing-item.is-open {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
 }
 
 ::v-deep .van-collapse-item__content {
-  padding: 0 16px 16px;
-  color: #666;
+  padding: 4px 16px 16px;
+  color: var(--g-muted);
   font-size: 14px;
   line-height: 1.6;
 }
 
 ::v-deep .van-cell {
-  padding: 16px;
-  background-color: #fff;
-  align-items: center;
+  padding: 14px 16px;
+  background-color: var(--g-surface);
+  align-items: flex-start;
   font-size: 16px;
 
   &::after {
-    display: none; /* Remove inner border */
+    display: none;
   }
 }
 
 .item-title {
   display: flex;
   align-items: center;
+  gap: 8px;
+}
+
+.item-title::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--g-primary), var(--g-primary-2));
+  box-shadow: 0 6px 14px rgba(255, 107, 107, 0.22);
 }
 
 .title-text {
+  font-weight: 700;
+  color: var(--g-title);
+  line-height: 1.25;
+  max-width: calc(100vw - 170px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  letter-spacing: 0.2px;
+}
+
+.today-pill {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
   font-weight: 600;
-  color: #333;
-  margin-right: 8px;
+  color: var(--g-primary);
+  background: rgba(255, 107, 107, 0.14);
+}
+
+.item-preview {
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--g-muted);
+  line-height: 1.5;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  word-break: break-word;
+}
+
+.item-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding-top: 2px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(37, 99, 235, 0.08);
+}
+
+.meta-icon {
+  font-size: 14px;
+  color: rgba(37, 99, 235, 0.55);
 }
 
 .item-date {
   font-size: 13px;
-  color: #999;
+  color: rgba(37, 99, 235, 0.72);
+  white-space: nowrap;
 }
 
 .content-text {
   white-space: pre-wrap;
-  word-break: break-all;
+  word-break: break-word;
+  color: var(--g-muted);
 }
 
 .popup-content {
@@ -370,7 +511,7 @@ export default {
   height: 100%;
   display: flex;
   flex-direction: column;
-  background-color: #f7f8fa;
+  background: linear-gradient(180deg, #ffffff 0%, var(--g-bg) 100%);
 }
 
 .popup-header {
@@ -380,13 +521,13 @@ export default {
   justify-content: space-between;
   height: 50px;
   padding: 0 16px;
-  background-color: #fff;
+  background-color: var(--g-surface);
 }
 
 .header-title {
   font-size: 17px;
   font-weight: 600;
-  color: #333;
+  color: var(--g-text);
 }
 
 .popup-body {
@@ -397,7 +538,7 @@ export default {
 
 .form-group {
   margin-bottom: 12px;
-  background-color: #fff;
+  background-color: var(--g-surface);
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 1px 4px rgba(0,0,0,0.02);
@@ -430,7 +571,7 @@ export default {
 
 .section-title {
   font-size: 14px;
-  color: #999;
+  color: var(--g-muted-2);
   font-weight: 500;
 }
 
@@ -443,8 +584,8 @@ export default {
 
 .custom-tag {
   padding: 6px 12px;
-  background-color: #e3f2fd;
-  color: #1976d2;
+  background: rgba(255, 138, 92, 0.12);
+  color: #ea580c;
   border-radius: 20px;
   font-size: 13px;
   transition: all 0.2s;
@@ -469,7 +610,7 @@ export default {
   flex-shrink: 0;
   padding: 12px 16px;
   padding-bottom: calc(12px + env(safe-area-inset-bottom));
-  background-color: #fff;
+  background-color: var(--g-surface);
   box-shadow: 0 -2px 10px rgba(0,0,0,0.03);
 }
 
