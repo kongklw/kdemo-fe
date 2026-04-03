@@ -138,7 +138,7 @@ export default {
         this.form.height_cm = data.height_cm === null || data.height_cm === undefined ? '' : `${data.height_cm}`
         this.form.weight_kg = data.weight_kg === null || data.weight_kg === undefined ? '' : `${data.weight_kg}`
         this.form.head_circumference_cm = data.head_circumference_cm === null || data.head_circumference_cm === undefined ? '' : `${data.head_circumference_cm}`
-        this.originalPhoto = data.photo || ''
+        this.originalPhoto = data.photo_full || data.photo || ''
         this.fileList = this.originalPhoto ? [{ url: this.originalPhoto }] : []
         if (this.form.measure_date) {
           this.formDate = moment(this.form.measure_date, 'YYYY-MM-DD').toDate()

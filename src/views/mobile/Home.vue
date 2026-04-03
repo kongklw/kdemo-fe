@@ -19,7 +19,7 @@
         </div>
         <div class="baby-info-right">
           <div class="baby-avatar-large">
-            <img :src="babyInfo.image || 'https://img.yzcdn.cn/vant/cat.jpeg'">
+            <img :src="babyInfo.image_full || babyInfo.image || 'https://img.yzcdn.cn/vant/cat.jpeg'">
           </div>
         </div>
       </div>

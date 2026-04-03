@@ -365,8 +365,8 @@ export default {
     },
     pageParams() {
       return {
-        page: Math.floor(this.list.length / 20) + 1, // Simple pagination calc
-        limit: 20,
+        page: Math.floor(this.list.length / 10) + 1, // Simple pagination calc
+        limit: 10,
         name: this.filterName,
         expense_type: this.filterType,
         start_date: this.monthRange[0],
@@ -390,16 +390,16 @@ export default {
       }
 
       try {
-        const page = Math.floor(this.list.length / 20) + 1
+        const page = Math.floor(this.list.length / 10) + 1
         console.log('Fetching expense list:', {
           page_num: page,
-          page_size: 20,
+          page_size: 10,
           monthrange: this.monthRange
         })
 
         const res = await showExpenseListReq({
           page_num: page,
-          page_size: 20,
+          page_size: 10,
           name: this.filterName,
           expense_type: this.filterType,
           monthrange: this.monthRange
@@ -681,7 +681,10 @@ export default {
     },
 
     getImageUrl(item) {
+      if (!item) return ''
+      if (item.image_url_full) return item.image_url_full
       if (!item.image_url) return ''
+      if (/^https?:\/\//.test(item.image_url)) return item.image_url
       const url = item.image_url.replace(/\\/g, '/')
       return process.env.VUE_APP_BASE_API + '/media/' + url
     },

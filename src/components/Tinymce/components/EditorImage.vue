@@ -11,8 +11,9 @@
         :on-remove="handleRemove"
         :on-success="handleSuccess"
         :before-upload="beforeUpload"
+        :headers="uploadHeaders"
         class="editor-slide-upload"
-        action="https://httpbin.org/post"
+        :action="uploadUrl"
         list-type="picture-card"
       >
         <el-button size="small" type="primary">
@@ -31,6 +32,7 @@
 
 <script>
 // import { getToken } from 'api/qiniu'
+import { getToken } from '@/utils/auth'
 
 export default {
   name: 'EditorSlideUpload',
@@ -45,6 +47,16 @@ export default {
       dialogVisible: false,
       listObj: {},
       fileList: []
+    }
+  },
+  computed: {
+    uploadUrl() {
+      return process.env.VUE_APP_BASE_API + '/file/upload'
+    },
+    uploadHeaders() {
+      const token = getToken()
+      if (!token) return {}
+      return { Authorization: 'Bearer ' + token }
     }
   },
   methods: {
@@ -67,8 +79,12 @@ export default {
       const objKeyArr = Object.keys(this.listObj)
       for (let i = 0, len = objKeyArr.length; i < len; i++) {
         if (this.listObj[objKeyArr[i]].uid === uid) {
-          this.listObj[objKeyArr[i]].url = response.files.file
-          this.listObj[objKeyArr[i]].hasSuccess = true
+          const ok = response && response.code === 200 && response.data
+          const id = ok ? response.data.id : null
+          const stableUrl = id ? (process.env.VUE_APP_BASE_API + '/file/r/' + id) : ''
+          const url = stableUrl || (ok && response.data.url ? response.data.url : '')
+          this.listObj[objKeyArr[i]].url = url
+          this.listObj[objKeyArr[i]].hasSuccess = !!url
           return
         }
       }

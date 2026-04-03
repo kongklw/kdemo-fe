@@ -39,7 +39,7 @@
                   </div>
                   <div class="record-body">
                     <div class="thumb">
-                      <img v-if="item.photo" :src="item.photo" alt="photo">
+                      <img v-if="item.photo_full || item.photo" :src="item.photo_full || item.photo" alt="photo">
                       <div v-else class="thumb-placeholder" />
                     </div>
                     <div class="metrics">

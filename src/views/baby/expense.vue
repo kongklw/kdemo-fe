@@ -530,10 +530,10 @@ export default {
     },
 
     getImageUrl(row) {
-      if (!row || !row.image_url) {
-        return ''
-      }
-      // Fix: Replace backslashes with forward slashes for Windows compatibility
+      if (!row) return ''
+      if (row.image_url_full) return row.image_url_full
+      if (!row.image_url) return ''
+      if (/^https?:\/\//.test(row.image_url)) return row.image_url
       const url = row.image_url.replace(/\\/g, '/')
       return this.$BASE_API + '/media/' + url
     },

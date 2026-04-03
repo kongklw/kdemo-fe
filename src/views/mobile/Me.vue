@@ -18,7 +18,7 @@
             width="40"
             height="40"
             fit="cover"
-            :src="babyInfo.image || 'https://img.yzcdn.cn/vant/cat.jpeg'"
+            :src="babyInfo.image_full || babyInfo.image || 'https://img.yzcdn.cn/vant/cat.jpeg'"
           />
         </div>
         <div class="baby-card-center">
@@ -259,12 +259,13 @@ export default {
       }
 
       this.fileList = []
-      if (this.babyInfo && this.babyInfo.image) {
+      const avatarUrl = (this.babyInfo && (this.babyInfo.image_full || this.babyInfo.image)) || ''
+      if (avatarUrl) {
         // Construct full URL if needed, assuming absolute URL from backend or relative
         // If relative starting with /media, we might need to adjust based on environment
         // For now, use as is if it works
         this.fileList.push({
-          url: this.babyInfo.image,
+          url: avatarUrl,
           isImage: true,
           name: 'current_image'
         })

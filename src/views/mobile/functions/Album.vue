@@ -11,7 +11,7 @@
           round
           width="80"
           height="80"
-          :src="babyInfo.image || defaultAvatar"
+          :src="babyInfo.image_full || babyInfo.image || defaultAvatar"
           fit="cover"
           class="avatar"
         />
@@ -377,7 +377,7 @@ export default {
         this.refreshing = false
       }
 
-      const pageSize = 20
+      const pageSize = 3
       const page = Math.floor(this.list.length / pageSize) + 1
 
       getBabyAlbumsReq({ page_num: page, page_size: pageSize }).then(res => {
