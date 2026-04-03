@@ -79,6 +79,7 @@
                     <div v-if="item.photos[0].is_video" style="position: relative;" @click="previewVideo(item.photos[0].image)">
                       <video
                         :src="item.photos[0].image"
+                        :poster="item.photos[0].poster"
                         style="width: 100%; max-height: 300px; border-radius: 8px; background: #000; object-fit: contain;"
                         preload="metadata"
                       />
@@ -100,6 +101,7 @@
                       <div v-if="photo.is_video" style="width: 100%; height: 100%;" @click="previewVideo(photo.image)">
                         <video
                           :src="photo.image"
+                          :poster="photo.poster"
                           style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px; background: #000;"
                           preload="metadata"
                         />
@@ -271,6 +273,7 @@
         controls
         style="width: 100%; max-height: 100%;"
         autoplay
+        preload="metadata"
       />
     </van-popup>
   </div>
