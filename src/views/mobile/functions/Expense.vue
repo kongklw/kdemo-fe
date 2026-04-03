@@ -384,28 +384,21 @@ export default {
 
     // --- Data Loading ---
     async onLoad() {
+      const pageSize = 10
       if (this.refreshing) {
         this.list = []
         this.refreshing = false
       }
 
       try {
-        const page = Math.floor(this.list.length / 10) + 1
-        console.log('Fetching expense list:', {
-          page_num: page,
-          page_size: 10,
-          monthrange: this.monthRange
-        })
-
+        const page = Math.floor(this.list.length / pageSize) + 1
         const res = await showExpenseListReq({
           page_num: page,
-          page_size: 10,
+          page_size: pageSize,
           name: this.filterName,
           expense_type: this.filterType,
           monthrange: this.monthRange
         })
-
-        console.log('Expense list response:', res)
 
         if (res.code === 200) {
           const data = res.data
@@ -415,9 +408,9 @@ export default {
             this.finished = true
           } else {
             this.list = [...this.list, ...newData]
-            if (newData.length < 20) {
-              this.finished = true
-            }
+            const total = Number.isFinite(Number(data.total)) ? Number(data.total) : null
+            if (total !== null) this.finished = this.list.length >= total
+            else if (newData.length < pageSize) this.finished = true
           }
 
           // Update stats
