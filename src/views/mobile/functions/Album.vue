@@ -81,7 +81,7 @@
                         width="100%"
                         height="200"
                         fit="cover"
-                        :src="resolveApiUrl(item.photos[0].poster || item.photos[0].image)"
+                        :src="resolveApiUrl(item.photos[0].poster) || videoCoverPlaceholder"
                         radius="8"
                       />
                       <van-icon name="play-circle-o" size="50" color="rgba(255,255,255,0.8)" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none;" />
@@ -104,7 +104,7 @@
                           width="100%"
                           height="100%"
                           fit="cover"
-                          :src="resolveApiUrl(photo.poster || photo.image)"
+                          :src="resolveApiUrl(photo.poster) || videoCoverPlaceholder"
                           radius="4"
                         />
                         <van-icon name="play-circle-o" size="30" color="rgba(255,255,255,0.8)" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none;" />
@@ -272,7 +272,7 @@
       <video
         v-if="currentVideo"
         ref="videoPlayer"
-        :poster="resolveApiUrl(currentVideo.poster)"
+        :poster="resolveApiUrl(currentVideo.poster) || videoCoverPlaceholder"
         controls
         style="width: 100%; max-height: 100%;"
         autoplay
@@ -313,6 +313,7 @@ export default {
     return {
       babyInfo: {},
       defaultAvatar: 'https://img.yzcdn.cn/vant/cat.jpeg', // Placeholder
+      videoCoverPlaceholder: 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"800\" height=\"450\" viewBox=\"0 0 800 450\"><defs><linearGradient id=\"g\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"#111827\"/><stop offset=\"1\" stop-color=\"#1f2937\"/></linearGradient></defs><rect width=\"800\" height=\"450\" fill=\"url(#g)\"/><circle cx=\"400\" cy=\"225\" r=\"56\" fill=\"rgba(255,255,255,0.18)\"/><polygon points=\"388,196 388,254 444,225\" fill=\"rgba(255,255,255,0.85)\"/><text x=\"24\" y=\"420\" font-family=\"Arial, sans-serif\" font-size=\"20\" fill=\"rgba(255,255,255,0.55)\">视频封面生成中</text></svg>'),
       list: [],
       loading: false,
       finished: false,
@@ -569,7 +570,6 @@ export default {
 
       try {
         const assetIds = []
-        let presignDisabled = false
         let files = []
 
         if (this.fileList.length > 0) {
@@ -587,10 +587,6 @@ export default {
 
             if (!initRes || initRes.code !== 200 || !initRes.data) {
               const msg = (initRes && initRes.msg) || '获取上传地址失败'
-              if (initRes && initRes.code === 400 && msg === 'S3 media not enabled') {
-                presignDisabled = true
-                break
-              }
               throw new Error(msg)
             }
 
@@ -619,31 +615,6 @@ export default {
               duration: 0
             })
           }
-        }
-
-        if (presignDisabled) {
-          const formData = new FormData()
-          formData.append('content', this.form.content)
-          formData.append('happened_at', this.form.happened_at)
-          formData.append('visibility', this.form.visibility)
-          if (this.form.tags && this.form.tags.length > 0) {
-            formData.append('tags', JSON.stringify(this.form.tags))
-          }
-          if (files.length > 0) {
-            files.forEach(file => {
-              formData.append('images', file)
-            })
-          }
-
-          const saveRes = await addBabyAlbumReq(formData)
-          if (!saveRes || saveRes.code !== 200) {
-            throw new Error((saveRes && saveRes.msg) || '发布失败')
-          }
-
-          Toast.success('发布成功')
-          this.showAddDialog = false
-          this.onRefresh()
-          return
         }
 
         const payload = {
@@ -697,10 +668,45 @@ export default {
 
       if (hlsUrl && video.canPlayType('application/vnd.apple.mpegurl')) {
         video.src = hlsUrl
+        video.addEventListener('error', () => {
+          if (mp4Url) {
+            video.src = mp4Url
+            const p = video.play()
+            if (p && typeof p.catch === 'function') {
+              p.catch(() => null)
+            }
+          } else {
+            Toast.fail('视频加载失败')
+          }
+        }, { once: true })
       } else if (hlsUrl && Hls && Hls.isSupported && Hls.isSupported()) {
         this.hls = new Hls({
           maxBufferLength: 30,
           maxMaxBufferLength: 60
+        })
+        this.hls.on(Hls.Events.ERROR, (_, data) => {
+          if (!data) return
+          const details = data.details || ''
+          const shouldFallback = Boolean(
+            data.fatal ||
+            details === 'manifestLoadError' ||
+            details === 'manifestLoadTimeOut' ||
+            details === 'manifestParsingError'
+          )
+          if (!shouldFallback) return
+          try {
+            this.hls.destroy()
+          } catch (e) { void e }
+          this.hls = null
+          if (mp4Url) {
+            video.src = mp4Url
+            const p = video.play()
+            if (p && typeof p.catch === 'function') {
+              p.catch(() => null)
+            }
+          } else {
+            Toast.fail('视频加载失败')
+          }
         })
         this.hls.loadSource(hlsUrl)
         this.hls.attachMedia(video)
