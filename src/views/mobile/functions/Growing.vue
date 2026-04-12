@@ -37,18 +37,25 @@
               :class="{ 'is-open': isOpen(item.id) }"
             >
               <template #title>
-                <div class="item-title">
-                  <span class="title-text">{{ item.title }}</span>
-                  <span v-if="isToday(item.created_time)" class="today-pill">今天</span>
-                </div>
-                <div v-if="!isOpen(item.id) && item.content" class="item-preview">
-                  {{ item.content }}
-                </div>
-              </template>
-              <template #value>
-                <div class="item-meta">
-                  <van-icon name="calendar-o" class="meta-icon" />
-                  <span class="item-date">{{ formatDate(item.created_time) }}</span>
+                <div class="cell-head">
+                  <div class="head-left">
+                    <div class="item-title">
+                      <span class="title-text">{{ item.title }}</span>
+                      <span v-if="isToday(item.created_time)" class="today-pill">今天</span>
+                    </div>
+                    <div v-if="!isOpen(item.id) && item.content" class="item-preview">
+                      {{ item.content }}
+                    </div>
+                  </div>
+                  <div class="head-right">
+                    <div class="pill date-pill">
+                      <van-icon name="calendar-o" class="pill-icon" />
+                      <span class="pill-text">{{ formatDate(item.created_time) }}</span>
+                    </div>
+                    <div v-if="ageText(item.created_time)" class="pill age-pill">
+                      <span class="pill-text">{{ ageText(item.created_time) }}</span>
+                    </div>
+                  </div>
                 </div>
               </template>
               <div class="content-text">{{ item.content }}</div>
@@ -161,7 +168,7 @@
 </template>
 
 <script>
-import { showGrowingListReq, addGrowingReq, geneContentReq } from '@/api/baby'
+import { getBabyInfoReq, showGrowingListReq, addGrowingReq, geneContentReq } from '@/api/baby'
 import { Toast } from 'vant'
 import moment from 'moment'
 
@@ -169,6 +176,7 @@ export default {
   name: 'MobileGrowing',
   data() {
     return {
+      babyInfo: null,
       list: [],
       loading: false,
       finished: false,
@@ -202,9 +210,19 @@ export default {
       cursorIndex: 0
     }
   },
+  created() {
+    this.fetchBabyInfo()
+  },
   methods: {
     onClickLeft() {
       this.$router.back()
+    },
+    fetchBabyInfo() {
+      getBabyInfoReq().then((res) => {
+        if (res.code === 200) {
+          this.babyInfo = res.data || null
+        }
+      }).catch(() => {})
     },
     formatDate(val) {
       if (!val) return ''
@@ -216,6 +234,32 @@ export default {
     },
     isOpen(id) {
       return Array.isArray(this.activeNames) && this.activeNames.includes(id)
+    },
+    ageText(recordDate) {
+      const birthday = this.babyInfo && this.babyInfo.birthday
+      if (!birthday || !recordDate) return ''
+
+      const birth = moment(birthday)
+      const record = moment(recordDate)
+      if (!birth.isValid() || !record.isValid()) return ''
+      if (record.isBefore(birth, 'day')) return ''
+
+      const cursor = birth.clone()
+      const years = record.diff(cursor, 'years')
+      cursor.add(years, 'years')
+      const months = record.diff(cursor, 'months')
+      cursor.add(months, 'months')
+      const days = record.diff(cursor, 'days')
+
+      if (years <= 0) {
+        if (months > 0 && days > 0) return `${months}月${days}天`
+        if (months > 0) return `${months}月`
+        return `${days}天`
+      }
+      if (months > 0 && days > 0) return `${years}岁${months}月${days}天`
+      if (months > 0) return `${years}岁${months}月`
+      if (days > 0) return `${years}岁${days}天`
+      return `${years}岁`
     },
 
     onLoad() {
@@ -443,7 +487,7 @@ export default {
   font-weight: 700;
   color: var(--g-title);
   line-height: 1.25;
-  max-width: calc(100vw - 170px);
+  max-width: calc(100vw - 210px);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -471,25 +515,55 @@ export default {
   word-break: break-word;
 }
 
-.item-meta {
+.cell-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+}
+
+.head-left {
+  flex: 1;
+  min-width: 0;
+}
+
+.head-right {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  padding-top: 2px;
+}
+
+.pill {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding-top: 2px;
-  padding: 4px 10px;
+  padding: 6px 10px;
   border-radius: 999px;
-  background: rgba(37, 99, 235, 0.08);
-}
-
-.meta-icon {
-  font-size: 14px;
-  color: rgba(37, 99, 235, 0.55);
-}
-
-.item-date {
-  font-size: 13px;
-  color: rgba(37, 99, 235, 0.72);
+  line-height: 1;
   white-space: nowrap;
+}
+
+.pill-icon {
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+.pill-text {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.date-pill {
+  color: rgba(37, 99, 235, 0.82);
+  background: rgba(37, 99, 235, 0.1);
+}
+
+.age-pill {
+  color: rgba(255, 107, 107, 0.92);
+  background: rgba(255, 107, 107, 0.14);
 }
 
 .content-text {

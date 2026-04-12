@@ -55,8 +55,8 @@
               placeholder="添加临时任务..."
               right-icon="plus"
               class="add-input"
-              @click-right="onAddTodo"
-              @keyup.enter="onAddTodo"
+              @click-right-icon="onAddTodo"
+              @keyup.enter.native="onAddTodo"
             />
           </div>
 
@@ -120,8 +120,8 @@
             v-model="newHabitText"
             placeholder="输入习惯名称 (如: 喝水)"
             right-icon="plus"
-            @click-right="addHabit"
-            @keyup.enter="addHabit"
+            @click-right-icon="addHabit"
+            @keyup.enter.native="addHabit"
           />
         </div>
 
@@ -305,7 +305,12 @@ export default {
         if (res.code === 200) {
           this.newTodoText = ''
           this.loadTodos()
+        } else {
+          Toast.fail(res.msg || '添加失败')
         }
+      }).catch((e) => {
+        Toast.fail('添加失败')
+        this.appendLog && this.appendLog('<-', { type: 'error', message: String(e) })
       })
     },
     onTaskChange(todo) {
@@ -329,7 +334,7 @@ export default {
         title: '确认删除',
         message: '确定要删除这个任务吗？'
       }).then(() => {
-        deleteTodoListReq({ id: todo.id }).then(res => {
+        deleteTodoListReq(todo.id).then(res => {
           if (res.code === 200) {
             this.loadTodos()
           }
